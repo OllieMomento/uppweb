@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Test from './test';
 
 
 class ProjectPage extends Component {
@@ -7,6 +8,7 @@ class ProjectPage extends Component {
             <div className="ProjectPage">
                 <h1>ProjectPage</h1>
                 <p>id: {this.props.match.params.id}</p>
+                <Test/>
             </div>
         );
     }

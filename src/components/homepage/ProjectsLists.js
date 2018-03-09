@@ -60,7 +60,7 @@ class ProjectsLists extends Component {
                     Projects
                 </Typography>
 
-                <Grid container>
+                <Grid container style= {{width:"100%"}}>
 
                     <Grid item sm>
                         <Typography variant="subheading" color="inherit" >
