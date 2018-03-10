@@ -19,9 +19,17 @@ import {
     mxEvent,
     mxImage,
     mxFastOrganicLayout,
-    mxCellTracker
+    mxCellTracker,
+    mxObjectCodec,
+    mxCodecRegistry,
+    mxLog
 } from "mxgraph-js";
 
+class CustomData {
+    constructor(value) {
+        this.value = value;
+    }
+}
 
 class Test extends Component {
 
@@ -30,7 +38,9 @@ class Test extends Component {
         this.state = {
 
         };
+        var codec = new mxObjectCodec(new CustomData());
     }
+
 
     componentDidMount() {
         this.componentDidUpdate()
@@ -49,6 +59,14 @@ class Test extends Component {
 
         dec.decode(root, graph.getModel());
     }
+
+    encode(enc, obj) {
+        console.log("encode method");
+        var node = enc.document.createElement('CustomData');
+        mxUtils.setTextContent(node, JSON.stringify(obj));
+
+        return node;
+    };
 
 
     loadGraph() {
@@ -80,45 +98,45 @@ class Test extends Component {
 
             // Adds cells to the model in a single step
             graph.getModel().beginUpdate();
+
+
             try {
                 /*
-                               var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30, 'fillColor=pink');
-                               var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30, 'fillColor=blue');
-                               var v3 = graph.insertVertex(parent, null, 'World!', 20, 150, 80, 30, 'fillColor=red');
-                               var e1 = graph.insertEdge(parent, null, 'Connect', v1, v2, 'perimeterSpacing=4;strokeWidth=4;labelBackgroundColor=white;fontStyle=1');
-               
-               */
-                //var  cell = <mxCell id="2" value="Hello," vertex="1"/>
-
-
-                var xml = '<root><mxCell id="2" value="Hello," vertex="1"><mxGeometry x="20" y="20" width="80" height="30" as="geometry"/></mxCell><mxCell id="3" value="World!" vertex="1"><mxGeometry x="200" y="150" width="80" height="30" as="geometry"/></mxCell><mxCell id="4" value="" edge="1" source="2" target="3"><mxGeometry relative="1" as="geometry"/></mxCell></root>';
-                var doc = mxUtils.parseXml(xml);
-                var codec = new mxCodec(doc);
-                var elt = doc.documentElement.firstChild;
-
-                var cells = [];
-
-                while (elt != null) {
-                    console.log(elt)
-                    cells.push(codec.decode(elt));
-                    elt = elt.nextSibling;
-                }
-
-
-                console.log("graph:  " + graph)
-                graph.addCell(cells);
-                console.log(cells);
-
-
-
+                for (let index = 0; index < 5; index++) {
+                    graph.insertVertex(parent, null, (index + ' hello'), 20*index, 20*index, 80*index, 30*index, 'fillColor=pink');
+                    
+                }*/
                 /*
-                               var encoder = new mxCodec();
-                               var node = encoder.encode(graph.getModel());
-                               mxUtils.popup(mxUtils.getPrettyXml(node), true);
-                               */
+                                var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
+                                //v1.data = new CustomData('v1');
+                                var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
+                                //v2.data = new CustomData('v2');
+                                var e1 = graph.insertEdge(parent, null, '', v1, v2);
+                
+                                var enc = new mxCodec();
+                                var cells = graph.getModel();
+                                var xmlString = mxUtils.getPrettyXml(enc.encode(cells));
+                                console.log(xmlString);*/
 
-                // Loads the mxGraph file format (XML file)                
-                //this.read(graph, '../../data/xmlProjects/fileio.xml');
+
+                var xmlString = `<mxGraphModel>
+               <root>
+                 <mxCell id="0"/>
+                 <mxCell id="1" parent="0"/>
+                 <mxCell id="2" value="Hello," vertex="1" parent="1">
+                   <mxGeometry x="20" y="20" width="80" height="30" as="geometry"/>
+                 </mxCell>
+                 <mxCell id="3" value="World!" vertex="1" parent="1">
+                   <mxGeometry x="200" y="150" width="80" height="30" as="geometry"/>
+                 </mxCell>
+                 <mxCell id="4" value="" edge="1" parent="1" source="2" target="3">
+                   <mxGeometry relative="1" as="geometry"/>
+                 </mxCell>
+               </root>
+             </mxGraphModel>`
+
+
+
 
             }
             finally {
@@ -126,11 +144,97 @@ class Test extends Component {
                 graph.getModel().endUpdate();
             }
 
+            var doc = mxUtils.parseXml(xmlString);
+            //console.log(doc)
+            var codec = new mxCodec(doc);
+            //console.log(codec)
+            var tmp = codec.decode(doc.documentElement, graph.getModel());
+            //console.log(tmp)
+
+            var cell = tmp.firstChild;
+            //console.log(cell)
+
+            /*
+            var elt = doc.documentElement.firstChild;
+            var str = JSON.stringify(elt, null, 4);
+            console.log("elt: " + str)
+
+            while (elt != null) {
+                var cell = codec.decode(elt);
+      
+                //graph.insertVertex(parent, null, (index + ' hello'), 20*index, 20*index, 80*index, 30*index, 'fillColor=pink');
+                elt = elt.nextSibling;
+            }*/
+
+            //graph.addCells(cells);
+            //console.log(str)
+
+            var xml = `
+            <mxGraphModel>
+                <root>
+                    <mxCell id="0"/>
+                    <mxCell id="1" parent="0"/>
+                    <mxCell id="2" value="Hello," vertex="1" parent="1">
+                        <mxGeometry x="20" y="20" width="80" height="30" as="geometry"/>
+                    </mxCell>
+                    <mxCell id="3" value="World!" vertex="1" parent="1">
+                        <mxGeometry x="200" y="150" width="80" height="30" as="geometry"/>
+                    </mxCell>
+                    <mxCell id="4" value="" edge="1" parent="1" source="2" target="3">
+                        <mxGeometry relative="1" as="geometry"/>
+                    </mxCell>
+                </root>
+            </mxGraphModel>`
+            var doc = mxUtils.parseXml(xml);
+            var codec = new mxCodec(doc);
+            var model = codec.decode(doc.documentElement, graph.getModel())
+            var cells = model.getElementsByTagName("mxCell");
+            var cellArr = Array.from(cells);
+            var vertexes = [];
+            console.log(cellArr)
+
+            for (var i = 0; i < cellArr.length; i++) { 
+                let element = cellArr[i]      
+                var id = element.getAttribute("id")  
+                var value = element.getAttribute("value")    
+
+                //If element is Vertex/cell
+                if(element.hasAttribute("vertex")){                    
+                    
+                    var geometry = element.getElementsByTagName("mxGeometry");
+                    var x = geometry[0].getAttribute("x")
+                    var y = geometry[0].getAttribute("y")
+                    var width = geometry[0].getAttribute("width")
+                    var height = geometry[0].getAttribute("height")
+
+                    //add vertex
+                    vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                }
+                //If element is Edge
+                else if(element.hasAttribute("edge")){
+                    var source = element.getAttribute("source")
+                    var target = element.getAttribute("target")
+
+                    var sourceElement = vertexes[source];
+                    var targetElement = vertexes[target];
+                    
+                    //add Edge
+                    graph.insertEdge(parent, id, value, sourceElement, targetElement)
+
+                }
+                
+                
+            }
+/*
+            while (elt != null) {
+                cell = codec.decode(elt);
+                console.log(cell);
+                elt = elt.nextSibling;
+            }*/
+
         }
 
-
     }
-
 
 
     render() {
