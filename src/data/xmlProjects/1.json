@@ -1,0 +1,7 @@
+{
+   "projects":[
+              {"id":0, "xml":"example"},
+              {"id":1, "xml":"examle1"},
+              {"id":2, "xml":"examle2"}
+              ]  
+ }  

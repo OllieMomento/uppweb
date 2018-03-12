@@ -8,7 +8,7 @@ class ProjectPage extends Component {
             <div className="ProjectPage">
                 <h1>ProjectPage</h1>
                 <p>id: {this.props.match.params.id}</p>
-                <Test/>
+                <Test id={this.props.match.params.id}/>
             </div>
         );
     }

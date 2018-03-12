@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
+//import fs from "file-system";
+import fetch from 'node-fetch';
+//import fs from 'mz/fs';
+import projects from './../../data/xmlProjects/1.json';
+import jsonfile from 'jsonfile';
+
 import {
     mxGraph,
     mxParallelEdgeLayout,
@@ -25,11 +31,6 @@ import {
     mxLog
 } from "mxgraph-js";
 
-class CustomData {
-    constructor(value) {
-        this.value = value;
-    }
-}
 
 class Test extends Component {
 
@@ -38,40 +39,26 @@ class Test extends Component {
         this.state = {
 
         };
-        var codec = new mxObjectCodec(new CustomData());
+
     }
 
 
     componentDidMount() {
         this.componentDidUpdate()
+
+
     }
 
     componentDidUpdate() {
         this.loadGraph()
     }
 
-    read(graph, filename) {
-        var req = mxUtils.load(filename);
-        var root = req.getDocumentElement();
-        var dec = new mxCodec(root.ownerDocument);
-        console.log(filename)
-        console.log(dec)
-
-        dec.decode(root, graph.getModel());
-    }
-
-    encode(enc, obj) {
-        console.log("encode method");
-        var node = enc.document.createElement('CustomData');
-        mxUtils.setTextContent(node, JSON.stringify(obj));
-
-        return node;
-    };
-
-
     loadGraph() {
         var container = ReactDOM.findDOMNode(this.refs.divGraph);
-        console.log(container);
+
+
+
+
         // Checks if the browser is supported
 
         // Program starts here. Creates a sample graph in the
@@ -94,7 +81,7 @@ class Test extends Component {
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             var parent = graph.getDefaultParent();
-            console.log("parent:  " + parent)
+            // console.log("parent:  " + parent)
 
             // Adds cells to the model in a single step
             graph.getModel().beginUpdate();
@@ -106,35 +93,6 @@ class Test extends Component {
                     graph.insertVertex(parent, null, (index + ' hello'), 20*index, 20*index, 80*index, 30*index, 'fillColor=pink');
                     
                 }*/
-                /*
-                                var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
-                                //v1.data = new CustomData('v1');
-                                var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
-                                //v2.data = new CustomData('v2');
-                                var e1 = graph.insertEdge(parent, null, '', v1, v2);
-                
-                                var enc = new mxCodec();
-                                var cells = graph.getModel();
-                                var xmlString = mxUtils.getPrettyXml(enc.encode(cells));
-                                console.log(xmlString);*/
-
-
-                var xmlString = `<mxGraphModel>
-               <root>
-                 <mxCell id="0"/>
-                 <mxCell id="1" parent="0"/>
-                 <mxCell id="2" value="Hello," vertex="1" parent="1">
-                   <mxGeometry x="20" y="20" width="80" height="30" as="geometry"/>
-                 </mxCell>
-                 <mxCell id="3" value="World!" vertex="1" parent="1">
-                   <mxGeometry x="200" y="150" width="80" height="30" as="geometry"/>
-                 </mxCell>
-                 <mxCell id="4" value="" edge="1" parent="1" source="2" target="3">
-                   <mxGeometry relative="1" as="geometry"/>
-                 </mxCell>
-               </root>
-             </mxGraphModel>`
-
 
 
 
@@ -143,31 +101,6 @@ class Test extends Component {
                 // Updates the display
                 graph.getModel().endUpdate();
             }
-
-            var doc = mxUtils.parseXml(xmlString);
-            //console.log(doc)
-            var codec = new mxCodec(doc);
-            //console.log(codec)
-            var tmp = codec.decode(doc.documentElement, graph.getModel());
-            //console.log(tmp)
-
-            var cell = tmp.firstChild;
-            //console.log(cell)
-
-            /*
-            var elt = doc.documentElement.firstChild;
-            var str = JSON.stringify(elt, null, 4);
-            console.log("elt: " + str)
-
-            while (elt != null) {
-                var cell = codec.decode(elt);
-      
-                //graph.insertVertex(parent, null, (index + ' hello'), 20*index, 20*index, 80*index, 30*index, 'fillColor=pink');
-                elt = elt.nextSibling;
-            }*/
-
-            //graph.addCells(cells);
-            //console.log(str)
 
             var xml = `
             <mxGraphModel>
@@ -185,22 +118,26 @@ class Test extends Component {
                     </mxCell>
                 </root>
             </mxGraphModel>`
+
+            //  var text = fs.readFileSync("../../data/xmlProjects/fileio.xml");        
+
+
             var doc = mxUtils.parseXml(xml);
             var codec = new mxCodec(doc);
             var model = codec.decode(doc.documentElement, graph.getModel())
             var cells = model.getElementsByTagName("mxCell");
             var cellArr = Array.from(cells);
             var vertexes = [];
-            console.log(cellArr)
+            //console.log(cellArr)
 
-            for (var i = 0; i < cellArr.length; i++) { 
-                let element = cellArr[i]      
-                var id = element.getAttribute("id")  
-                var value = element.getAttribute("value")    
+            for (var i = 0; i < cellArr.length; i++) {
+                let element = cellArr[i]
+                var id = element.getAttribute("id")
+                var value = element.getAttribute("value")
 
                 //If element is Vertex/cell
-                if(element.hasAttribute("vertex")){                    
-                    
+                if (element.hasAttribute("vertex")) {
+
                     var geometry = element.getElementsByTagName("mxGeometry");
                     var x = geometry[0].getAttribute("x")
                     var y = geometry[0].getAttribute("y")
@@ -211,26 +148,47 @@ class Test extends Component {
                     vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
                 }
                 //If element is Edge
-                else if(element.hasAttribute("edge")){
+                else if (element.hasAttribute("edge")) {
                     var source = element.getAttribute("source")
                     var target = element.getAttribute("target")
 
                     var sourceElement = vertexes[source];
                     var targetElement = vertexes[target];
-                    
+
                     //add Edge
                     graph.insertEdge(parent, id, value, sourceElement, targetElement)
 
                 }
-                
-                
+
             }
-/*
-            while (elt != null) {
-                cell = codec.decode(elt);
-                console.log(cell);
-                elt = elt.nextSibling;
-            }*/
+
+            //const fs = require('fs');
+            console.log(projects.projects[2].xml)
+            projects.projects.push({ "id": 3, "xml": xml })
+            console.log(projects)
+
+            var file = '/tmp/data.json'
+            var obj = { name: 'JP' }
+
+            jsonfile.writeFile(file, obj, function (err) {
+                console.error(err)
+            })
+
+
+
+            /*
+
+            var json = JSON.stringify(projects);
+
+
+            //var file = '1.json'
+            
+            jsonfile.writeFile(file, json, function (err) {
+                console.error(err)
+            })
+            //const data = import('./../../data/xmlProjects/' + this.props.id + '.xml')
+            //console.log(data);
+*/
 
         }
 
