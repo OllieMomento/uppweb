@@ -49,7 +49,7 @@ router.route('/comments')
         Comment.find(function (err, comments) {
             if (err)
                 res.send(err);
-            //responds with a json object of our database comments.
+            //responds with a json object of ourz database comments.
             res.json(comments)
         });
     })
@@ -132,6 +132,53 @@ router.route('/projects')
         });
     });
 
+router.route('/projects/:projects_id')
+    .get(function (req, res) {
+        //looks at our Comment Schema
+       //res.send(req.params.project_id)
+        Project.findById(req.params.projects_id, function (err, projects) {
+            if (err)
+                res.send(err);
+            //responds with a json object of our database projects.
+            res.json(projects)
+        });
+    })
+
+    //The put method gives us the chance to update our project based on the ID passed to the route
+    .put(function (req, res) {
+        Project.findById(req.params.project_id, function (err, project) {
+            if (err)
+                res.send(err);
+            //setting the new author and text to whatever was changed. If nothing was changed
+            // we will not alter the field.
+            (req.body.name) ? project.author = req.body.author : null;
+            (req.body.desc) ? project.text = req.body.text : null;
+            (req.body.start) ? project.author = req.body.author : null;
+            (req.body.end) ? project.text = req.body.text : null;
+            (req.body.image) ? project.author = req.body.author : null;
+            (req.body.status) ? project.text = req.body.text : null;
+            (req.body.path) ? project.author = req.body.author : null;
+            (req.body.artists) ? project.artists = req.body.artists : null;
+            (req.body.supervisor) ? project.supervisor = req.body.supervisor : null;
+            (req.body.comments) ? project.comments = req.body.comments : null;
+            (req.body.xml) ? project.xml = req.body.xml : null;
+            //save project
+            project.save(function (err) {
+                if (err)
+                    res.send(err);
+                res.json({ message: 'Project has been updated' });
+            });
+        });
+    })
+    //delete method for removing a comment from our database
+    .delete(function (req, res) {
+        //selects the comment by its ID, then removes it.
+        Project.remove({ _id: req.params.project_id }, function (err, project) {
+            if (err)
+                res.send(err);
+            res.json({ message: 'Project has been deleted' })
+        })
+    });
 
 //Use our router configuration when we call /api
 app.use('/api', router);

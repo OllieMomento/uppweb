@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
-//import fs from "file-system";
-import fetch from 'node-fetch';
-//import fs from 'mz/fs';
-import projects from './../../data/xmlProjects/1.json';
-import jsonfile from 'jsonfile';
+
 
 import {
     mxGraph,
@@ -32,7 +28,7 @@ import {
 } from "mxgraph-js";
 
 
-class Test extends Component {
+class Graph extends Component {
 
     constructor(props) {
         super(props);
@@ -159,41 +155,10 @@ class Test extends Component {
                     graph.insertEdge(parent, id, value, sourceElement, targetElement)
 
                 }
-
             }
-
-            //const fs = require('fs');
-            console.log(projects.projects[2].xml)
-            projects.projects.push({ "id": 3, "xml": xml })
-            console.log(projects)
-
-            var file = '/tmp/data.json'
-            var obj = { name: 'JP' }
-
-            jsonfile.writeFile(file, obj, function (err) {
-                console.error(err)
-            })
-
-
-
-            /*
-
-            var json = JSON.stringify(projects);
-
-
-            //var file = '1.json'
-            
-            jsonfile.writeFile(file, json, function (err) {
-                console.error(err)
-            })
-            //const data = import('./../../data/xmlProjects/' + this.props.id + '.xml')
-            //console.log(data);
-*/
-
         }
 
     }
-
 
     render() {
         return (
@@ -204,4 +169,4 @@ class Test extends Component {
     }
 }
 
-export default Test;
+export default Graph;

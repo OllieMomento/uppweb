@@ -4,6 +4,7 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import ProjectItem from './ProjectItem';
 import List from 'material-ui/List';
+import axios from 'axios';
 
 /*
 const styles = {
@@ -15,6 +16,22 @@ const styles = {
 
 
 class ProjectsLists extends Component {
+    constructor(props) {
+        super(props);
+        this.state = { data: [] };
+    }
+
+    componentDidMount() {
+        this.loadCommentsFromServer();
+        //setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+    }
+
+    loadCommentsFromServer = () => {
+        axios.get(this.props.url)
+            .then(res => {
+                this.setState({ data: res.data });
+            })
+    }
 
     getYourId() {
         return 2;
@@ -25,7 +42,7 @@ class ProjectsLists extends Component {
         const projects = this.props.projects;
         const filterText = this.props.filterText;
 
-        const projectList = projects
+        const projectList = this.state.data
             .filter(project => {
                 if (type === 1) {
                     return project.supervisor === this.getYourId();
@@ -41,7 +58,7 @@ class ProjectsLists extends Component {
             })
             .map(project => {
                 return (
-                    <ProjectItem key={project.id} project={project} />
+                    <ProjectItem key={project._id} project={project} />
                 )
             })
 
@@ -60,7 +77,7 @@ class ProjectsLists extends Component {
                     Projects
                 </Typography>
 
-                <Grid container style= {{width:"100%"}}>
+                <Grid container style={{ width: "100%" }}>
 
                     <Grid item sm>
                         <Typography variant="subheading" color="inherit" >

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Header, Footer, Subheader } from '../layouts/index';
+
 import ProjectsLists from './ProjectsLists';
 
 
@@ -10,6 +11,7 @@ class HomepageS extends Component {
     super(props)
     this.state = {
       filterText: ''
+
     }
   }
   filterUpdate(value) {
@@ -19,22 +21,23 @@ class HomepageS extends Component {
   }
 
 
+
   render() {
-    console.log('filterText state from parent component', this.state.filterText)
+    //console.log('filterText state from parent component', this.state.filterText)
 
     return (
-          <div className="HomepageS">
-            <Header />
-            <Subheader
-              filterText={this.state.filterText}
-              filterUpdate={this.filterUpdate.bind(this)}
-            />
-            <ProjectsLists
-              projects={this.props.projects}
-              filterText={this.state.filterText}
-            />
-            <Footer />
-          </div>
+      <div className="HomepageS">
+        <Header />
+        <Subheader
+          filterText={this.state.filterText}
+          filterUpdate={this.filterUpdate.bind(this)}
+        />
+        <ProjectsLists
+          url={this.props.url}
+          filterText={this.state.filterText}
+        />
+        <Footer />
+      </div>
 
     );
   }
