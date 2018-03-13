@@ -32,7 +32,7 @@ class Graph extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: []
+            data: {}
         };
 
     }
@@ -43,17 +43,26 @@ class Graph extends Component {
         axios.get('http://localhost:3001/api/projects/' + this.props.id)
             .then(res => {
                 this.setState({ data: res.data });
-
                 this.loadGraph();
-
             })
     }
 
-    componentWillMount() {
-        console.log("will Mount")
+    componentDidMount() {
         this.loadCommentsFromServer();
-
     }
+    updateGraphOnServer(xml) {
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.id, {
+            xml: xml
+        })
+            .then(response => {
+                console.log(response);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
 
     loadGraph() {
         var container = ReactDOM.findDOMNode(this.refs.divGraph);
@@ -132,8 +141,6 @@ class Graph extends Component {
                 }
 
 
-
-
             }
             finally {
                 // Updates the display
@@ -143,17 +150,12 @@ class Graph extends Component {
             var button = mxUtils.button('Save Graph', () => {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
-               
-                axios.put('http://localhost:3001/api/projects/' + this.props.id, this.state.data)
-                    .catch(err => {
-                        console.log(err);
-                    })
-
+                var xml = mxUtils.getPrettyXml(node)
+                this.updateGraphOnServer(xml)
+                console.log(xml)
             });
 
             document.body.insertBefore(button, container.nextSibling);
-
-
 
         }
 
@@ -162,7 +164,10 @@ class Graph extends Component {
     render() {
         console.log("render")
         return (
-            <div className="graph-container" ref="divGraph" id="divGraph" />
+
+            <div className="graph-container" ref="divGraph" id="divGraph">
+                <p>{this.state.data.name}</p>
+            </div>
         );
 
 
