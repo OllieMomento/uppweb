@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
-
-
+import axios from 'axios';
 import {
     mxGraph,
     mxParallelEdgeLayout,
@@ -33,26 +32,32 @@ class Graph extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            data: []
         };
 
     }
 
 
-    componentDidMount() {
-        this.componentDidUpdate()
+    loadCommentsFromServer = () => {
+        console.log("loadFromSercer")
+        axios.get('http://localhost:3001/api/projects/' + this.props.id)
+            .then(res => {
+                this.setState({ data: res.data });
 
+                this.loadGraph();
 
+            })
     }
 
-    componentDidUpdate() {
-        this.loadGraph()
+    componentWillMount() {
+        console.log("will Mount")
+        this.loadCommentsFromServer();
+
     }
 
     loadGraph() {
         var container = ReactDOM.findDOMNode(this.refs.divGraph);
-
-
+        console.log("loadGraph")
 
 
         // Checks if the browser is supported
@@ -70,10 +75,6 @@ class Graph extends Component {
             // Creates the graph inside the given container
             var graph = new mxGraph(container);
 
-
-
-
-
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             var parent = graph.getDefaultParent();
@@ -84,11 +85,52 @@ class Graph extends Component {
 
 
             try {
-                /*
-                for (let index = 0; index < 5; index++) {
-                    graph.insertVertex(parent, null, (index + ' hello'), 20*index, 20*index, 80*index, 30*index, 'fillColor=pink');
-                    
-                }*/
+                var xml = this.state.data.xml;
+                console.log(xml)
+
+                //  var text = fs.readFileSync("../../data/xmlProjects/fileio.xml");        
+
+
+                var doc = mxUtils.parseXml(xml);
+                var codec = new mxCodec(doc);
+                var model = codec.decode(doc.documentElement, graph.getModel())
+                var cells = model.getElementsByTagName("mxCell");
+                var cellArr = Array.from(cells);
+                var vertexes = [];
+                //console.log(cellArr)
+
+                for (var i = 0; i < cellArr.length; i++) {
+                    let element = cellArr[i]
+                    var id = element.getAttribute("id")
+                    var value = element.getAttribute("value")
+
+                    //If element is Vertex/cell
+                    if (element.hasAttribute("vertex")) {
+
+                        var geometry = element.getElementsByTagName("mxGeometry");
+                        var x = geometry[0].getAttribute("x")
+                        var y = geometry[0].getAttribute("y")
+                        var width = geometry[0].getAttribute("width")
+                        var height = geometry[0].getAttribute("height")
+
+                        //add vertex
+                        vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                    }
+                    //If element is Edge
+                    else if (element.hasAttribute("edge")) {
+                        var source = element.getAttribute("source")
+                        var target = element.getAttribute("target")
+
+                        var sourceElement = vertexes[source];
+                        var targetElement = vertexes[target];
+
+                        //add Edge
+                        graph.insertEdge(parent, id, value, sourceElement, targetElement)
+
+                    }
+
+                }
+
 
 
 
@@ -98,69 +140,27 @@ class Graph extends Component {
                 graph.getModel().endUpdate();
             }
 
-            var xml = `
-            <mxGraphModel>
-                <root>
-                    <mxCell id="0"/>
-                    <mxCell id="1" parent="0"/>
-                    <mxCell id="2" value="Hello," vertex="1" parent="1">
-                        <mxGeometry x="20" y="20" width="80" height="30" as="geometry"/>
-                    </mxCell>
-                    <mxCell id="3" value="World!" vertex="1" parent="1">
-                        <mxGeometry x="200" y="150" width="80" height="30" as="geometry"/>
-                    </mxCell>
-                    <mxCell id="4" value="" edge="1" parent="1" source="2" target="3">
-                        <mxGeometry relative="1" as="geometry"/>
-                    </mxCell>
-                </root>
-            </mxGraphModel>`
+            var button = mxUtils.button('Save Graph', () => {
+                var encoder = new mxCodec();
+                var node = encoder.encode(graph.getModel());
+               
+                axios.put('http://localhost:3001/api/projects/' + this.props.id, this.state.data)
+                    .catch(err => {
+                        console.log(err);
+                    })
 
-            //  var text = fs.readFileSync("../../data/xmlProjects/fileio.xml");        
+            });
+
+            document.body.insertBefore(button, container.nextSibling);
 
 
-            var doc = mxUtils.parseXml(xml);
-            var codec = new mxCodec(doc);
-            var model = codec.decode(doc.documentElement, graph.getModel())
-            var cells = model.getElementsByTagName("mxCell");
-            var cellArr = Array.from(cells);
-            var vertexes = [];
-            //console.log(cellArr)
 
-            for (var i = 0; i < cellArr.length; i++) {
-                let element = cellArr[i]
-                var id = element.getAttribute("id")
-                var value = element.getAttribute("value")
-
-                //If element is Vertex/cell
-                if (element.hasAttribute("vertex")) {
-
-                    var geometry = element.getElementsByTagName("mxGeometry");
-                    var x = geometry[0].getAttribute("x")
-                    var y = geometry[0].getAttribute("y")
-                    var width = geometry[0].getAttribute("width")
-                    var height = geometry[0].getAttribute("height")
-
-                    //add vertex
-                    vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
-                }
-                //If element is Edge
-                else if (element.hasAttribute("edge")) {
-                    var source = element.getAttribute("source")
-                    var target = element.getAttribute("target")
-
-                    var sourceElement = vertexes[source];
-                    var targetElement = vertexes[target];
-
-                    //add Edge
-                    graph.insertEdge(parent, id, value, sourceElement, targetElement)
-
-                }
-            }
         }
 
     }
 
     render() {
+        console.log("render")
         return (
             <div className="graph-container" ref="divGraph" id="divGraph" />
         );

@@ -146,7 +146,7 @@ router.route('/projects/:projects_id')
 
     //The put method gives us the chance to update our project based on the ID passed to the route
     .put(function (req, res) {
-        Project.findById(req.params.project_id, function (err, project) {
+        Project.findById(req.params.projects_id, function (err, projects) {
             if (err)
                 res.send(err);
             //setting the new author and text to whatever was changed. If nothing was changed
@@ -166,7 +166,7 @@ router.route('/projects/:projects_id')
             project.save(function (err) {
                 if (err)
                     res.send(err);
-                res.json({ message: 'Project has been updated' });
+                res.json({ mesasage: 'Project has been updated' });
             });
         });
     })
