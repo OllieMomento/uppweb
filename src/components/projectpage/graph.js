@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import axios from 'axios';
 import {
     mxGraph,
+    mxGraphModel,
     mxParallelEdgeLayout,
     mxConstants,
     mxEdgeStyle,
@@ -38,7 +39,7 @@ class Graph extends Component {
     }
 
 
-    loadCommentsFromServer = () => {
+    loadProjectsFromServer = () => {
         console.log("loadFromSercer")
         axios.get('http://localhost:3001/api/projects/' + this.props.id)
             .then(res => {
@@ -48,7 +49,7 @@ class Graph extends Component {
     }
 
     componentDidMount() {
-        this.loadCommentsFromServer();
+        this.loadProjectsFromServer();
     }
     updateGraphOnServer(xml) {
 
@@ -81,8 +82,51 @@ class Graph extends Component {
             mxUtils.error('Browser is not supported!', 200, false);
         }
         else {
-            // Creates the graph inside the given container
-            var graph = new mxGraph(container);
+
+
+
+            //mxConnectionHandler.prototype.connectImage = new mxImage('images/connector.gif', 16, 16);
+
+            // Creates the div for the toolbar
+            var tbContainer = ReactDOM.findDOMNode(this.refs.graphToolbar);
+            /*
+            tbContainer.style.position = 'absolute';
+            tbContainer.style.overflow = 'hidden';
+            tbContainer.style.padding = '2px';
+            tbContainer.style.left = '0px';
+            tbContainer.style.top = '0px';
+            tbContainer.style.width = '24px';
+            tbContainer.style.bottom = '0px';
+            */
+            
+
+            // Creates new toolbar without event processing
+            var toolbar = new mxToolbar(tbContainer);
+            toolbar.enabled = false
+
+            // Creates the div for the graph
+            var container = ReactDOM.findDOMNode(this.refs.graphContainer);
+            /*
+            container.style.position = 'absolute';
+            container.style.overflow = 'hidden';
+            container.style.left = '24px';
+            container.style.top = '0px';
+            container.style.right = '0px';
+            container.style.bottom = '0px';
+            container.style.background = 'url("editors/images/grid.gif")';
+            */
+
+
+            var model = new mxGraphModel();
+            var graph = new mxGraph(container, model);
+
+            // Enables new connections in the graph
+            graph.setConnectable(true);
+            graph.setMultigraph(false);
+
+            // Stops editing on enter or escape keypress
+            var keyHandler = new mxKeyHandler(graph);
+            //var rubberband = new mxRubberband(graph);
 
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
@@ -91,6 +135,62 @@ class Graph extends Component {
 
             // Adds cells to the model in a single step
             graph.getModel().beginUpdate();
+
+            var addVertex = function (icon, w, h, style) {
+                var vertex = new mxCell(null, new mxGeometry(0, 0, w, h), style);
+                vertex.setVertex(true);
+
+                var img = addToolbarItem(graph, toolbar, vertex, icon);
+                img.enabled = true;
+
+                graph.getSelectionModel().addListener(mxEvent.CHANGE, function () {
+                    var tmp = graph.isSelectionEmpty();
+                    mxUtils.setOpacity(img, (tmp) ? 100 : 20);
+                    img.enabled = tmp;
+                });
+            };
+            addVertex('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/rectangle.gif', 100, 40, '');
+
+            function addToolbarItem(graph, toolbar, prototype, image) {
+                // Function that is executed when the image is dropped on
+                // the graph. The cell argument points to the cell under
+                // the mousepointer if there is one.
+                var funct = function (graph, evt, cell, x, y) {
+                    graph.stopEditing(false);
+
+                    var vertex = graph.getModel().cloneCell(prototype);
+                    vertex.geometry.x = x;
+                    vertex.geometry.y = y;
+
+                    graph.addCell(vertex);
+                    graph.setSelectionCell(vertex);
+                }
+
+                // Creates the image which is used as the drag icon (preview)
+                var img = toolbar.addMode(null, image, function (evt, cell) {
+                    var pt = this.graph.getPointForEvent(evt);
+                    funct(graph, evt, cell, pt.x, pt.y);
+                });
+
+                // Disables dragging if element is disabled. This is a workaround
+                // for wrong event order in IE. Following is a dummy listener that
+                // is invoked as the last listener in IE.
+                mxEvent.addListener(img, 'mousedown', function (evt) {
+                    // do nothing
+                });
+
+                // This listener is always called first before any other listener
+                // in all browsers.
+                mxEvent.addListener(img, 'mousedown', function (evt) {
+                    if (img.enabled == false) {
+                        mxEvent.consume(evt);
+                    }
+                });
+
+                mxUtils.makeDraggable(img, graph, funct);
+
+                return img;
+            }
 
 
             try {
@@ -155,7 +255,10 @@ class Graph extends Component {
                 console.log(xml)
             });
 
-            document.body.insertBefore(button, container.nextSibling);
+            var graphButton = ReactDOM.findDOMNode(this.refs.graphButton);
+            graphButton.appendChild(button)
+
+           // container.insertBefore(button, container.nextSibling);
 
         }
 
@@ -165,7 +268,11 @@ class Graph extends Component {
         console.log("render")
         return (
 
-            <div className="graph-container" ref="divGraph" id="divGraph">
+            <div className="graph" ref="divGraph" id="divGraph">
+                <div className="graph-button" ref="graphButton" id="graphButton"/>
+                <div className="graph-container" ref="graphContainer" id="graphContainer"/>
+
+                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar"/>
                 <p>{this.state.data.name}</p>
             </div>
         );

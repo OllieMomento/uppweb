@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Graph from './graph';
+import axios from 'axios';
 
 
 class ProjectPage extends Component {
