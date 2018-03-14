@@ -3,13 +3,59 @@ import Graph from './graph';
 import axios from 'axios';
 
 
+
+
 class ProjectPage extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoading: true,
+            data: {}
+        };
+
+    }
+
+    loadProjectsFromServer = () => {
+        console.log("loadFromSercer")
+        console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
+        axios.get('http://localhost:3001/api/projects/' + this.props.match.params.id)
+            .then(res => {
+                this.setState({ data: res.data });
+                console.log("dostal jsme data")
+
+                //call child function
+                this.child.loadGraph()
+                
+            })
+    }
+
+    componentDidMount() {
+        this.loadProjectsFromServer();
+    }
+    updateGraphOnServer(xml) {
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
+            xml: xml
+        })
+            .then(response => {
+                console.log(response);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    
+
     render() {
         return (
             <div className="ProjectPage">
                 <h1>ProjectPage</h1>
                 <p>id: {this.props.match.params.id}</p>
-                <Graph id={this.props.match.params.id}/>
+                
+
+                <Graph project={this.state.data} updateGraphOnServer = {this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
             </div>
         );
     }

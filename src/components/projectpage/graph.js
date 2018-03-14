@@ -29,40 +29,70 @@ import {
 
 
 class Graph extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            data: {}
-        };
-
-    }
-
-
-    loadProjectsFromServer = () => {
-        console.log("loadFromSercer")
-        axios.get('http://localhost:3001/api/projects/' + this.props.id)
-            .then(res => {
-                this.setState({ data: res.data });
-                this.loadGraph();
-            })
-    }
-
+    /*
     componentDidMount() {
-        this.loadProjectsFromServer();
+        this.loadGraph();
+        
     }
-    updateGraphOnServer(xml) {
+    */
+    readFromXML(graph, parent) {
+        try {
+            var xml = this.props.project.xml;
+            console.log(xml)     
 
-        axios.put('http://localhost:3001/api/projects/' + this.props.id, {
-            xml: xml
-        })
-            .then(response => {
-                console.log(response);
-            })
-            .catch(err => {
-                console.log(err);
-            });
+
+            var doc = mxUtils.parseXml(xml);
+            var codec = new mxCodec(doc);
+            var model = codec.decode(doc.documentElement, graph.getModel())
+            var cells = model.getElementsByTagName("mxCell");
+            var cellArr = Array.from(cells);
+            var vertexes = [];
+            //console.log(cellArr)
+
+            for (var i = 0; i < cellArr.length; i++) {
+                let element = cellArr[i]
+                var id = element.getAttribute("id")
+                var value = element.getAttribute("value")
+
+                //If element is Vertex/cell
+                if (element.hasAttribute("vertex")) {
+
+                    var geometry = element.getElementsByTagName("mxGeometry");
+                    var x = geometry[0].getAttribute("x")
+                    var y = geometry[0].getAttribute("y")
+                    var width = geometry[0].getAttribute("width")
+                    var height = geometry[0].getAttribute("height")
+
+                    //add vertex
+                    vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                }
+                //If element is Edge
+                else if (element.hasAttribute("edge")) {
+                    var source = element.getAttribute("source")
+                    var target = element.getAttribute("target")
+
+                    var sourceElement = vertexes[source];
+                    var targetElement = vertexes[target];
+
+                    //add Edge
+                    graph.insertEdge(parent, id, value, sourceElement, targetElement)
+
+                }
+
+            }
+
+
+        } catch (e) {
+            console.log(e)
+        }
+        finally {
+            // Updates the display
+            graph.getModel().endUpdate();
+        }
     }
+
+
+
 
 
     loadGraph() {
@@ -98,7 +128,7 @@ class Graph extends Component {
             tbContainer.style.width = '24px';
             tbContainer.style.bottom = '0px';
             */
-            
+
 
             // Creates new toolbar without event processing
             var toolbar = new mxToolbar(tbContainer);
@@ -126,7 +156,7 @@ class Graph extends Component {
 
             // Stops editing on enter or escape keypress
             var keyHandler = new mxKeyHandler(graph);
-            //var rubberband = new mxRubberband(graph);
+            var rubberband = new mxRubberband(graph);
 
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
@@ -150,6 +180,8 @@ class Graph extends Component {
                 });
             };
             addVertex('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/rectangle.gif', 100, 40, '');
+
+            //console.log(graph.isSelectionEmpty())
 
             function addToolbarItem(graph, toolbar, prototype, image) {
                 // Function that is executed when the image is dropped on
@@ -192,73 +224,21 @@ class Graph extends Component {
                 return img;
             }
 
+            this.readFromXML(graph, parent)
 
-            try {
-                var xml = this.state.data.xml;
-                console.log(xml)
-
-                //  var text = fs.readFileSync("../../data/xmlProjects/fileio.xml");        
-
-
-                var doc = mxUtils.parseXml(xml);
-                var codec = new mxCodec(doc);
-                var model = codec.decode(doc.documentElement, graph.getModel())
-                var cells = model.getElementsByTagName("mxCell");
-                var cellArr = Array.from(cells);
-                var vertexes = [];
-                //console.log(cellArr)
-
-                for (var i = 0; i < cellArr.length; i++) {
-                    let element = cellArr[i]
-                    var id = element.getAttribute("id")
-                    var value = element.getAttribute("value")
-
-                    //If element is Vertex/cell
-                    if (element.hasAttribute("vertex")) {
-
-                        var geometry = element.getElementsByTagName("mxGeometry");
-                        var x = geometry[0].getAttribute("x")
-                        var y = geometry[0].getAttribute("y")
-                        var width = geometry[0].getAttribute("width")
-                        var height = geometry[0].getAttribute("height")
-
-                        //add vertex
-                        vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
-                    }
-                    //If element is Edge
-                    else if (element.hasAttribute("edge")) {
-                        var source = element.getAttribute("source")
-                        var target = element.getAttribute("target")
-
-                        var sourceElement = vertexes[source];
-                        var targetElement = vertexes[target];
-
-                        //add Edge
-                        graph.insertEdge(parent, id, value, sourceElement, targetElement)
-
-                    }
-
-                }
-
-
-            }
-            finally {
-                // Updates the display
-                graph.getModel().endUpdate();
-            }
 
             var button = mxUtils.button('Save Graph', () => {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                 var xml = mxUtils.getPrettyXml(node)
-                this.updateGraphOnServer(xml)
+                this.props.updateGraphOnServer(xml)
                 console.log(xml)
             });
 
             var graphButton = ReactDOM.findDOMNode(this.refs.graphButton);
             graphButton.appendChild(button)
 
-           // container.insertBefore(button, container.nextSibling);
+            // container.insertBefore(button, container.nextSibling);
 
         }
 
@@ -269,11 +249,11 @@ class Graph extends Component {
         return (
 
             <div className="graph" ref="divGraph" id="divGraph">
-                <div className="graph-button" ref="graphButton" id="graphButton"/>
-                <div className="graph-container" ref="graphContainer" id="graphContainer"/>
+                <div className="graph-button" ref="graphButton" id="graphButton" />
+                <div className="graph-container" ref="graphContainer" id="graphContainer" />
 
-                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar"/>
-                <p>{this.state.data.name}</p>
+                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
+
             </div>
         );
 
