@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Button from 'material-ui/Button';
-import { BrowserRouter as Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 //import SearchBar from 'material-ui-search-bar'
 
 
@@ -32,7 +32,7 @@ class SearchAndButtonBar extends Component {
     render() {
         return (
             <div style={style.Div}>
-                <Link to="/test">
+                <Link to='/test'  style={{ textDecoration: 'none' }}>
                     <Button variant="raised" color="default">
                         Create Project
                     </Button>

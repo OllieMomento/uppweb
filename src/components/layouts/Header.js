@@ -10,6 +10,7 @@ import AccountCircle from 'material-ui-icons/AccountCircle';
 //import Switch from 'material-ui/Switch';
 //import { FormControlLabel, FormGroup } from 'material-ui/Form';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import { BrowserRouter as Link } from "react-router-dom";
 
 const styles = {
   root: {
@@ -48,13 +49,14 @@ class MenuAppBar extends Component {
 
         <AppBar position="static">
           <Toolbar>
-
-            <Typography variant="title" color="inherit" className={classes.flex}>
-              UPP Project Planner
+            <Link to="/test">
+              <Typography variant="title" color="inherit" className={classes.flex}>
+                UPP Project Planner
             </Typography>
+            </Link>
             {auth && (
               <div>
-                
+
                 <IconButton
                   aria-owns={open ? 'menu-appbar' : null}
                   aria-haspopup="true"

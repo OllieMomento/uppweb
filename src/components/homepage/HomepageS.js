@@ -4,6 +4,14 @@ import { Header, Footer, Subheader } from '../layouts/index';
 import ProjectsLists from './ProjectsLists';
 
 
+const style = {
+
+  Div: {
+   margin: '1em'
+  }
+};
+
+
 
 class HomepageS extends Component {
 
@@ -28,14 +36,17 @@ class HomepageS extends Component {
     return (
       <div className="HomepageS">
         <Header />
-        <Subheader
-          filterText={this.state.filterText}
-          filterUpdate={this.filterUpdate.bind(this)}
-        />
-        <ProjectsLists
-          url={this.props.url}
-          filterText={this.state.filterText}
-        />
+        <div style={style.Div}>
+          <Subheader
+            filterText={this.state.filterText}
+            filterUpdate={this.filterUpdate.bind(this)}
+          />
+          <ProjectsLists
+            url={this.props.url}
+            filterText={this.state.filterText}
+          />
+        </div>
+
         <Footer />
       </div>
 

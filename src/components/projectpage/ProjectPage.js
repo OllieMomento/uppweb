@@ -1,6 +1,18 @@
 import React, { Component } from 'react';
 import Graph from './graph';
 import axios from 'axios';
+import Header from '../layouts/Header'
+import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
+import LeftPane from '../layouts/leftPane/LeftPane'
+
+
+const style = {
+
+    Div: {
+     margin: '2em'
+    }
+  };
+  
 
 
 
@@ -26,7 +38,7 @@ class ProjectPage extends Component {
 
                 //call child function
                 this.child.loadGraph()
-                
+
             })
     }
 
@@ -46,16 +58,22 @@ class ProjectPage extends Component {
             });
     }
 
-    
+
 
     render() {
         return (
             <div className="ProjectPage">
-                <h1>ProjectPage</h1>
-                <p>id: {this.props.match.params.id}</p>
-                
+                <Header />
+                <div style={style.Div}>
+                    <BreadcrumbsAndButton />
+                    <LeftPane />
 
-                <Graph project={this.state.data} updateGraphOnServer = {this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                    <h1>ProjectPage</h1>
+                    <p>id: {this.props.match.params.id}</p>
+
+
+                    <Graph project={this.state.data} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                </div>
             </div>
         );
     }

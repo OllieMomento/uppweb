@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Route } from "react-router-dom";
 import ProjectPage from './components/projectpage/ProjectPage';
 //import mxGraphGridAreaEditor from './components/projectpage/mxGraphGridAreaEditor';
 
+import Footer from './components/layouts/Footer'
+
 
 class App extends Component {
 
@@ -17,8 +19,9 @@ class App extends Component {
           <Route exact path="/" render={() => <HomepageS url='http://localhost:3001/api/projects'
             pollInterval={2000} />} />
 
-
           <Route path="/projects/:id" component={ProjectPage} />
+          <Route path="/test" component={Footer} />
+          
         </div>
       </Router>
 
