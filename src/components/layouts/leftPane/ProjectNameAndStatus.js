@@ -12,7 +12,11 @@ const style = {
         maxWidth: 800
 
     },
-    
+    Div: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: ''
+    }
 };
 
 
@@ -25,13 +29,12 @@ class ProjectNameAndStatus extends Component {
         return (
             <div style={style.Div}>
                 <div className="ProjectName">
-                    <Typography variant="title" color="inherit" >
+                    <Typography variant="caption" color="inherit" >
                         Project
                     </Typography>
                     <Typography variant="title" color="inherit" >
-                        Honda
+                       {this.props.project.name}
                     </Typography>
-
                 </div>
 
             </div>

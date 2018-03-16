@@ -66,7 +66,7 @@ class ProjectPage extends Component {
                 <Header />
                 <div style={style.Div}>
                     <BreadcrumbsAndButton />
-                    <LeftPane />
+                    <LeftPane project={this.state.data}/>
 
                     <h1>ProjectPage</h1>
                     <p>id: {this.props.match.params.id}</p>

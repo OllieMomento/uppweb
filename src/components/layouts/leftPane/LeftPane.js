@@ -25,7 +25,7 @@ class LeftPane extends Component {
     render() {
         return (
             <div style={style.Div}>
-            <ProjectNameAndStatus/>
+            <ProjectNameAndStatus project={this.props.project}/>
                 
                 
             </div>
