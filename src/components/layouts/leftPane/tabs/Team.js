@@ -59,9 +59,22 @@ class Team extends Component {
         suggestions: [],
     };
 
-    handleSuggestionsFetchRequested = ({ value }) => {
+    getSupervisors(){
+        const people = this.props.people
+        .map(human =>{
+            return  { label: human.name }
+        })
+        return(people)
+    }
+    
+
+    handleSuggestionsFetchRequested = ({ value }) => {   
+        console.log(typeof(suggestions))
+        console.log(suggestions)
+        console.log(this.getSupervisors())
+
         this.setState({
-            suggestions: getSuggestions(suggestions, value),
+            suggestions: getSuggestions(this.getSupervisors(), value),
         });
     };
 
@@ -77,7 +90,8 @@ class Team extends Component {
         });
     };
 
-    render() {        
+    render() {     
+        this.getSupervisors();
 
         return (
             <div style={{margin:'2em'}}>

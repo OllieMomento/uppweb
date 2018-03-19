@@ -15,15 +15,15 @@ import Autosuggest from 'react-autosuggest';
 
 
 export function renderInput(inputProps) {
-    const { ref, ...other } = inputProps;
+    const { InputProps, classes, ref, ...other } = inputProps;
 
     return (
         <TextField
-            fullWidth
             InputProps={{
-                inputRef: ref,
-                ...other,
+                inputRef: ref,                
+                ...InputProps,
             }}
+            {...other}
         />
     );
 }
