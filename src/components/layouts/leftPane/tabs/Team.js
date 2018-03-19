@@ -10,6 +10,8 @@ import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 
+import {getSuggestions, renderInput, renderSuggestionsContainer, getSuggestionValue, renderSuggestion} from '../../../../functions/autosuggest'
+
 //import SearchBar from 'material-ui-search-bar'
 
 
@@ -51,91 +53,6 @@ const suggestions = [
     { label: 'Brunei Darussalam' },
 ];
 
-function renderInput(inputProps) {
-    const {ref, ...other } = inputProps;
-
-    return (
-        <TextField
-            fullWidth
-            InputProps={{
-                inputRef: ref,                
-                ...other,
-            }}
-        />
-    );
-}
-
-function renderSuggestion(suggestion, { query, isHighlighted }) {
-    const matches = match(suggestion.label, query);
-    const parts = parse(suggestion.label, matches);
-
-    return (
-        <MenuItem selected={isHighlighted} component="div">
-            <div>
-                {parts.map((part, index) => {
-                    return part.highlight ? (
-                        <span key={String(index)} style={{ fontWeight: 300 }}>
-                            {part.text}
-                        </span>
-                    ) : (
-                            <strong key={String(index)} style={{ fontWeight: 500 }}>
-                                {part.text}
-                            </strong>
-                        );
-                })}
-            </div>
-        </MenuItem>
-    );
-}
-
-function renderSuggestionsContainer(options) {
-    const { containerProps, children } = options;
-
-    return (
-        <Paper {...containerProps} square>
-            {children}
-        </Paper>
-    );
-}
-
-function getSuggestionValue(suggestion) {
-    return suggestion.label;
-}
-
-function getSuggestions(value) {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
-    let count = 0;
-
-    return inputLength === 0
-        ? []
-        : suggestions.filter(suggestion => {
-            const keep =
-                count < 5 && suggestion.label.toLowerCase().slice(0, inputLength) === inputValue;
-
-            if (keep) {
-                count += 1;
-            }
-
-            return keep;
-        });
-}
-
-const styles = theme => ({
-    container: {
-   
-    },
-    suggestionsContainerOpen: {
-  
-    },
-    suggestion: {
-       
-    },
-    suggestionsList: {
-      
-    },
-});
-
 class Team extends Component {
     state = {
         value: '',
@@ -144,7 +61,7 @@ class Team extends Component {
 
     handleSuggestionsFetchRequested = ({ value }) => {
         this.setState({
-            suggestions: getSuggestions(value),
+            suggestions: getSuggestions(suggestions, value),
         });
     };
 
