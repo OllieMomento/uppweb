@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var Comment = require('../model/comments');
 var Project = require('../model/projects')
+var People = require('../model/people')
 
 //and create our instances
 var app = express();
@@ -135,7 +136,7 @@ router.route('/projects')
 router.route('/projects/:project_id')
     .get(function (req, res) {
         //looks at our Comment Schema
-       //res.send(req.params.project_id)
+        //res.send(req.params.project_id)
         Project.findById(req.params.project_id, function (err, project) {
             if (err)
                 res.send(err);
@@ -178,6 +179,36 @@ router.route('/projects/:project_id')
                 res.send(err);
             res.json({ message: 'Project has been deleted' })
         })
+    });
+
+//adding the /people route to our /api router
+router.route('/people')
+    //retrieve all comments from the database
+    .get(function (req, res) {
+        //looks at our Comment Schema
+        People.find(function (err, people) {
+            if (err)
+                res.send(err);
+            //responds with a json object of our database people.
+            res.json(people)
+        });
+    })
+    .post(function (req, res) {
+        var people = new People();
+        //body parser lets us use the req.body
+        people.name = req.body.name;
+        people.artist = req.body.artist;
+        people.supervisor = req.body.supervisor;
+        people.projects = req.body.projects
+        people.sequence = req.body.sequence
+        people.assets = req.body.assets
+
+
+        people.save(function (err) {
+            if (err)
+                res.send(err);
+            res.json({ message: 'People successfully added!' });
+        });
     });
 
 //Use our router configuration when we call /api

@@ -4,15 +4,16 @@ import axios from 'axios';
 import Header from '../layouts/Header'
 import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import LeftPane from '../layouts/leftPane/LeftPane'
-
+import RightPane from '../layouts/rightPane/RightPane'
+import Grid from 'material-ui/Grid'
 
 const style = {
 
     Div: {
-     margin: '2em'
+       // margin: '2em'
     }
-  };
-  
+};
+
 
 
 
@@ -23,18 +24,19 @@ class ProjectPage extends Component {
         super(props);
         this.state = {
             isLoading: true,
-            data: {}
+            project: {},
+            people:[]
         };
 
     }
 
     loadProjectsFromServer = () => {
-        console.log("loadFromSercer")
-        console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
+        //console.log("loadFromSercer")
+        //console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
         axios.get('http://localhost:3001/api/projects/' + this.props.match.params.id)
             .then(res => {
-                this.setState({ data: res.data });
-                console.log("dostal jsme data")
+                this.setState({ project: res.data });
+                //console.log("dostal jsme project")
 
                 //call child function
                 this.child.loadGraph()
@@ -42,8 +44,19 @@ class ProjectPage extends Component {
             })
     }
 
+    loadPeopleFromServer = () => {
+        //console.log("loadFromSercer")
+        //console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
+        axios.get('http://localhost:3001/api/people/')
+            .then(res => {
+                this.setState({ people: res.data });  
+
+            })
+    }
+
     componentDidMount() {
         this.loadProjectsFromServer();
+        this.loadPeopleFromServer();
     }
     updateGraphOnServer(xml) {
 
@@ -51,7 +64,7 @@ class ProjectPage extends Component {
             xml: xml
         })
             .then(response => {
-                console.log(response);
+                //console.log(response);
             })
             .catch(err => {
                 console.log(err);
@@ -66,13 +79,22 @@ class ProjectPage extends Component {
                 <Header />
                 <div style={style.Div}>
                     <BreadcrumbsAndButton />
-                    <LeftPane project={this.state.data}/>
+
+                    <Grid container>
+                        <Grid item xs={3}>
+                            <LeftPane project={this.state.project} people={this.state.people}/>
+                        </Grid>
+                        <Grid item xs={9}>
+                            <RightPane />
+                        </Grid>
+                    </Grid>
+
 
                     <h1>ProjectPage</h1>
                     <p>id: {this.props.match.params.id}</p>
 
 
-                    <Graph project={this.state.data} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                    <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
                 </div>
             </div>
         );

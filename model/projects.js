@@ -17,7 +17,12 @@ var ProjectsSchema = new Schema({
     path: String,
     artists: [String],
     supervisor: Number,
-    comments: [String],    
+    comments: [{
+        author: String,
+        date : String,
+        text: String,
+        id: Number
+    }],    
     xml: String
 });
 

@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
-import Button from 'material-ui/Button';
-import { Link } from "react-router-dom";
 
 import ProjectNameAndStatus from './ProjectNameAndStatus';
+import TabsBar from './TabsBar';
 //import SearchBar from 'material-ui-search-bar'
 
 
 
 const style = {
-    SearchBar: {
-        marginLeft: 15,
-        maxWidth: 800
+    LeftPane: {
+       width: 400,
 
+    },
+    Div: {
+        backgroundColor: "#eeeeee",
+        padding: "2em"
     }
-    
+
 };
 
 
@@ -24,10 +26,14 @@ class LeftPane extends Component {
 
     render() {
         return (
-            <div style={style.Div}>
-            <ProjectNameAndStatus project={this.props.project}/>
-                
-                
+            <div style={style.LeftPane}>
+                <div style={style.Div}>
+                    <ProjectNameAndStatus project={this.props.project} />
+
+
+
+                </div>
+                <TabsBar project={this.props.project} people={this.props.people}/>
             </div>
         );
     }

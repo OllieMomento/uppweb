@@ -22,11 +22,11 @@ class ProjectsLists extends Component {
     }
 
     componentDidMount() {
-        this.loadCommentsFromServer();
-        //setInterval(this.loadCommentsFromServer, this.props.pollInterval);
+        this.loadProjectsFromServer();
+        //setInterval(this.loadProjectsFromServer, this.props.pollInterval);
     }
 
-    loadCommentsFromServer = () => {
+    loadProjectsFromServer = () => {
         axios.get(this.props.url)
             .then(res => {
                 this.setState({ data: res.data });
@@ -39,7 +39,7 @@ class ProjectsLists extends Component {
 
     getProjectList(type) {
 
-        const projects = this.props.projects;
+        //const projects = this.props.projects;
         const filterText = this.props.filterText;
 
         const projectList = this.state.data
