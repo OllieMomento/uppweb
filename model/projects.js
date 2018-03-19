@@ -16,7 +16,7 @@ var ProjectsSchema = new Schema({
     status: String,
     path: String,
     artists: [String],
-    supervisor: Number,
+    supervisor: String,
     comments: [{
         author: String,
         date : String,

@@ -9,76 +9,72 @@ import Paper from 'material-ui/Paper';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
+import axios from 'axios';
 
-import {getSuggestions, renderInput, renderSuggestionsContainer, getSuggestionValue, renderSuggestion} from '../../../../functions/autosuggest'
+import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion } from '../../../../functions/autosuggest'
 
 //import SearchBar from 'material-ui-search-bar'
 
+const style = {
+    SearchBar: {
+        marginLeft: 15,
+        maxWidth: 800
+
+    },
+    Div: {
+        backgroundColor: "#eeeeee",
+        padding: "2em"
+    },
+    Divdiv: {
+        marginBottom: "1em"
+    }
+
+};
 
 
-const suggestions = [
-    { label: 'Afghanistan' },
-    { label: 'Aland Islands' },
-    { label: 'Albania' },
-    { label: 'Algeria' },
-    { label: 'American Samoa' },
-    { label: 'Andorra' },
-    { label: 'Angola' },
-    { label: 'Anguilla' },
-    { label: 'Antarctica' },
-    { label: 'Antigua and Barbuda' },
-    { label: 'Argentina' },
-    { label: 'Armenia' },
-    { label: 'Aruba' },
-    { label: 'Australia' },
-    { label: 'Austria' },
-    { label: 'Azerbaijan' },
-    { label: 'Bahamas' },
-    { label: 'Bahrain' },
-    { label: 'Bangladesh' },
-    { label: 'Barbados' },
-    { label: 'Belarus' },
-    { label: 'Belgium' },
-    { label: 'Belize' },
-    { label: 'Benin' },
-    { label: 'Bermuda' },
-    { label: 'Bhutan' },
-    { label: 'Bolivia, Plurinational State of' },
-    { label: 'Bonaire, Sint Eustatius and Saba' },
-    { label: 'Bosnia and Herzegovina' },
-    { label: 'Botswana' },
-    { label: 'Bouvet Island' },
-    { label: 'Brazil' },
-    { label: 'British Indian Ocean Territory' },
-    { label: 'Brunei Darussalam' },
-];
 
 class Team extends Component {
-    state = {
-        value: '',
-        suggestions: [],
-    };
-
-    getSupervisors(){
-        const people = this.props.people
-        .map(human =>{
-            return  { label: human.name }
-        })
-        return(people)
+    constructor(props) {
+        super(props);
+        this.state = {
+            value: this.getNameFromID(this.props.project.supervisor),
+            suggestions: [],
+        };
     }
-    
 
-    handleSuggestionsFetchRequested = ({ value }) => {   
-        console.log(typeof(suggestions))
-        console.log(suggestions)
-        console.log(this.getSupervisors())
+    getSupervisors() {
+        const people = this.props.people
+            .filter(human => {
+                return human.supervisor === 1
+            })
+            .map(human => {
+                return { label: human.name, id: human._id }
+            })
+        return (people)
+    }
 
+    getNameFromID(id) {
+        const name = this.props.people
+
+            .filter(human => {
+                return human._id === id
+            }).map(human => {
+                return (
+                    human.name
+                )
+            })
+        return (name[0])
+    }
+
+
+    handleSuggestionsFetchRequested = ({ value }) => {
         this.setState({
             suggestions: getSuggestions(this.getSupervisors(), value),
         });
     };
 
     handleSuggestionsClearRequested = () => {
+
         this.setState({
             suggestions: [],
         });
@@ -90,25 +86,50 @@ class Team extends Component {
         });
     };
 
-    render() {     
-        this.getSupervisors();
+
+    putDataOnServer(suggestion, project) {
+        console.log(typeof (suggestion.id))
+
+        axios.put('http://localhost:3001/api/projects/' + project._id, {
+            supervisor: suggestion.id
+        }).then(response => {
+            console.log(response);
+        })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+    getSuggestionValue(suggestion) {
+
+        console.log(this.props.project)
+        this.putDataOnServer(suggestion, this.props.project)
+
+        return suggestion.label;
+    }
+
+    render() {
+        /*
+        this.setState({
+            value:(this.getNameFromID(this.props.project.supervisor))
+        })*/
 
         return (
-            <div style={{margin:'2em'}}>
-            <Autosuggest 
-                renderInputComponent={renderInput}
-                suggestions={this.state.suggestions}
-                onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
-                onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
-                renderSuggestionsContainer={renderSuggestionsContainer}
-                getSuggestionValue={getSuggestionValue}
-                renderSuggestion={renderSuggestion}
-                inputProps={{                    
-                    placeholder: 'Search a supervisor',
-                    value: this.state.value,
-                    onChange: this.handleChange,
-                }}
-            />
+            <div style={style.Div} >
+                <Autosuggest
+                    renderInputComponent={renderInput}
+                    suggestions={this.state.suggestions}
+                    onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
+                    onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
+                    renderSuggestionsContainer={renderSuggestionsContainer}
+                    getSuggestionValue={this.getSuggestionValue.bind(this)}
+                    renderSuggestion={renderSuggestion}
+                    inputProps={{
+                        placeholder: 'Search a supervisor',
+                        value: this.state.value,
+                        onChange: this.handleChange,
+                    }}
+                />
             </div>
         );
     }

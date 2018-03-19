@@ -19,8 +19,9 @@ export function renderInput(inputProps) {
 
     return (
         <TextField
+            fullWidth
             InputProps={{
-                inputRef: ref,                
+                inputRef: ref,
                 ...InputProps,
             }}
             {...other}
@@ -28,23 +29,19 @@ export function renderInput(inputProps) {
     );
 }
 
-export function renderSuggestion(suggestion, { query, isHighlighted }) {
+export function renderSuggestion(suggestion, { query }) {
     const matches = match(suggestion.label, query);
     const parts = parse(suggestion.label, matches);
 
     return (
-        <MenuItem selected={isHighlighted} component="div">
+        <MenuItem  component="div">
             <div>
                 {parts.map((part, index) => {
-                    return part.highlight ? (
-                        <span key={String(index)} style={{ fontWeight: 300 }}>
-                            {part.text}
-                        </span>
-                    ) : (
+                    return (
                             <strong key={String(index)} style={{ fontWeight: 500 }}>
                                 {part.text}
                             </strong>
-                        );
+                    );
                 })}
             </div>
         </MenuItem>
@@ -61,10 +58,6 @@ export function renderSuggestionsContainer(options) {
     );
 }
 
-export function getSuggestionValue(suggestion) {
-    return suggestion.label;
-}
-
 export function getSuggestions(suggestions, value) {
     const inputValue = value.trim().toLowerCase();
     const inputLength = inputValue.length;
@@ -74,7 +67,7 @@ export function getSuggestions(suggestions, value) {
         ? []
         : suggestions.filter(suggestion => {
             const keep =
-                count < 5 && suggestion.label.toLowerCase().slice(0, inputLength) === inputValue;
+                count < 5 && suggestion.label.toLowerCase().includes(inputValue);
 
             if (keep) {
                 count += 1;
