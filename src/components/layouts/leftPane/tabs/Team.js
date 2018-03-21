@@ -88,12 +88,11 @@ class Team extends Component {
 
 
     putDataOnServer(suggestion, project) {
-        console.log(typeof (suggestion.id))
 
         axios.put('http://localhost:3001/api/projects/' + project._id, {
             supervisor: suggestion.id
         }).then(response => {
-            console.log(response);
+            // console.log(response);
         })
             .catch(err => {
                 console.log(err);
@@ -102,7 +101,7 @@ class Team extends Component {
 
     getSuggestionValue(suggestion) {
 
-        console.log(this.props.project)
+        // console.log(this.props.project)
         this.putDataOnServer(suggestion, this.props.project)
 
         return suggestion.label;
@@ -116,6 +115,10 @@ class Team extends Component {
 
         return (
             <div style={style.Div} >
+                <Typography variant="caption"  >
+                    Supervisor
+                </Typography>
+
                 <Autosuggest
                     renderInputComponent={renderInput}
                     suggestions={this.state.suggestions}

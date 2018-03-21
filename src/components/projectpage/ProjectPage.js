@@ -10,7 +10,7 @@ import Grid from 'material-ui/Grid'
 const style = {
 
     Div: {
-       // margin: '2em'
+        // margin: '2em'
     }
 };
 
@@ -25,7 +25,7 @@ class ProjectPage extends Component {
         this.state = {
             isLoading: true,
             project: {},
-            people:[]
+            people: []
         };
 
     }
@@ -49,7 +49,7 @@ class ProjectPage extends Component {
         //console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
-                this.setState({ people: res.data });  
+                this.setState({ people: res.data });
 
             })
     }
@@ -78,14 +78,15 @@ class ProjectPage extends Component {
             <div className="ProjectPage">
                 <Header />
                 <div style={style.Div}>
-                    <BreadcrumbsAndButton />
+                    <BreadcrumbsAndButton path={[this.state.project]} />
 
                     <Grid container>
-                        <Grid item xs={3}>
-                            <LeftPane project={this.state.project} people={this.state.people}/>
+                        <Grid>
+                            <LeftPane project={this.state.project} people={this.state.people} />
                         </Grid>
-                        <Grid item xs={9}>
-                            <RightPane />
+                        <Grid>
+                            <Graph style={{paddingTop: '0.5em'}} project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                            {/*<RightPane />*/}
                         </Grid>
                     </Grid>
 
@@ -94,7 +95,7 @@ class ProjectPage extends Component {
                     <p>id: {this.props.match.params.id}</p>
 
 
-                    <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+
                 </div>
             </div>
         );

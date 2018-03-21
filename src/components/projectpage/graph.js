@@ -38,7 +38,7 @@ class Graph extends Component {
     readFromXML(graph, parent) {
         try {
             var xml = this.props.project.xml;
-           // console.log(xml)     
+            // console.log(xml)     
 
 
             var doc = mxUtils.parseXml(xml);
@@ -97,7 +97,14 @@ class Graph extends Component {
 
     loadGraph() {
         var container = ReactDOM.findDOMNode(this.refs.divGraph);
-       // console.log("loadGraph")
+        container.style.overflow = 'hidden';
+        container.style.left = '24px';
+        container.style.top = '0px';
+        container.style.right = '0px';
+        container.style.bottom = '0px';
+
+
+        // console.log("loadGraph")
 
 
         // Checks if the browser is supported
@@ -136,15 +143,15 @@ class Graph extends Component {
 
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
-            /*
-            container.style.position = 'absolute';
+
+
             container.style.overflow = 'hidden';
             container.style.left = '24px';
             container.style.top = '0px';
             container.style.right = '0px';
             container.style.bottom = '0px';
             container.style.background = 'url("editors/images/grid.gif")';
-            */
+
 
 
             var model = new mxGraphModel();
@@ -232,7 +239,7 @@ class Graph extends Component {
                 var node = encoder.encode(graph.getModel());
                 var xml = mxUtils.getPrettyXml(node)
                 this.props.updateGraphOnServer(xml)
-               // console.log(xml)
+                // console.log(xml)
             });
 
             var graphButton = ReactDOM.findDOMNode(this.refs.graphButton);
@@ -245,7 +252,7 @@ class Graph extends Component {
     }
 
     render() {
-       // console.log("render")
+        // console.log("render")
         return (
 
             <div className="graph" ref="divGraph" id="divGraph">
