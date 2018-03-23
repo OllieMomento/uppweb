@@ -4,6 +4,14 @@ import axios from 'axios';
 import {
     mxGraph,
     mxGraphModel,
+    mxPerimeter,
+    mxPoint,
+    mxRectangle,
+    mxEditor,
+    mxGuide,
+    mxGraphHandler,
+    mxOutline,
+    mxEdgeHandler,
     mxParallelEdgeLayout,
     mxConstants,
     mxEdgeStyle,
@@ -24,6 +32,7 @@ import {
     mxCellTracker,
     mxObjectCodec,
     mxCodecRegistry,
+    mxEdgeLabelLayout,
     mxLog
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
@@ -43,8 +52,6 @@ const style = {
     Container: {
         flexGrow: '1'
     }
-
-
 };
 
 
@@ -56,10 +63,10 @@ class Graph extends Component {
     }
     */
     readFromXML(graph, parent) {
+        console.log("kokottt")
+        graph.getModel().beginUpdate();
         try {
             var xml = this.props.project.xml;
-            // console.log(xml)     
-
 
             var doc = mxUtils.parseXml(xml);
             var codec = new mxCodec(doc);
@@ -83,8 +90,11 @@ class Graph extends Component {
                     var width = geometry[0].getAttribute("width")
                     var height = geometry[0].getAttribute("height")
 
+                    console.log("x" + x)
+                    console.log("y" + y)
+
                     //add vertex
-                    vertexes[i] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                    vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
                 }
                 //If element is Edge
                 else if (element.hasAttribute("edge")) {
@@ -107,8 +117,29 @@ class Graph extends Component {
         }
         finally {
             // Updates the display
+            graph.refresh()
             graph.getModel().endUpdate();
+
+            //Need to move othervise the dragging canvas is broken
+            graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
         }
+    }
+
+    createPopupMenu(graph, menu, cell, evt) {
+        if (cell != null) {
+            menu.addItem('Cell Item', 'editors/images/image.gif', function () {
+                mxUtils.alert('MenuItem1');
+            });
+        }
+        else {
+            menu.addItem('No-Cell Item', 'editors/images/image.gif', function () {
+                mxUtils.alert('MenuItem2');
+            });
+        }
+        menu.addSeparator();
+        menu.addItem('MenuItem3', '../src/images/warning.gif', function () {
+            mxUtils.alert('MenuItem3: ' + graph.getSelectionCount() + ' selected');
+        });
     }
 
 
@@ -116,6 +147,7 @@ class Graph extends Component {
 
 
     loadGraph() {
+        console.log("loadGraph")
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -123,6 +155,7 @@ class Graph extends Component {
             mxUtils.error('Browser is not supported!', 200, false);
         }
         else {
+
 
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
 
@@ -138,24 +171,41 @@ class Graph extends Component {
 
             container.style.background = "url(" + Grid + ")"
 
-
-
             var model = new mxGraphModel();
             var graph = new mxGraph(container, model);
             graph.dropEnabled = true;
 
+
+
             // Enables new connections in the graph
             graph.setConnectable(true);
+            // Enables moving with right click ang drag
+            graph.setPanning(true);
+
+            graph.setTooltips(true);
             graph.setMultigraph(false);
+
+
+
+
+            // Does not allow dangling edges
+            graph.setAllowDanglingEdges(false);
 
             // Stops editing on enter or escape keypress
             var keyHandler = new mxKeyHandler(graph);
             var rubberband = new mxRubberband(graph);
 
+            // Installs a popupmenu handler using local function / Right click.
+            graph.popupMenuHandler.factoryMethod = (menu, cell, evt) => {
+                return this.createPopupMenu(graph, menu, cell, evt);
+            };
+
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             var parent = graph.getDefaultParent();
             // console.log("parent:  " + parent)
+
+            this.readFromXML(graph, parent)
 
             // Adds cells to the model in a single step
             graph.getModel().beginUpdate();
@@ -168,6 +218,7 @@ class Graph extends Component {
             };
             addVertex('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/rectangle.gif', 100, 40, '');
 
+            graph.getModel().endUpdate();
             //console.log(graph.isSelectionEmpty())
 
             function addToolbarItem(graph, toolbar, prototype, image) {
@@ -190,23 +241,36 @@ class Graph extends Component {
                 mxUtils.makeDraggable(img, graph, funct);
             }
 
-            this.readFromXML(graph, parent)
 
+
+            // Enables guides (vodici cary)
+            mxGraphHandler.prototype.guidesEnabled = true;
+
+            // Disable highlight of cells when dragging from toolbar
+            graph.setDropEnabled(false);
+
+            // Enables snapping waypoints to terminals
+            mxEdgeHandler.prototype.snapToTerminals = true;
 
             var button = mxUtils.button('Save Graph', () => {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                 var xml = mxUtils.getPrettyXml(node)
+
                 this.props.updateGraphOnServer(xml)
-                // console.log(xml)
+                console.log(xml)
             });
 
             var graphButton = ReactDOM.findDOMNode(this.refs.graphButton);
             graphButton.appendChild(button)
 
+            var outline = document.getElementById('outlineContainer');
+
+            var outln = new mxOutline(graph, outline);
             // container.insertBefore(button, container.nextSibling);
 
         }
+
 
     }
 
@@ -217,6 +281,9 @@ class Graph extends Component {
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
                 <div className="graph-button" ref="graphButton" id="graphButton" />
                 <div className="graph-tbcont" style={style.TbCont}>
+                    <div id="outlineContainer"
+                        style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
+                    </div>
                     <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
