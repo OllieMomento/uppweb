@@ -13,9 +13,9 @@ const style = {
         minWidth: '133px' 
 
     },
-    Div: {
-        backgroundColor: "#eeeeee",
-        padding: "2em"
+    Tabs: {
+        backgroundColor: "#eeeeee",        
+        flexDirection: 'column',            
     }
 
 };
@@ -39,7 +39,7 @@ class TabsBar extends Component {
         const { value } = this.state;
 
         return (
-            <div className="Tabs">
+            <div className="Tabs" style={style.Tabs}>
                 <AppBar position="static" color="default">
                     <Tabs
                         value={this.state.value}

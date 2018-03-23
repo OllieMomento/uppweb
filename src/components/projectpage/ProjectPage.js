@@ -8,10 +8,29 @@ import RightPane from '../layouts/rightPane/RightPane'
 import Grid from 'material-ui/Grid'
 
 const style = {
+    Page:{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh'
+
+    },
+    Container: {
+        display: 'flex',
+        flexGrow: '1',
+
+    },
 
     Div: {
-        // margin: '2em'
+        display: 'flex',
+        flexDirection: 'column',
+        
+    },
+    LeftPane: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        flexGrow: '1'
     }
+
 };
 
 
@@ -75,28 +94,17 @@ class ProjectPage extends Component {
 
     render() {
         return (
-            <div className="ProjectPage">
+            <div className="ProjectPage" style={style.Page}>
                 <Header />
-                <div style={style.Div}>
-                    <BreadcrumbsAndButton path={[this.state.project]} />
+                <BreadcrumbsAndButton path={[this.state.project]} />                
 
-                    <Grid container>
-                        <Grid>
-                            <LeftPane project={this.state.project} people={this.state.people} />
-                        </Grid>
-                        <Grid>
-                            <Graph style={{paddingTop: '0.5em'}} project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
-                            {/*<RightPane />*/}
-                        </Grid>
-                    </Grid>
+                    <div style={style.Container}>
+                        <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} />
+                        <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                        {/*<RightPane />*/}
 
-
-                    <h1>ProjectPage</h1>
-                    <p>id: {this.props.match.params.id}</p>
-
-
-
-                </div>
+                    </div>                
+                <div> footer</div>
             </div>
         );
     }

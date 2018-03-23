@@ -26,6 +26,26 @@ import {
     mxCodecRegistry,
     mxLog
 } from "mxgraph-js";
+import Grid from '../../images/grid.gif'
+import Connector from '../../images/connector.gif'
+
+
+const style = {
+    Graph: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: '1'
+    },
+    TbCont: {
+        display: 'flex',
+        flexGrow: '1'
+    },
+    Container: {
+        flexGrow: '1'
+    }
+
+
+};
 
 
 class Graph extends Component {
@@ -96,22 +116,6 @@ class Graph extends Component {
 
 
     loadGraph() {
-        var container = ReactDOM.findDOMNode(this.refs.divGraph);
-        container.style.overflow = 'hidden';
-        container.style.left = '24px';
-        container.style.top = '0px';
-        container.style.right = '0px';
-        container.style.bottom = '0px';
-
-
-        // console.log("loadGraph")
-
-
-        // Checks if the browser is supported
-
-        // Program starts here. Creates a sample graph in the
-        // DOM node with the specified ID. This function is invoked
-        // from the onLoad event handler of the document (see below).
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -120,21 +124,9 @@ class Graph extends Component {
         }
         else {
 
+            mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
 
-
-            //mxConnectionHandler.prototype.connectImage = new mxImage('images/connector.gif', 16, 16);
-
-            // Creates the div for the toolbar
             var tbContainer = ReactDOM.findDOMNode(this.refs.graphToolbar);
-            /*
-            tbContainer.style.position = 'absolute';
-            tbContainer.style.overflow = 'hidden';
-            tbContainer.style.padding = '2px';
-            tbContainer.style.left = '0px';
-            tbContainer.style.top = '0px';
-            tbContainer.style.width = '24px';
-            tbContainer.style.bottom = '0px';
-            */
 
 
             // Creates new toolbar without event processing
@@ -144,18 +136,13 @@ class Graph extends Component {
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
 
-
-            container.style.overflow = 'hidden';
-            container.style.left = '24px';
-            container.style.top = '0px';
-            container.style.right = '0px';
-            container.style.bottom = '0px';
-            container.style.background = 'url("editors/images/grid.gif")';
+            container.style.background = "url(" + Grid + ")"
 
 
 
             var model = new mxGraphModel();
             var graph = new mxGraph(container, model);
+            graph.dropEnabled = true;
 
             // Enables new connections in the graph
             graph.setConnectable(true);
@@ -177,14 +164,7 @@ class Graph extends Component {
                 var vertex = new mxCell(null, new mxGeometry(0, 0, w, h), style);
                 vertex.setVertex(true);
 
-                var img = addToolbarItem(graph, toolbar, vertex, icon);
-                img.enabled = true;
-
-                graph.getSelectionModel().addListener(mxEvent.CHANGE, function () {
-                    var tmp = graph.isSelectionEmpty();
-                    mxUtils.setOpacity(img, (tmp) ? 100 : 20);
-                    img.enabled = tmp;
-                });
+                addToolbarItem(graph, toolbar, vertex, icon);
             };
             addVertex('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/rectangle.gif', 100, 40, '');
 
@@ -194,41 +174,20 @@ class Graph extends Component {
                 // Function that is executed when the image is dropped on
                 // the graph. The cell argument points to the cell under
                 // the mousepointer if there is one.
-                var funct = function (graph, evt, cell, x, y) {
+                var funct = function (graph, evt, cell) {
                     graph.stopEditing(false);
 
+                    var pt = graph.getPointForEvent(evt);
                     var vertex = graph.getModel().cloneCell(prototype);
-                    vertex.geometry.x = x;
-                    vertex.geometry.y = y;
+                    vertex.geometry.x = pt.x;
+                    vertex.geometry.y = pt.y;
 
-                    graph.addCell(vertex);
-                    graph.setSelectionCell(vertex);
+                    graph.setSelectionCells(graph.importCells([vertex], 0, 0, cell));
                 }
 
                 // Creates the image which is used as the drag icon (preview)
-                var img = toolbar.addMode(null, image, function (evt, cell) {
-                    var pt = this.graph.getPointForEvent(evt);
-                    funct(graph, evt, cell, pt.x, pt.y);
-                });
-
-                // Disables dragging if element is disabled. This is a workaround
-                // for wrong event order in IE. Following is a dummy listener that
-                // is invoked as the last listener in IE.
-                mxEvent.addListener(img, 'mousedown', function (evt) {
-                    // do nothing
-                });
-
-                // This listener is always called first before any other listener
-                // in all browsers.
-                mxEvent.addListener(img, 'mousedown', function (evt) {
-                    if (img.enabled == false) {
-                        mxEvent.consume(evt);
-                    }
-                });
-
+                var img = toolbar.addMode(null, image, funct);
                 mxUtils.makeDraggable(img, graph, funct);
-
-                return img;
             }
 
             this.readFromXML(graph, parent)
@@ -255,11 +214,13 @@ class Graph extends Component {
         // console.log("render")
         return (
 
-            <div className="graph" ref="divGraph" id="divGraph">
+            <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
                 <div className="graph-button" ref="graphButton" id="graphButton" />
-                <div className="graph-container" ref="graphContainer" id="graphContainer" />
+                <div className="graph-tbcont" style={style.TbCont}>
+                    <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
+                    <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
+                </div>
 
-                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
 
             </div>
         );

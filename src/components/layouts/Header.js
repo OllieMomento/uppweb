@@ -14,7 +14,7 @@ import { BrowserRouter as Link } from "react-router-dom";
 
 const styles = {
   root: {
-    flexGrow: 1,
+    
   },
   flex: {
     flex: 1,

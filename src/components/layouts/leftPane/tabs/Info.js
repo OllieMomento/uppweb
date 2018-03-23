@@ -13,8 +13,12 @@ const style = {
 
     },
     Div: {
-        backgroundColor: "#eeeeee",
-        padding: "2em"
+
+        padding: "2em",
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'wrap',
+        flexGrow: '1'
     },
     Divdiv: {
         marginBottom: "1em"
@@ -39,7 +43,7 @@ class Info extends Component {
 
 
     render() {
-       // var start = this.props.project.start
+        // var start = this.props.project.start
         //start = String(start).slice(0, 10)
 
 

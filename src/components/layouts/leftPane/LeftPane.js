@@ -9,11 +9,13 @@ import TabsBar from './TabsBar';
 const style = {
     LeftPane: {
        width: 400,
+       backgroundColor: "#eeeeee",
 
     },
     Div: {
-        backgroundColor: "#eeeeee",
-        padding: "2em"
+       
+        padding: "2em"    
+                    
     }
 
 };
