@@ -56,14 +56,20 @@ const style = {
 
 
 class Graph extends Component {
-    /*
-    componentDidMount() {
-        this.loadGraph();
-        
+
+    constructor(props) {
+        console.log("constructor")
+        super(props);
+        this.state = {
+            adj: [],
+            edges: [],
+            nodes: []
+        };
+
     }
-    */
+
     readFromXML(graph, parent) {
-        console.log("kokottt")
+
         graph.getModel().beginUpdate();
         try {
             var xml = this.props.project.xml;
@@ -84,20 +90,24 @@ class Graph extends Component {
                 //If element is Vertex/cell
                 if (element.hasAttribute("vertex")) {
 
+
                     var geometry = element.getElementsByTagName("mxGeometry");
                     var x = geometry[0].getAttribute("x")
                     var y = geometry[0].getAttribute("y")
                     var width = geometry[0].getAttribute("width")
                     var height = geometry[0].getAttribute("height")
 
-                    console.log("x" + x)
-                    console.log("y" + y)
-
                     //add vertex
                     vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                    this.state.nodes.push(id)
+
+
+
                 }
                 //If element is Edge
                 else if (element.hasAttribute("edge")) {
+
+
                     var source = element.getAttribute("source")
                     var target = element.getAttribute("target")
 
@@ -106,6 +116,17 @@ class Graph extends Component {
 
                     //add Edge
                     graph.insertEdge(parent, id, value, sourceElement, targetElement)
+                    this.state.edges.push(id)
+
+
+                    console.log('source ' + source)
+
+                    //add edge into adj graph
+
+                    this.state.adj.push({
+                        source: source,
+                        target: target
+                    })
 
                 }
 
@@ -116,38 +137,98 @@ class Graph extends Component {
             console.log(e)
         }
         finally {
+            console.log(this.state.edges)
+            console.log(this.state.nodes)
+            console.log(this.state.adj)
             // Updates the display
             graph.refresh()
             graph.getModel().endUpdate();
 
             //Need to move othervise the dragging canvas is broken
             graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
+            graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
         }
     }
 
-    createPopupMenu(graph, menu, cell, evt) {
-        if (cell != null) {
-            menu.addItem('Cell Item', 'editors/images/image.gif', function () {
-                mxUtils.alert('MenuItem1');
-            });
+    addSidebarIcon(graph, sidebar, label, image) {
+        // Function that is executed when the image is dropped on
+        // the graph. The cell argument points to the cell under
+        // the mousepointer if there is one.
+        var funct = function (graph, evt, cell, x, y) {
+            var parent = graph.getDefaultParent();
+            var model = graph.getModel();
+
+            var v1 = null;
+
+            model.beginUpdate();
+            try {
+                // NOTE: For non-HTML labels the image must be displayed via the style
+                // rather than the label markup, so use 'image=' + image for the style.
+                // as follows: v1 = graph.insertVertex(parent, null, label,
+                // pt.x, pt.y, 120, 120, 'image=' + image);
+
+
+                v1 = graph.insertVertex(parent, null, (this.state.nodes.length), x, y, 120, 120);
+                this.state.nodes.push(this.state.nodes.length + 1)
+
+
+            }
+            finally {
+                model.endUpdate();
+            }
+
+            graph.setSelectionCell(v1);
         }
-        else {
-            menu.addItem('No-Cell Item', 'editors/images/image.gif', function () {
-                mxUtils.alert('MenuItem2');
-            });
+
+        // Creates the image which is used as the sidebar icon (drag source)
+        var img = document.createElement('img');
+        img.setAttribute('src', image);
+        img.style.width = '48px';
+        img.style.height = '48px';
+        img.title = 'Drag this to the diagram to create a new vertex';
+        sidebar.appendChild(img);
+
+        var dragElt = document.createElement('div');
+        dragElt.style.border = 'dashed black 1px';
+        dragElt.style.width = '120px';
+        dragElt.style.height = '120px';
+
+        // Creates the image which is used as the drag icon (preview)
+        var ds = mxUtils.makeDraggable(img, graph, funct.bind(this), dragElt, 0, 0, true, true);
+        ds.setGuidesEnabled(true);
+    };
+
+    addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
+        var button = document.createElement('button');
+        button.style.fontSize = '10';
+        if (image != null) {
+            var img = document.createElement('img');
+            img.setAttribute('src', image);
+            img.style.width = '16px';
+            img.style.height = '16px';
+            img.style.verticalAlign = 'middle';
+            img.style.marginRight = '2px';
+            button.appendChild(img);
         }
-        menu.addSeparator();
-        menu.addItem('MenuItem3', '../src/images/warning.gif', function () {
-            mxUtils.alert('MenuItem3: ' + graph.getSelectionCount() + ' selected');
+        if (isTransparent) {
+            button.style.background = 'transparent';
+            button.style.color = '#FFFFFF';
+            button.style.border = 'none';
+        }
+        mxEvent.addListener(button, 'click', function (evt) {
+            editor.execute(action);
         });
-    }
+        mxUtils.write(button, label);
+        toolbar.appendChild(button);
+    };
+
+
 
 
 
 
 
     loadGraph() {
-        console.log("loadGraph")
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -159,22 +240,45 @@ class Graph extends Component {
 
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
 
-            var tbContainer = ReactDOM.findDOMNode(this.refs.graphToolbar);
-
-
-            // Creates new toolbar without event processing
-            var toolbar = new mxToolbar(tbContainer);
-            toolbar.enabled = false
+            var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
+            var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
 
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
 
             container.style.background = "url(" + Grid + ")"
 
-            var model = new mxGraphModel();
-            var graph = new mxGraph(container, model);
-            graph.dropEnabled = true;
+            // Creates a wrapper editor with a graph inside the given container.
+            // The editor is used to create certain functionality for the
+            // graph, such as the rubberband selection, but most parts
+            // of the UI are custom in this example.
+            var editor = new mxEditor();
+            var graph = editor.graph;
+            var model = graph.getModel();
 
+            // Disable highlight of cells when dragging from toolbar
+            graph.setDropEnabled(false);
+
+            editor.setGraphContainer(container);
+            var config = mxUtils.load(
+                './../../data/graphEditorConfig.xml').getDocumentElement()      
+
+            editor.configure(config);
+
+
+
+
+            // Gets the default parent for inserting new cells. This
+            // is normally the first child of the root (ie. layer 0).
+            var parent = graph.getDefaultParent();
+            // console.log("parent:  " + parent)
+
+            this.readFromXML(graph, parent)
+
+
+            this.addSidebarIcon(graph, sidebar, 'Website', 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
+
+            this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png');
 
 
             // Enables new connections in the graph
@@ -200,48 +304,6 @@ class Graph extends Component {
                 return this.createPopupMenu(graph, menu, cell, evt);
             };
 
-            // Gets the default parent for inserting new cells. This
-            // is normally the first child of the root (ie. layer 0).
-            var parent = graph.getDefaultParent();
-            // console.log("parent:  " + parent)
-
-            this.readFromXML(graph, parent)
-
-            // Adds cells to the model in a single step
-            graph.getModel().beginUpdate();
-
-            var addVertex = function (icon, w, h, style) {
-                var vertex = new mxCell(null, new mxGeometry(0, 0, w, h), style);
-                vertex.setVertex(true);
-
-                addToolbarItem(graph, toolbar, vertex, icon);
-            };
-            addVertex('https://jgraph.github.io/mxgraph/javascript/examples/editors/images/rectangle.gif', 100, 40, '');
-
-            graph.getModel().endUpdate();
-            //console.log(graph.isSelectionEmpty())
-
-            function addToolbarItem(graph, toolbar, prototype, image) {
-                // Function that is executed when the image is dropped on
-                // the graph. The cell argument points to the cell under
-                // the mousepointer if there is one.
-                var funct = function (graph, evt, cell) {
-                    graph.stopEditing(false);
-
-                    var pt = graph.getPointForEvent(evt);
-                    var vertex = graph.getModel().cloneCell(prototype);
-                    vertex.geometry.x = pt.x;
-                    vertex.geometry.y = pt.y;
-
-                    graph.setSelectionCells(graph.importCells([vertex], 0, 0, cell));
-                }
-
-                // Creates the image which is used as the drag icon (preview)
-                var img = toolbar.addMode(null, image, funct);
-                mxUtils.makeDraggable(img, graph, funct);
-            }
-
-
 
             // Enables guides (vodici cary)
             mxGraphHandler.prototype.guidesEnabled = true;
@@ -255,19 +317,15 @@ class Graph extends Component {
             var button = mxUtils.button('Save Graph', () => {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
+                console.log(node)
                 var xml = mxUtils.getPrettyXml(node)
 
                 this.props.updateGraphOnServer(xml)
                 console.log(xml)
             });
 
-            var graphButton = ReactDOM.findDOMNode(this.refs.graphButton);
-            graphButton.appendChild(button)
 
-            var outline = document.getElementById('outlineContainer');
-
-            var outln = new mxOutline(graph, outline);
-            // container.insertBefore(button, container.nextSibling);
+            toolbar.appendChild(button)
 
         }
 
@@ -279,12 +337,12 @@ class Graph extends Component {
         return (
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
-                <div className="graph-button" ref="graphButton" id="graphButton" />
+                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div id="outlineContainer"
                         style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
                     </div>
-                    <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
+                    <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
 

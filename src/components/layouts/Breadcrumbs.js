@@ -30,8 +30,7 @@ class Breadcrumbs extends Component {
 
         let url = 'http://localhost:3000/projects/'
         let path = pathObj
-            .map((obj, index) => {
-                console.log(obj._id)
+            .map((obj, index) => {               
                 url = url + obj._id + '/';
                 if(index+1 === pathObj.length){
                     return(<li key={index}>{obj.name}</li>)
@@ -47,7 +46,7 @@ class Breadcrumbs extends Component {
     }
 
     render() {
-        console.log(this.props.path)
+        
         this.getPath(this.props.path)
         return (
             <div style={style.Div}>
