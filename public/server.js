@@ -124,6 +124,7 @@ router.route('/projects')
         project.supervisor = req.body.supervisor;
         project.comments = req.body.comments;
         project.xml = req.body.xml;
+        project.seq = req.body.seq;
 
 
         project.save(function (err) {
@@ -163,6 +164,7 @@ router.route('/projects/:project_id')
             (req.body.supervisor) ? project.supervisor = req.body.supervisor : null;
             (req.body.comments) ? project.comments = req.body.comments : null;
             (req.body.xml) ? project.xml = req.body.xml : null;
+            (req.body.seq) ? project.seq = req.body.seq : null;
             //save project
             project.save(function (err) {
                 if (err)

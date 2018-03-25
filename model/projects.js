@@ -23,7 +23,15 @@ var ProjectsSchema = new Schema({
         text: String,
         id: Number
     }],    
-    xml: String
+    xml: String,
+    seq:[{
+        name: String,
+        nodes: [Number],
+        edge:[{
+            source:Number,
+            target:Number
+        }]
+    }]
 });
 
 //export our module to use in server.js

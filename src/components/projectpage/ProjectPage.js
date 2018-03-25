@@ -55,7 +55,7 @@ class ProjectPage extends Component {
         axios.get('http://localhost:3001/api/projects/' + this.props.match.params.id)
             .then(res => {
                 this.setState({ project: res.data });
-                //console.log("dostal jsme project")
+                console.log("dostal jsme project")
 
                 //call child function
                 this.child.loadGraph()

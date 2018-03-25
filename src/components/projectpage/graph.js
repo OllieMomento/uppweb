@@ -39,6 +39,7 @@ import {
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
+import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
 
 
 const style = {
@@ -65,12 +66,36 @@ class Graph extends Component {
         this.state = {
             adj: [],
             edges: [],
-            nodes: []
+            nodes: [],
+            seq: [],
+            activeSeq: "",
+
         };
 
     }
 
     readFromXML(graph, parent) {
+
+        // Changes the default style for edges "in-place" and assigns
+        // an alternate edge style which is applied in mxGraph.flip
+        // when the user double clicks on the adjustment control point
+        // of the edge. The ElbowConnector edge style switches to TopToBottom
+        // if the horizontal style is true.
+        var style = graph.getStylesheet().getDefaultEdgeStyle();
+        style[mxConstants.STYLE_ROUNDED] = true;
+        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+
+        graph.alternateEdgeStyle = 'elbow=vertical';
+
+        // Automatically handle parallel edges
+        var layout = new mxParallelEdgeLayout(graph);
+        var layoutMgr = new mxLayoutManager(graph);
+
+        layoutMgr.getLayout = function (cell) {
+            if (cell.getChildCount() > 0) {
+                return layout;
+            }
+        };
 
         graph.getModel().beginUpdate();
         try {
@@ -88,6 +113,7 @@ class Graph extends Component {
                 let element = cellArr[i]
                 var id = element.getAttribute("id")
                 var value = element.getAttribute("value")
+                var style = element.getAttribute("style")
 
                 //If element is Vertex/cell
                 if (element.hasAttribute("vertex")) {
@@ -100,7 +126,7 @@ class Graph extends Component {
                     var height = geometry[0].getAttribute("height")
 
                     //add vertex
-                    vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, 'fillColor=pink');
+                    vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
                     this.state.nodes.push(id)
 
 
@@ -117,7 +143,7 @@ class Graph extends Component {
                     var targetElement = vertexes[target];
 
                     //add Edge
-                    graph.insertEdge(parent, id, value, sourceElement, targetElement)
+                    graph.insertEdge(parent, id, value, sourceElement, targetElement, style)
                     this.state.edges.push(id)
 
 
@@ -127,7 +153,8 @@ class Graph extends Component {
 
                     this.state.adj.push({
                         source: source,
-                        target: target
+                        target: target,
+                        sequence: this.state.activeSeq
                     })
 
                 }
@@ -231,6 +258,9 @@ class Graph extends Component {
 
     loadGraph() {
 
+        this.setState({ seq: this.props.project.seq })
+        this.setState({ activeSeq: this.props.project.seq[0] })
+
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
             // Displays an error message if the browser is not supported.
@@ -257,6 +287,8 @@ class Graph extends Component {
             var graph = editor.graph;
             var model = graph.getModel();
 
+            editor.validation = true
+
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
 
@@ -275,6 +307,36 @@ class Graph extends Component {
             mxEvent.disableContextMenu(container);
 
 
+            var colors = ['red', 'green']
+
+            mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
+
+                let flag = true;  
+                this.state.activeSeq.edge.map(edge=>{
+                    if (edge.source === source.id ) {
+                        alert(source.name+ "is already a source node" + this.state.activeSeq.name) 
+                        flag = false
+                    }
+                })
+
+                var index = this.state.seq.map(function(e) { return e.name; }).indexOf(this.state.activeSeq.name);
+                console.log(index)
+
+                if (flag) {
+                    var styleEdge = graph.getStylesheet().getDefaultEdgeStyle();
+
+                    styleEdge['strokeColor'] = colors[this.props.project.seq.indexOf(this.state.activeSeq)]
+                    styleEdge['strokeWidth'] = 2
+                    graph.insertEdge(parent, id, value, source, target, style)
+
+                    this.state.seq[index].edge.push({
+                        source: source.id,
+                        target: target.id,
+                    })
+                    console.log(this.state.seq[index])                  
+
+                }
+            }
 
 
 
@@ -297,31 +359,12 @@ class Graph extends Component {
             graph.setPanning(true);
 
             graph.setTooltips(true);
-           // graph.setMultigraph(false);
+            // graph.setMultigraph(false);
 
 
 
 
-            // Automatically handle parallel edges
-            var layout = new mxParallelEdgeLayout(graph);
-            var layoutMgr = new mxLayoutManager(graph);
 
-            layoutMgr.getLayout = function (cell) {
-                if (cell.getChildCount() > 0) {
-                    return layout;
-                }
-            };
-
-            // Changes the default style for edges "in-place" and assigns
-            // an alternate edge style which is applied in mxGraph.flip
-            // when the user double clicks on the adjustment control point
-            // of the edge. The ElbowConnector edge style switches to TopToBottom
-            // if the horizontal style is true.
-            var style = graph.getStylesheet().getDefaultEdgeStyle();
-            style[mxConstants.STYLE_ROUNDED] = true;
-            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
-
-            graph.alternateEdgeStyle = 'elbow=vertical';
 
 
 
@@ -351,6 +394,17 @@ class Graph extends Component {
             });
 
             toolbar.appendChild(button)
+
+
+
+            this.state.seq.map((seq, index) => {
+                var button = mxUtils.button(seq.name, () => {
+                    this.setState({ activeSeq: seq })
+
+
+                })
+                toolbar.appendChild(button)
+            })
         }
 
 
@@ -362,8 +416,8 @@ class Graph extends Component {
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
                 <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
-                <div className="graph-tbcont" style={style.TbCont}>
 
+                <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
