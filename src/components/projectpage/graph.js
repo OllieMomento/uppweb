@@ -4,6 +4,7 @@ import axios from 'axios';
 import {
     mxGraph,
     mxGraphModel,
+    mxPanningHandler,
     mxPerimeter,
     mxPoint,
     mxRectangle,
@@ -33,7 +34,8 @@ import {
     mxObjectCodec,
     mxCodecRegistry,
     mxEdgeLabelLayout,
-    mxLog
+    mxLog,
+    mxDefaultKeyHandler
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
@@ -167,8 +169,7 @@ class Graph extends Component {
                 // as follows: v1 = graph.insertVertex(parent, null, label,
                 // pt.x, pt.y, 120, 120, 'image=' + image);
 
-
-                v1 = graph.insertVertex(parent, null, (this.state.nodes.length), x, y, 120, 120);
+                v1 = graph.insertVertex(parent, null, (this.state.nodes.length), x, y, 100, 50);
                 this.state.nodes.push(this.state.nodes.length + 1)
 
 
@@ -190,8 +191,8 @@ class Graph extends Component {
 
         var dragElt = document.createElement('div');
         dragElt.style.border = 'dashed black 1px';
-        dragElt.style.width = '120px';
-        dragElt.style.height = '120px';
+        dragElt.style.width = '100px';
+        dragElt.style.height = '50px';
 
         // Creates the image which is used as the drag icon (preview)
         var ds = mxUtils.makeDraggable(img, graph, funct.bind(this), dragElt, 0, 0, true, true);
@@ -260,10 +261,20 @@ class Graph extends Component {
             graph.setDropEnabled(false);
 
             editor.setGraphContainer(container);
-            var config = mxUtils.load(
-                './../../data/graphEditorConfig.xml').getDocumentElement()      
+            var keyHandler = new mxDefaultKeyHandler(editor);
+            keyHandler.bindAction(46, 'delete');
+            keyHandler.bindAction(90, 'undo', true);
+            keyHandler.bindAction(89, 'redo', true);
+            keyHandler.bindAction(88, 'cut', true);
+            keyHandler.bindAction(67, 'copy', true);
+            keyHandler.bindAction(86, 'paste', true);
+            keyHandler.bindAction(107, 'zoomIn');
+            keyHandler.bindAction(109, 'zoomOut');
 
-            editor.configure(config);
+            // Disables built-in context menu
+            mxEvent.disableContextMenu(container);
+
+
 
 
 
@@ -277,7 +288,6 @@ class Graph extends Component {
 
 
             this.addSidebarIcon(graph, sidebar, 'Website', 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
-
             this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png');
 
 
@@ -287,8 +297,31 @@ class Graph extends Component {
             graph.setPanning(true);
 
             graph.setTooltips(true);
-            graph.setMultigraph(false);
+           // graph.setMultigraph(false);
 
+
+
+
+            // Automatically handle parallel edges
+            var layout = new mxParallelEdgeLayout(graph);
+            var layoutMgr = new mxLayoutManager(graph);
+
+            layoutMgr.getLayout = function (cell) {
+                if (cell.getChildCount() > 0) {
+                    return layout;
+                }
+            };
+
+            // Changes the default style for edges "in-place" and assigns
+            // an alternate edge style which is applied in mxGraph.flip
+            // when the user double clicks on the adjustment control point
+            // of the edge. The ElbowConnector edge style switches to TopToBottom
+            // if the horizontal style is true.
+            var style = graph.getStylesheet().getDefaultEdgeStyle();
+            style[mxConstants.STYLE_ROUNDED] = true;
+            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+
+            graph.alternateEdgeStyle = 'elbow=vertical';
 
 
 
@@ -296,14 +329,7 @@ class Graph extends Component {
             graph.setAllowDanglingEdges(false);
 
             // Stops editing on enter or escape keypress
-            var keyHandler = new mxKeyHandler(graph);
             var rubberband = new mxRubberband(graph);
-
-            // Installs a popupmenu handler using local function / Right click.
-            graph.popupMenuHandler.factoryMethod = (menu, cell, evt) => {
-                return this.createPopupMenu(graph, menu, cell, evt);
-            };
-
 
             // Enables guides (vodici cary)
             mxGraphHandler.prototype.guidesEnabled = true;
@@ -324,9 +350,7 @@ class Graph extends Component {
                 console.log(xml)
             });
 
-
             toolbar.appendChild(button)
-
         }
 
 
@@ -339,9 +363,7 @@ class Graph extends Component {
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
                 <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
                 <div className="graph-tbcont" style={style.TbCont}>
-                    <div id="outlineContainer"
-                        style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
-                    </div>
+
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
@@ -355,3 +377,7 @@ class Graph extends Component {
 }
 
 export default Graph;
+
+/*<div id="outlineContainer"
+                        style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
+                    </div>*/
