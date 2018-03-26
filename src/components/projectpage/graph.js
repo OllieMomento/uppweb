@@ -40,6 +40,8 @@ import {
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
 import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
+import { BrowserRouter as Router, Route, Redirect, Link } from "react-router-dom";
+import Footer from "../layouts/Footer"
 
 
 const style = {
@@ -69,8 +71,59 @@ class Graph extends Component {
             nodes: [],
             seq: [],
             activeSeq: "",
-
         };
+
+    }
+    getColors() {
+        var colors = ['red', 'green', 'pink', 'yellow']
+        return colors;
+    }
+
+    getColor(index) {
+        var colors = this.getColors()
+        return colors[index]
+    }
+
+    getIndex(color) {
+        var colors = this.getColors()
+        return colors.indexOf(color)
+    }
+    getIndexFromStyle(style) {
+        var color = style.replace('strokeColor=', '');
+        return this.getIndex(color)
+    }
+
+    deleteSelection(selection) {
+        selection.forEach(el => {
+
+            //Edge
+            if (el.edge === true) {
+                var index = this.getIndexFromStyle(el.style)
+                var newSeq = this.state.seq[index]
+                newSeq.edge = newSeq.edge.filter(edge => {
+                    return (edge.source != el.source.id && edge.target != el.target.id)
+                })
+                var newSeqs = this.state.seq
+                newSeqs[index] = newSeq
+                this.setState({ seq: newSeqs })
+            }
+            //Vertex
+            else {
+                var newSeqs = []
+                this.state.seq.forEach((seq) => {
+
+                    var edge = seq.edge.filter(edge => {
+                        return (el.id != edge.source && el.id != edge.target)
+                    })
+                    seq.edge = edge
+                    newSeqs.push(seq)
+
+                })
+                this.setState({ seq: newSeqs })
+
+
+            }
+        })
 
     }
 
@@ -84,6 +137,7 @@ class Graph extends Component {
         var style = graph.getStylesheet().getDefaultEdgeStyle();
         style[mxConstants.STYLE_ROUNDED] = true;
         style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+        style['strokeWidth'] = 2
 
         graph.alternateEdgeStyle = 'elbow=vertical';
 
@@ -115,6 +169,8 @@ class Graph extends Component {
                 var value = element.getAttribute("value")
                 var style = element.getAttribute("style")
 
+
+                console.log(element)
                 //If element is Vertex/cell
                 if (element.hasAttribute("vertex")) {
 
@@ -127,48 +183,37 @@ class Graph extends Component {
 
                     //add vertex
                     vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
-                    this.state.nodes.push(id)
-
-
-
                 }
-                //If element is Edge
-                else if (element.hasAttribute("edge")) {
-
-
-                    var source = element.getAttribute("source")
-                    var target = element.getAttribute("target")
-
-                    var sourceElement = vertexes[source];
-                    var targetElement = vertexes[target];
-
-                    //add Edge
-                    graph.insertEdge(parent, id, value, sourceElement, targetElement, style)
-                    this.state.edges.push(id)
-
-
-                    console.log('source ' + source)
-
-                    //add edge into adj graph
-
-                    this.state.adj.push({
-                        source: source,
-                        target: target,
-                        sequence: this.state.activeSeq
-                    })
-
-                }
-
             }
+
+
+            this.state.seq.map((seq, index) => {
+
+                seq.edge.map(edge => {
+                    var sourceElement = vertexes[edge.source];
+                    var targetElement = vertexes[edge.target];
+
+                    var color = this.getColor(index)
+                    this.setState({ activeSeq: this.state.seq[index] })
+                    console.log(this.state.activeSeq.name)
+                    graph.insertEdge(parent, id, value, sourceElement, targetElement, 'strokeColor=' + color)
+
+
+
+                })
+                console.log(seq)
+            })
+
+
+
+
 
 
         } catch (e) {
             console.log(e)
         }
         finally {
-            console.log(this.state.edges)
-            console.log(this.state.nodes)
-            console.log(this.state.adj)
+
             // Updates the display
             graph.refresh()
             graph.getModel().endUpdate();
@@ -228,6 +273,7 @@ class Graph extends Component {
 
     addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
         var button = document.createElement('button');
+        button.setAttribute("id", action + "Button");
         button.style.fontSize = '10';
         if (image != null) {
             var img = document.createElement('img');
@@ -243,16 +289,17 @@ class Graph extends Component {
             button.style.color = '#FFFFFF';
             button.style.border = 'none';
         }
-        mxEvent.addListener(button, 'click', function (evt) {
+
+        mxEvent.addListener(button, 'click', (evt) => {
+            if (action === "delete") {
+                var selected = editor.graph.getSelectionCells()
+                this.deleteSelection(selected)
+            }
             editor.execute(action);
         });
         mxUtils.write(button, label);
         toolbar.appendChild(button);
     };
-
-
-
-
 
 
 
@@ -293,50 +340,63 @@ class Graph extends Component {
             graph.setDropEnabled(false);
 
             editor.setGraphContainer(container);
-            var keyHandler = new mxDefaultKeyHandler(editor);
-            keyHandler.bindAction(46, 'delete');
-            keyHandler.bindAction(90, 'undo', true);
-            keyHandler.bindAction(89, 'redo', true);
-            keyHandler.bindAction(88, 'cut', true);
-            keyHandler.bindAction(67, 'copy', true);
-            keyHandler.bindAction(86, 'paste', true);
-            keyHandler.bindAction(107, 'zoomIn');
-            keyHandler.bindAction(109, 'zoomOut');
+
+            var keyHandler = new mxKeyHandler(graph);
+            keyHandler.bindKey(46, (evt) => {
+                if (graph.isEnabled()) {
+
+                    var selected = editor.graph.getSelectionCells()
+                    this.deleteSelection(selected)
+
+                    graph.removeCells();
+                }
+            });
 
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
 
-
-            var colors = ['red', 'green']
-
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-                let flag = true;  
-                this.state.activeSeq.edge.map(edge=>{
-                    if (edge.source === source.id ) {
-                        alert(source.name+ "is already a source node" + this.state.activeSeq.name) 
+                let flag = true;
+                this.state.activeSeq.edge.map(edge => {
+                    if (edge.source == source.id) {
+                        alert(source.name + "is already a source node" + this.state.activeSeq.name)
                         flag = false
                     }
                 })
-
-                var index = this.state.seq.map(function(e) { return e.name; }).indexOf(this.state.activeSeq.name);
-                console.log(index)
+                var index = this.state.seq.map(function (e) { return e.name; }).indexOf(this.state.activeSeq.name);
 
                 if (flag) {
-                    var styleEdge = graph.getStylesheet().getDefaultEdgeStyle();
+                    var color = this.getColor(index)
+                    console.log(index)
 
-                    styleEdge['strokeColor'] = colors[this.props.project.seq.indexOf(this.state.activeSeq)]
-                    styleEdge['strokeWidth'] = 2
-                    graph.insertEdge(parent, id, value, source, target, style)
+                    graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
 
                     this.state.seq[index].edge.push({
                         source: source.id,
                         target: target.id,
                     })
-                    console.log(this.state.seq[index])                  
 
                 }
             }
+
+            graph.dblClick = (evt, cell) => {
+                // Do not fire a DOUBLE_CLICK event here as mxEditor will
+                // consume the event and start the in-place editor.
+
+
+                <Router>
+                    <Redirect push to="/login" />
+                    <Route path="/login" component={Footer} />
+                </Router>
+                console.log("click")
+                // window.location.href = this.props.project._id+"/"+cell.id
+
+                // Disables any default behaviour for the double click
+                mxEvent.consume(evt);
+            };
+
+
 
 
 
@@ -350,7 +410,7 @@ class Graph extends Component {
 
 
             this.addSidebarIcon(graph, sidebar, 'Website', 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
-            this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png');
+            this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
 
 
             // Enables new connections in the graph
@@ -388,11 +448,11 @@ class Graph extends Component {
                 var node = encoder.encode(graph.getModel());
                 console.log(node)
                 var xml = mxUtils.getPrettyXml(node)
+                var seq = this.state.seq
 
-                this.props.updateGraphOnServer(xml)
-                console.log(xml)
+                this.props.updateGraphOnServer(xml, seq)
+
             });
-
             toolbar.appendChild(button)
 
 
@@ -400,13 +460,10 @@ class Graph extends Component {
             this.state.seq.map((seq, index) => {
                 var button = mxUtils.button(seq.name, () => {
                     this.setState({ activeSeq: seq })
-
-
                 })
                 toolbar.appendChild(button)
             })
         }
-
 
     }
 
@@ -421,7 +478,9 @@ class Graph extends Component {
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
-
+                <Link to={`/projects/${this.props.project._id}/19`} style={{ textDecoration: 'none' }}>
+                    <div>kokoteee</div>
+                </Link>
 
             </div>
         );

@@ -20,6 +20,7 @@ class App extends Component {
             pollInterval={2000} />} />
 
           <Route path="/projects/:id" component={ProjectPage} />
+          <Route path="/projects/:id/:shot" component={Footer} />
           <Route path="/test" component={Footer} />
           
         </div>

@@ -77,10 +77,11 @@ class ProjectPage extends Component {
         this.loadProjectsFromServer();
         this.loadPeopleFromServer();
     }
-    updateGraphOnServer(xml) {
+    updateGraphOnServer(xml, seq) {
 
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
-            xml: xml
+            xml: xml,
+            seq : seq
         })
             .then(response => {
                 //console.log(response);
