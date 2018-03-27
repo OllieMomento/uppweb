@@ -40,8 +40,9 @@ import {
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
 import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
-import { BrowserRouter as Router, Route, Redirect, Link } from "react-router-dom";
+import { Router, Route, Link, withRouter} from "react-router-dom";
 import Footer from "../layouts/Footer"
+import history from '../../history';
 
 
 const style = {
@@ -71,6 +72,8 @@ class Graph extends Component {
             nodes: [],
             seq: [],
             activeSeq: "",
+            redirect: false,
+            selectCell: ""
         };
 
     }
@@ -379,18 +382,11 @@ class Graph extends Component {
 
                 }
             }
+            
 
-            graph.dblClick = (evt, cell) => {
-                // Do not fire a DOUBLE_CLICK event here as mxEditor will
-                // consume the event and start the in-place editor.
+            graph.dblClick = (evt, cell) => {               
 
-
-                <Router>
-                    <Redirect push to="/login" />
-                    <Route path="/login" component={Footer} />
-                </Router>
-                console.log("click")
-                // window.location.href = this.props.project._id+"/"+cell.id
+                history.push('/projects/'+this.props.project._id+'/'+cell.id);
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
@@ -467,8 +463,9 @@ class Graph extends Component {
 
     }
 
-    render() {
-        // console.log("render")
+    render() {      
+        
+
         return (
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
@@ -478,10 +475,6 @@ class Graph extends Component {
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
-                <Link to={`/projects/${this.props.project._id}/19`} style={{ textDecoration: 'none' }}>
-                    <div>kokoteee</div>
-                </Link>
-
             </div>
         );
 

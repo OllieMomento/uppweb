@@ -6,9 +6,13 @@ import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import LeftPane from '../layouts/leftPane/LeftPane'
 import RightPane from '../layouts/rightPane/RightPane'
 import Grid from 'material-ui/Grid'
+import { Router, Route } from 'react-router-dom'
+import ShotPage from '../shotpage/ShotPage'
+import history from '../../history'
+
 
 const style = {
-    Page:{
+    Page: {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh'
@@ -23,7 +27,7 @@ const style = {
     Div: {
         display: 'flex',
         flexDirection: 'column',
-        
+
     },
     LeftPane: {
         display: 'flex',
@@ -81,7 +85,7 @@ class ProjectPage extends Component {
 
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,
-            seq : seq
+            seq: seq
         })
             .then(response => {
                 //console.log(response);
@@ -96,15 +100,21 @@ class ProjectPage extends Component {
     render() {
         return (
             <div className="ProjectPage" style={style.Page}>
+                <Router history={history}>        
+                        <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project} />} />                    
+                </Router>
+
+
+
                 <Header />
-                <BreadcrumbsAndButton path={[this.state.project]} />                
+                <BreadcrumbsAndButton path={[this.state.project]} />
 
-                    <div style={style.Container}>
-                        <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} />
-                        <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
-                        {/*<RightPane />*/}
+                <div style={style.Container}>
+                    <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} />
+                    <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                    {/*<RightPane />*/}
 
-                    </div>                
+                </div>
                 <div> footer</div>
             </div>
         );
