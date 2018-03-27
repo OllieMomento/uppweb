@@ -27,8 +27,10 @@ const style = {
 class Breadcrumbs extends Component {
 
     getPath(pathObj) {
-
+       // console.log("getPath")
         let url = 'http://localhost:3000/projects/'
+        //console.log(pathObj)
+        /*
         let path = pathObj
             .map((obj, index) => {               
                 url = url + obj._id + '/';
@@ -42,12 +44,11 @@ class Breadcrumbs extends Component {
                 <li><a href='http://localhost:3000/'>Home</a></li>
                 {path}
             </ul>
-        )
+        )*/
     }
 
-    render() {
-        
-        this.getPath(this.props.path)
+    render() {      
+        this.getPath(this.props.project)
         return (
             <div style={style.Div}>
 

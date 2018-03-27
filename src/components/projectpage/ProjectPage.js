@@ -46,9 +46,9 @@ class ProjectPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isLoading: true,
             project: {},
-            people: []
+            people: [],
+            isLoading: true
         };
 
     }
@@ -60,9 +60,12 @@ class ProjectPage extends Component {
             .then(res => {
                 this.setState({ project: res.data });
                 console.log("dostal jsme project")
+                this.setState({ isLoading: false})
 
                 //call child function
-                this.child.loadGraph()
+                //this.child.loadGraph()
+
+
 
             })
     }
@@ -73,15 +76,30 @@ class ProjectPage extends Component {
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });
-
+                
             })
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         this.loadProjectsFromServer();
+       /*
+        if (this.props.location.state == null) {
+            console.log("if")
+            this.loadProjectsFromServer();
+            
+            
+        }else{
+            console.log("else")
+            this.setState({isLoading: false})
+            this.setState({ project: this.props.location.state.project });
+            console.log(this.state.project)
+            //this.child.loadGraph()
+        }*/
         this.loadPeopleFromServer();
     }
     updateGraphOnServer(xml, seq) {
+        
+       
 
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,
@@ -98,20 +116,32 @@ class ProjectPage extends Component {
 
 
     render() {
+  
+
+        console.log("isLoading: "+ this.state.isLoading)
+        var graph
+        if(!this.state.isLoading){
+            graph = <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} />
+        } else{
+            graph = <div>Loading Graph</div>
+        }
+
+
         return (
             <div className="ProjectPage" style={style.Page}>
-                <Router history={history}>        
-                        <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project} />} />                    
+                <Router history={history}>
+                    <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project} />} />
                 </Router>
 
 
 
                 <Header />
-                <BreadcrumbsAndButton path={[this.state.project]} />
+                <BreadcrumbsAndButton project={this.state.project} />
 
                 <div style={style.Container}>
                     <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} />
-                    <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} ref={instance => { this.child = instance; }} />
+                    {graph}
+                    
                     {/*<RightPane />*/}
 
                 </div>

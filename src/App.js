@@ -19,7 +19,7 @@ class App extends Component {
         <Router history={history}>
           <div>
             <Route exact path="/" render={() => <HomepageS url='http://localhost:3001/api/projects'
-              pollInterval={2000} />} />
+              history={history} />} />
 
             <Route exact path="/projects/:id" component={ProjectPage} />
             <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project}/>} />

@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 class ProjectItem extends Component {
     render() {
         return (
-            <Link to={`/projects/${this.props.project._id}`} style={{ textDecoration: 'none' }}>
+            <Link to={{ pathname: `/projects/${this.props.project._id}`, state: {project:this.props.project}, style:{ textDecoration: 'none' }}}>
                 <ListItem>
                     <ListItemAvatar>
                         <Avatar>

@@ -24,7 +24,7 @@ class BreadcrumbsAndButton extends Component {
     render() {
         return (
             <div style={style.Div}>
-                <Breadcrumbs path = {this.props.path}/>
+                <Breadcrumbs project = {this.props.project}/>
                 <Link to='/test' style={{ textDecoration: 'none', padding:'0.5em' }}>
                     <Button variant="raised" color="default">
                         View Diagram

@@ -40,7 +40,7 @@ import {
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
 import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
-import { Router, Route, Link, withRouter} from "react-router-dom";
+import { Router, Route, Link, withRouter } from "react-router-dom";
 import Footer from "../layouts/Footer"
 import history from '../../history';
 
@@ -70,8 +70,8 @@ class Graph extends Component {
             adj: [],
             edges: [],
             nodes: [],
-            seq: [],
-            activeSeq: "",
+            seq: this.props.project.seq,
+            activeSeq: this.props.project.seq[0],
             redirect: false,
             selectCell: ""
         };
@@ -114,11 +114,14 @@ class Graph extends Component {
             else {
                 var newSeqs = []
                 this.state.seq.forEach((seq) => {
-
+                    var nodes = seq.nodes.filter(node => {
+                        return node != el.id
+                    })
                     var edge = seq.edge.filter(edge => {
                         return (el.id != edge.source && el.id != edge.target)
                     })
                     seq.edge = edge
+                    seq.nodes = nodes
                     newSeqs.push(seq)
 
                 })
@@ -164,7 +167,6 @@ class Graph extends Component {
             var cells = model.getElementsByTagName("mxCell");
             var cellArr = Array.from(cells);
             var vertexes = [];
-            //console.log(cellArr)
 
             for (var i = 0; i < cellArr.length; i++) {
                 let element = cellArr[i]
@@ -173,7 +175,7 @@ class Graph extends Component {
                 var style = element.getAttribute("style")
 
 
-                console.log(element)
+               
                 //If element is Vertex/cell
                 if (element.hasAttribute("vertex")) {
 
@@ -189,7 +191,7 @@ class Graph extends Component {
                 }
             }
 
-
+            console.log(this.state.seq)
             this.state.seq.map((seq, index) => {
 
                 seq.edge.map(edge => {
@@ -198,13 +200,13 @@ class Graph extends Component {
 
                     var color = this.getColor(index)
                     this.setState({ activeSeq: this.state.seq[index] })
-                    console.log(this.state.activeSeq.name)
+                    
                     graph.insertEdge(parent, id, value, sourceElement, targetElement, 'strokeColor=' + color)
 
 
 
                 })
-                console.log(seq)
+               // console.log(seq)
             })
 
 
@@ -308,8 +310,15 @@ class Graph extends Component {
 
     loadGraph() {
 
-        this.setState({ seq: this.props.project.seq })
+        console.log("project")
+        console.log(this.props.project.seq)
+
+        console.log(typeof this.props.project.seq)
+
+        this.setState({ seq: Array.from(this.props.project.seq) })
         this.setState({ activeSeq: this.props.project.seq[0] })
+
+        console.log(this.state.seq)
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -371,8 +380,7 @@ class Graph extends Component {
 
                 if (flag) {
                     var color = this.getColor(index)
-                    console.log(index)
-
+ 
                     graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
 
                     this.state.seq[index].edge.push({
@@ -380,13 +388,26 @@ class Graph extends Component {
                         target: target.id,
                     })
 
+                    if (!this.state.seq[index].nodes.includes(source.id)) {
+                        this.state.seq[index].nodes.push(source.id)
+                    }
+                    if (!this.state.seq[index].nodes.includes(target.id)) {
+                        this.state.seq[index].nodes.push(target.id)
+                    }
+
+
                 }
             }
-            
 
-            graph.dblClick = (evt, cell) => {               
 
-                history.push('/projects/'+this.props.project._id+'/'+cell.id);
+            graph.dblClick = (evt, cell) => {
+
+               // history.push('/projects/' + this.props.project._id + '/' + cell.id);
+
+                history.push({
+                    pathname: '/projects/' + this.props.project._id + '/' + cell.id,
+                    state: { project: this.props.project }
+                  })
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
@@ -462,9 +483,13 @@ class Graph extends Component {
         }
 
     }
+    componentDidMount(){
+        this.loadGraph()
+    }
 
-    render() {      
+    render() {
         
+
 
         return (
 
