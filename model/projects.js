@@ -8,7 +8,7 @@ var Schema = mongoose.Schema;
 //the shape of your database entries.
 var ProjectsSchema = new Schema({
     name: String,
-    
+
     desc: String,
     start: Date,
     end: Date,
@@ -19,18 +19,34 @@ var ProjectsSchema = new Schema({
     supervisor: String,
     comments: [{
         author: String,
-        date : String,
+        date: String,
         text: String,
         id: Number
-    }],    
+    }],
     xml: String,
-    seq:[{
+    seq: [{
+        id: Number,
         name: String,
         nodes: [Number],
-        edge:[{
-            source:Number,
-            target:Number
+        edge: [{
+            source: Number,
+            target: Number
         }]
+    }],
+    shots: [{
+        id: Number,
+        name: String,
+        desc: String,
+        comments: [{
+            author: String,
+            date: String,
+            text: String,
+            id: Number
+        }],
+        artists: [String],
+        supervisor: String,
+        status: String
+
     }]
 });
 

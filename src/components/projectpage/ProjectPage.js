@@ -60,7 +60,7 @@ class ProjectPage extends Component {
             .then(res => {
                 this.setState({ project: res.data });
                 console.log("dostal jsme project")
-                this.setState({ isLoading: false})
+                this.setState({ isLoading: false })
 
                 //call child function
                 //this.child.loadGraph()
@@ -76,34 +76,21 @@ class ProjectPage extends Component {
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });
-                
+
             })
     }
 
     componentDidMount = () => {
         this.loadProjectsFromServer();
-       /*
-        if (this.props.location.state == null) {
-            console.log("if")
-            this.loadProjectsFromServer();
-            
-            
-        }else{
-            console.log("else")
-            this.setState({isLoading: false})
-            this.setState({ project: this.props.location.state.project });
-            console.log(this.state.project)
-            //this.child.loadGraph()
-        }*/
         this.loadPeopleFromServer();
     }
-    updateGraphOnServer(xml, seq) {
-        
-       
+    updateGraphOnServer(xml, seq, shots) {
 
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,
-            seq: seq
+            seq: seq,
+            shots: shots
+
         })
             .then(response => {
                 //console.log(response);
@@ -116,32 +103,27 @@ class ProjectPage extends Component {
 
 
     render() {
-  
 
-        console.log("isLoading: "+ this.state.isLoading)
+
+        console.log("isLoading: " + this.state.isLoading)
         var graph
-        if(!this.state.isLoading){
+        if (!this.state.isLoading) {
             graph = <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} />
-        } else{
+        } else {
             graph = <div>Loading Graph</div>
         }
 
 
         return (
-            <div className="ProjectPage" style={style.Page}>
-                <Router history={history}>
-                    <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project} />} />
-                </Router>
-
-
+            <div className="ProjectPage" style={style.Page}>    
 
                 <Header />
                 <BreadcrumbsAndButton project={this.state.project} />
 
                 <div style={style.Container}>
-                    <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} />
+                    <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shotID={null}/>
                     {graph}
-                    
+
                     {/*<RightPane />*/}
 
                 </div>

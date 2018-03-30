@@ -35,7 +35,8 @@ import {
     mxCodecRegistry,
     mxEdgeLabelLayout,
     mxLog,
-    mxDefaultKeyHandler
+    mxDefaultKeyHandler,
+    mxVertexHandler
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
@@ -73,7 +74,10 @@ class Graph extends Component {
             seq: this.props.project.seq,
             activeSeq: this.props.project.seq[0],
             redirect: false,
-            selectCell: ""
+            selectCell: "",
+            readingXMLdone: false,
+            nodesLength: 1,
+            shots:[]
         };
 
     }
@@ -96,56 +100,31 @@ class Graph extends Component {
         return this.getIndex(color)
     }
 
-    deleteSelection(selection) {
-        selection.forEach(el => {
-
-            //Edge
-            if (el.edge === true) {
-                var index = this.getIndexFromStyle(el.style)
-                var newSeq = this.state.seq[index]
-                newSeq.edge = newSeq.edge.filter(edge => {
-                    return (edge.source != el.source.id && edge.target != el.target.id)
-                })
-                var newSeqs = this.state.seq
-                newSeqs[index] = newSeq
-                this.setState({ seq: newSeqs })
-            }
-            //Vertex
-            else {
-                var newSeqs = []
-                this.state.seq.forEach((seq) => {
-                    var nodes = seq.nodes.filter(node => {
-                        return node != el.id
-                    })
-                    var edge = seq.edge.filter(edge => {
-                        return (el.id != edge.source && el.id != edge.target)
-                    })
-                    seq.edge = edge
-                    seq.nodes = nodes
-                    newSeqs.push(seq)
-
-                })
-                this.setState({ seq: newSeqs })
-
-
-            }
-        })
-
-    }
-
-    readFromXML(graph, parent) {
-
+    setStyle(graph) {
         // Changes the default style for edges "in-place" and assigns
         // an alternate edge style which is applied in mxGraph.flip
         // when the user double clicks on the adjustment control point
         // of the edge. The ElbowConnector edge style switches to TopToBottom
         // if the horizontal style is true.
-        var style = graph.getStylesheet().getDefaultEdgeStyle();
-        style[mxConstants.STYLE_ROUNDED] = true;
-        style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
-        style['strokeWidth'] = 2
+        var styleEdge = graph.getStylesheet().getDefaultEdgeStyle();
+        styleEdge[mxConstants.STYLE_ROUNDED] = true;
+        styleEdge[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+        styleEdge['strokeWidth'] = 2
+        styleEdge[mxConstants.STYLE_NOLABEL] = true
 
         graph.alternateEdgeStyle = 'elbow=vertical';
+
+        var styleNode = graph.getStylesheet().getDefaultVertexStyle();
+        styleNode[mxConstants.STYLE_FONTSIZE] = '12';
+        styleNode[mxConstants.STYLE_FONTSTYLE] = 0;
+        styleNode[mxConstants.STYLE_FONTCOLOR] = '#000000';
+
+        
+    }
+
+
+
+    readFromXML(graph, parent) {
 
         // Automatically handle parallel edges
         var layout = new mxParallelEdgeLayout(graph);
@@ -159,12 +138,15 @@ class Graph extends Component {
 
         graph.getModel().beginUpdate();
         try {
+
             var xml = this.props.project.xml;
 
             var doc = mxUtils.parseXml(xml);
             var codec = new mxCodec(doc);
             var model = codec.decode(doc.documentElement, graph.getModel())
+            console.log(model)
             var cells = model.getElementsByTagName("mxCell");
+
             var cellArr = Array.from(cells);
             var vertexes = [];
 
@@ -175,7 +157,6 @@ class Graph extends Component {
                 var style = element.getAttribute("style")
 
 
-               
                 //If element is Vertex/cell
                 if (element.hasAttribute("vertex")) {
 
@@ -188,29 +169,32 @@ class Graph extends Component {
 
                     //add vertex
                     vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
+                    this.setState({
+                        nodesLength: this.state.nodesLength + 1
+                    })
                 }
-            }
+                // Sequence element > edge
+                else if (element.hasAttribute("edge")) {
+                    var parentNode = element.parentNode
 
-            console.log(this.state.seq)
-            this.state.seq.map((seq, index) => {
-
-                seq.edge.map(edge => {
-                    var sourceElement = vertexes[edge.source];
-                    var targetElement = vertexes[edge.target];
-
+                    var index = parentNode.getAttribute("seq")
                     var color = this.getColor(index)
+
+                    var sourceElement = vertexes[element.getAttribute("source")]
+                    var targetElement = vertexes[element.getAttribute("target")]
+
+                    console.log(color)
+                    var doc = mxUtils.createXmlDocument();
+                    var edge = doc.createElement('Sequence')
+                    edge.setAttribute('seq', index);
+
                     this.setState({ activeSeq: this.state.seq[index] })
-                    
-                    graph.insertEdge(parent, id, value, sourceElement, targetElement, 'strokeColor=' + color)
+                    graph.insertEdge(parent, id, edge, sourceElement, targetElement, 'strokeColor=' + color)
+
+                }
 
 
-
-                })
-               // console.log(seq)
-            })
-
-
-
+            }
 
 
 
@@ -226,6 +210,8 @@ class Graph extends Component {
             //Need to move othervise the dragging canvas is broken
             graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
             graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
+
+            this.setState({ readingXMLdone: true })
         }
     }
 
@@ -245,9 +231,19 @@ class Graph extends Component {
                 // rather than the label markup, so use 'image=' + image for the style.
                 // as follows: v1 = graph.insertVertex(parent, null, label,
                 // pt.x, pt.y, 120, 120, 'image=' + image);
+                
+                var number = ('0' + this.state.nodesLength + '0').slice(-3)
+                var title = `Shot ${number}`
 
-                v1 = graph.insertVertex(parent, null, (this.state.nodes.length), x, y, 100, 50);
-                this.state.nodes.push(this.state.nodes.length + 1)
+
+                var index = model.nextId
+                v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
+                
+                this.setState({
+                    nodesLength: this.state.nodesLength + 1
+                })
+
+
 
 
             }
@@ -296,10 +292,6 @@ class Graph extends Component {
         }
 
         mxEvent.addListener(button, 'click', (evt) => {
-            if (action === "delete") {
-                var selected = editor.graph.getSelectionCells()
-                this.deleteSelection(selected)
-            }
             editor.execute(action);
         });
         mxUtils.write(button, label);
@@ -309,6 +301,8 @@ class Graph extends Component {
 
 
     loadGraph() {
+
+
 
         console.log("project")
         console.log(this.props.project.seq)
@@ -351,67 +345,88 @@ class Graph extends Component {
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
 
+
+            // Optional disabling of sizing
+            graph.setCellsResizable(false);
+
             editor.setGraphContainer(container);
-
-            var keyHandler = new mxKeyHandler(graph);
-            keyHandler.bindKey(46, (evt) => {
-                if (graph.isEnabled()) {
-
-                    var selected = editor.graph.getSelectionCells()
-                    this.deleteSelection(selected)
-
-                    graph.removeCells();
-                }
-            });
 
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
 
+            //Set styles
+            this.setStyle(graph)
+
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-                let flag = true;
-                this.state.activeSeq.edge.map(edge => {
-                    if (edge.source == source.id) {
-                        alert(source.name + "is already a source node" + this.state.activeSeq.name)
-                        flag = false
-                    }
-                })
                 var index = this.state.seq.map(function (e) { return e.name; }).indexOf(this.state.activeSeq.name);
+
+                //var sequence = graph.getModel().getElementsByTagName("Sequence");
+                var encoder = new mxCodec();
+                var node = encoder.encode(graph.getModel());
+                //console.log(node)
+                var activeSeq = this.state.activeSeq.id
+                console.log(activeSeq)
+                var seqs = node.getElementsByTagName("Sequence")
+                seqs = Array.from(seqs);
+
+                var edges = seqs.filter(seq => {
+                    return seq.getAttribute("seq") == this.state.activeSeq.id
+                })
+                var flag = true;
+                edges.every(edge => {
+
+                    let cell = edge.firstChild
+                    cell.source = cell.getAttribute("source")
+                    cell.target = cell.getAttribute("target")
+
+                    if (cell.source == source.id || cell.target == target.id || cell.source == target.id) {
+                        alert("Cannot connect")
+                        flag = false
+                        return false
+
+                    }
+                    return true
+                })
 
                 if (flag) {
                     var color = this.getColor(index)
- 
-                    graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
+                    var doc = mxUtils.createXmlDocument();
+                    var edge = doc.createElement('Sequence')
+                    edge.setAttribute('seq', index);
 
-                    this.state.seq[index].edge.push({
-                        source: source.id,
-                        target: target.id,
-                    })
-
-                    if (!this.state.seq[index].nodes.includes(source.id)) {
-                        this.state.seq[index].nodes.push(source.id)
-                    }
-                    if (!this.state.seq[index].nodes.includes(target.id)) {
-                        this.state.seq[index].nodes.push(target.id)
-                    }
-
+                    graph.insertEdge(parent, id, edge, source, target, 'strokeColor=' + color)
 
                 }
             }
 
+            var keyHandler = new mxDefaultKeyHandler(editor);
+            keyHandler.bindAction(46, 'delete');
+            keyHandler.bindAction(90, 'undo', true);
+            keyHandler.bindAction(89, 'redo', true);
+            keyHandler.bindAction(88, 'cut', true);
+            keyHandler.bindAction(67, 'copy', true);
+            keyHandler.bindAction(86, 'paste', true);
+            keyHandler.bindAction(107, 'zoomIn');
+            keyHandler.bindAction(109, 'zoomOut');
+
+            // Disables built-in context menu
+            mxEvent.disableContextMenu(container);
+
 
             graph.dblClick = (evt, cell) => {
 
-               // history.push('/projects/' + this.props.project._id + '/' + cell.id);
+                // history.push('/projects/' + this.props.project._id + '/' + cell.id);
 
                 history.push({
                     pathname: '/projects/' + this.props.project._id + '/' + cell.id,
                     state: { project: this.props.project }
-                  })
+                })
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
             };
+
 
 
 
@@ -426,8 +441,15 @@ class Graph extends Component {
             this.readFromXML(graph, parent)
 
 
-            this.addSidebarIcon(graph, sidebar, 'Website', 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
+
+
+
+            this.addSidebarIcon(graph, sidebar, null,
+
+                'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
             this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
+
+            graph.setHtmlLabels(true);
 
 
             // Enables new connections in the graph
@@ -437,12 +459,6 @@ class Graph extends Component {
 
             graph.setTooltips(true);
             // graph.setMultigraph(false);
-
-
-
-
-
-
 
 
             // Does not allow dangling edges
@@ -464,10 +480,44 @@ class Graph extends Component {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                 console.log(node)
+                var nodes = node.getElementsByTagName("mxCell")
+                var cellArr = Array.from(nodes);
+                var vertexes = [];
+    
+                for (var i = 0; i < cellArr.length; i++) {
+                    let element = cellArr[i]
+                    var id = element.getAttribute("id")
+                    var value = element.getAttribute("value")
+                    var style = element.getAttribute("style")
+                    console.log(element)                        
+    
+                    //If element is Vertex/cell
+                    if (element.hasAttribute("vertex")) {
+                        let shot = {
+                            id: id,
+                            name: value,
+                            desc: "",
+                            comments:[],
+                            artists:[],
+                            supervisor:this.props.project.supervisor,
+                            status:"notstarted"
+        
+                        }
+                        vertexes.push(shot)
+                        
+                    }
+                }
+                this.setState({
+                    shots: vertexes
+                })
+                console.log(this.state.shots)
+
+
                 var xml = mxUtils.getPrettyXml(node)
                 var seq = this.state.seq
+                var shots = this.state.shots
 
-                this.props.updateGraphOnServer(xml, seq)
+                this.props.updateGraphOnServer(xml, seq, shots)
 
             });
             toolbar.appendChild(button)
@@ -483,12 +533,12 @@ class Graph extends Component {
         }
 
     }
-    componentDidMount(){
+    componentDidMount() {
         this.loadGraph()
     }
 
     render() {
-        
+
 
 
         return (
