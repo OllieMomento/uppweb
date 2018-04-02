@@ -58,24 +58,35 @@ class ShotNameAndStatus extends Component {
     }
 
 
-    render() {
-        var url = window.location.href
-        var shotID = url.split("/")[5];
+    render() {     
        
-        var shot = this.props.project.shots.filter( shot =>{
-            return shot.id == shotID
-        })
-        shot = shot[0]
 
+        var shots = this.props.shots
+
+        var names = shots.map((shot, index)=>{
+            let number = shot.name.replace("Shot ", "")
+            if(index != shots.length-1){  
+                number = number + ', '             
+            }          
+            
+            return number
+        })
+        
+        var caption = 'Shot'
+        if(shots.length > 1){
+            caption = 'Shots'
+        }
+        
+        
 
         return (
             <div style={style.Div}>
                 <div className="ProjectName">
                     <Typography variant="caption" color="inherit" >
-                        Shot
+                        {caption}
                     </Typography>
                     <Typography variant="title" color="inherit" >
-                        {shot.name}
+                        {names}
                     </Typography>
                 </div>
                 {this.getStatus(this.props.project.status)}

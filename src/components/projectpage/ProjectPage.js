@@ -103,9 +103,6 @@ class ProjectPage extends Component {
 
 
     render() {
-
-
-        console.log("isLoading: " + this.state.isLoading)
         var graph
         if (!this.state.isLoading) {
             graph = <Graph project={this.state.project} updateGraphOnServer={this.updateGraphOnServer.bind(this)} />

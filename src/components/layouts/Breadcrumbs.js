@@ -26,33 +26,23 @@ const style = {
 
 class Breadcrumbs extends Component {
 
-    getPath(pathObj) {
-       // console.log("getPath")
-        let url = 'http://localhost:3000/projects/'
-        //console.log(pathObj)
-        /*
-        let path = pathObj
-            .map((obj, index) => {               
-                url = url + obj._id + '/';
-                if(index+1 === pathObj.length){
-                    return(<li key={index}>{obj.name}</li>)
-                }
-                return (<li key={index}><a href={url}>{obj.name}</a></li>)
-            })
+    getPath(paths) {
+        var pathTmp = paths.map(( path, index) => {
+            return (<li key={index}> <a href={path.path}>{path.name}</a></li>)
+        })
+        
         return (
-            <ul className="breadcrumb">
-                <li><a href='http://localhost:3000/'>Home</a></li>
-                {path}
+            <ul className="breadcrumb">                
+                {pathTmp}
             </ul>
-        )*/
+        )
     }
 
-    render() {      
-        this.getPath(this.props.project)
+    render() {
         return (
             <div style={style.Div}>
 
-                {this.getPath(this.props.path)}
+                {this.getPath(this.props.paths)}
 
             </div>
         );

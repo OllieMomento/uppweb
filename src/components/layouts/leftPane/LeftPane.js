@@ -33,9 +33,9 @@ class LeftPane extends Component {
             var nameAndStatus = <ProjectNameAndStatus project={this.props.project} />
         }
         else {
-            var nameAndStatus = <ShotNameAndStatus project={this.props.project} shotID={this.props.shotID} />
+            var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
         }
-        console.log(this.props.project)
+
         return (
             <div style={style.LeftPane}>
                 <div style={style.Div}>

@@ -47,7 +47,8 @@ var ProjectsSchema = new Schema({
         supervisor: String,
         status: String
 
-    }]
+    }],
+    assetsXML: String
 });
 
 //export our module to use in server.js
