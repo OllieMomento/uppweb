@@ -417,11 +417,16 @@ class Graph extends Component {
             graph.dblClick = (evt, cell) => {
 
                 // history.push('/projects/' + this.props.project._id + '/' + cell.id);
-
+                
+                if(cell.edge === true){
+                    return
+                }
+ 
                 history.push({
                     pathname: '/projects/' + this.props.project._id + '/' + cell.id + '/',
                     state: { project: this.props.project }
                 })
+                
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
@@ -533,6 +538,9 @@ class Graph extends Component {
 
             var button = mxUtils.button('Open selected shots', () => {
                 var selection = graph.getSelectionCells()
+                selection = selection.filter( cell => {
+                    return cell.isVertex()
+                })
                 console.log(selection)
                 var url = ''
                 selection.forEach( (cell)=>{

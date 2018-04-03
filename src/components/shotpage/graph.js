@@ -36,7 +36,9 @@ import {
     mxEdgeLabelLayout,
     mxLog,
     mxDefaultKeyHandler,
-    mxVertexHandler
+    mxVertexHandler,
+    mxStackLayout,
+    mxEventSource
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
@@ -44,6 +46,7 @@ import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
 import { Router, Route, Link, withRouter } from "react-router-dom";
 import Footer from "../layouts/Footer"
 import history from '../../history';
+import { isAbsolute } from 'path';
 
 
 const style = {
@@ -115,6 +118,9 @@ class Graph extends Component {
                 return layout;
             }
         };
+        layoutMgr.executeLayout(layout, graph.getDefaultParent())
+
+        layout.execute(graph.getDefaultParent());
 
 
 
@@ -190,6 +196,7 @@ class Graph extends Component {
                 var shotArray = this.props.shotArray
                 let index = 0
                 let IndexEdge = 0
+                var stack = []
 
                 for (var i = 0; i < cellArr.length; i++) {
                     let element = cellArr[i]
@@ -208,15 +215,14 @@ class Graph extends Component {
                         var width = geometry[0].getAttribute("width")
                         var height = geometry[0].getAttribute("height")
 
-                        console.log("id")
-                        console.log(element)
                         //add shots selected shots vertex
                         if (value.startsWith("Shot") && shotArray.includes(id)) {
-                            
+
                             vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
                             vertexes[id].visible = true
+                            stack.push(vertexes[id])
                         }
-                        else{
+                        else {
                             vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
                             vertexes[id].visible = false
                         }
@@ -236,26 +242,24 @@ class Graph extends Component {
 
                     }
                 }
-                console.log(graph.getModel())
-
-                var stack = vertexes.filter(Boolean)
+                console.log("stack")
                 console.log(stack)
-                console.log(stack.length)
+
 
                 //while stack is empty
-                /*
+
                 while (stack.length !== 0) {
 
-                    console.log(stack.length)
+
                     var cell = stack.pop()
-                    console.log(stack.length)
+
                     console.log(cell)
                     cell.visible = true
                     var inEdges = graph.getModel().getIncomingEdges(cell)
                     console.log(inEdges)
 
                     inEdges.forEach((edge, index) => {
-                        console.log("dement")
+                        console.log("vertex")
                         var vertex = edge.source
 
                         console.log(vertex)
@@ -264,9 +268,11 @@ class Graph extends Component {
 
                     console.log(stack)
 
-                }*/
+                }
 
             }
+
+
 
 
 
@@ -284,6 +290,8 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
 
             this.setState({ readingXMLdone: true })
+            graph.center()
+
         }
     }
 
@@ -387,6 +395,10 @@ class Graph extends Component {
         }
         else {
 
+            mxConstants.MIN_HOTSPOT_SIZE = 16;
+            mxConstants.DEFAULT_HOTSPOT = 1;
+
+
 
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
 
@@ -400,13 +412,14 @@ class Graph extends Component {
 
             // Creates a wrapper editor with a graph inside the given container.
             // The editor is used to create certain functionality for the
-            // graph, such as the rubberband selection, but most parts
-            // of the UI are custom in this example.
+            // graph, such as the rubberband selection
             var editor = new mxEditor();
             var graph = editor.graph;
             var model = graph.getModel();
 
-            editor.validation = true
+
+
+
 
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
@@ -418,22 +431,19 @@ class Graph extends Component {
             editor.setGraphContainer(container);
 
 
+            // var rubberband = new mxRubberband(graph);
+
 
             //Set styles
             this.setStyle(graph, editor)
 
+
+
+
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-
-
-
-
                 var color = "blue"
-
-
                 graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
-
-
             }
 
             var keyHandler = new mxDefaultKeyHandler(editor);
@@ -466,12 +476,16 @@ class Graph extends Component {
 
 
 
+
+
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             var parent = graph.getDefaultParent();
             // console.log("parent:  " + parent)
 
             this.readFromXML(graph, parent)
+
+
 
             this.addSidebarIcon(graph, sidebar, null,
                 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
@@ -494,7 +508,7 @@ class Graph extends Component {
             graph.setAllowDanglingEdges(false);
 
             // Stops editing on enter or escape keypress
-            var rubberband = new mxRubberband(graph);
+
 
             // Enables guides (vodici cary)
             mxGraphHandler.prototype.guidesEnabled = true;
@@ -543,7 +557,120 @@ class Graph extends Component {
                 })
             })
             toolbar.appendChild(button)
+
+
+            var clientX
+            var clientY
+
+            container.addEventListener("mousedown", handleMouseDown, false);
+
+            var handleMouseDown = (evt) => {
+                let selection = document.createElement('div');
+                selection.setAttribute('id', "selectionDiv");
+
+                clientX = evt.clientX
+                clientY = evt.clientY
+                console.log(clientX)
+                console.log(clientY)
+
+                selection.style.position = "fixed",
+                    selection.style.display = "block",
+                    selection.style.background = "blue",
+                    selection.style.top = clientY + "px",
+                    selection.style.left = clientX + "px",
+
+                    selection.style.zIndex = 1000
+
+                container.addEventListener('mousemove', handleMouseMove, false)
+                container.addEventListener('mouseup', handleMouseUp, false)
+
+                container.appendChild(selection)
+            }
+
+            var handleMouseMove = (evt) =>{
+                var selection = document.getElementById('selectionDiv');
+                console.log(evt)
+                if (evt.clientX < clientX) {
+                    selection.style.left = evt.clientX + "px"
+                    selection.style.width = clientX - evt.clientX + "px"
+                }
+                else {
+                    selection.style.left = clientX + "px",
+                        selection.style.width = evt.clientX - clientX + "px"
+                }
+                if (evt.clientY < clientY) {
+                    selection.style.top = evt.clientY + "px"
+                    selection.style.height = clientY - evt.clientY + "px"
+                }
+                else {
+                    selection.style.top = clientY + "px"
+                    selection.style.height = evt.clientY - clientY + "px"
+                }
+            }
+            var handleMouseUp =  (evt) => {
+
+                console.log("KOKOT")
+                var selection = document.getElementById('selectionDiv');
+                selection.remove()
+                container.removeEventListener("mousemove", handleMouseMove, false);
+            }
+
+
+            /*
+            mxEvent.addListener(container, 'mousedown', (evt) => {
+                console.log(evt)
+                let selection = document.createElement('div');
+                selection.setAttribute('id', "selectionDiv");
+
+                clientX = evt.clientX
+                clientY = evt.clientY
+                console.log(clientX)
+                console.log(clientY)
+
+                selection.style.position = "fixed",
+                    selection.style.display = "block",
+                    selection.style.background = "blue",
+                    selection.style.top = clientY + "px",
+                    selection.style.left = clientX + "px",
+
+                    selection.style.zIndex = 1000
+
+                mxEvent.addListener(container, 'mousemove', (evt) => {
+                    console.log(evt)
+                    if (evt.clientX < clientX) {
+                        selection.style.left = evt.clientX + "px"
+                        selection.style.width = clientX - evt.clientX + "px"
+                    }
+                    else {
+                        selection.style.left = clientX + "px",
+                            selection.style.width = evt.clientX - clientX + "px"
+                    }
+                    if (evt.clientY < clientY) {
+                        selection.style.top = evt.clientY + "px"
+                        selection.style.height = clientY - evt.clientY + "px"
+                    }
+                    else {
+                        selection.style.top = clientY + "px"
+                        selection.style.height = evt.clientY - clientY + "px"
+                    }
+
+
+                })
+                container.appendChild(selection)
+            });
+            mxEvent.addListener(container, 'mouseup', (evt) => {
+                console.log("KOKOT")
+                var selection = document.getElementById('selectionDiv');
+                selection.remove()
+                container.removeEventListener("mousemove");  
+                
+
+            })
+            */
+
+
         }
+
 
     }
     componentDidMount() {
