@@ -19,7 +19,6 @@ import {
     mxLayoutManager,
     mxCell,
     mxGeometry,
-    mxRubberband,
     mxDragSource,
     mxKeyHandler,
     mxCodec,
@@ -38,15 +37,25 @@ import {
     mxDefaultKeyHandler,
     mxVertexHandler,
     mxStackLayout,
-    mxEventSource
+    mxEventSource,
+    mxPopupMenu
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
-import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
+import { FormControl, InputLabel, Select, MenuItem, Typography } from 'material-ui';
 import { Router, Route, Link, withRouter } from "react-router-dom";
 import Footer from "../layouts/Footer"
 import history from '../../history';
 import { isAbsolute } from 'path';
+import { RubberBandSelection } from '../../functions/rubberband'
+import { mxIconSet, addMouseListeners } from '../../functions/hoverIcons'
+import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion, getAssetTypes } from '../../functions/autosuggest'
+import Autosuggest from 'react-autosuggest';
+import Toolbar from '../shotpage/Toolbar'
+
+import PopUpSelect from '../shotpage/PopUpSelect'
+import './graph.css'
+
 
 
 const style = {
@@ -60,7 +69,10 @@ const style = {
         flexGrow: '1'
     },
     Container: {
-        flexGrow: '1'
+        flexGrow: '1',
+        minWidth: 0,
+        minHeight: 0
+
     }
 };
 
@@ -68,7 +80,7 @@ const style = {
 class Graph extends Component {
 
     constructor(props) {
-        console.log("constructor")
+        var editor
         super(props);
         this.state = {
             adj: [],
@@ -80,10 +92,15 @@ class Graph extends Component {
             selectCell: "",
             readingXMLdone: false,
             nodesLength: 1,
-            shots: []
+            shots: [],
+            activePopUp: false,
+            selectedAsset: "",
+            clientCoord: ""
         };
 
     }
+
+
     getColors() {
         var colors = ['red', 'green', 'pink', 'yellow']
         return colors;
@@ -109,6 +126,7 @@ class Graph extends Component {
 
     setStyle(graph, editor) {
 
+
         // Automatically handle parallel edges
         var layout = new mxParallelEdgeLayout(graph);
         var layoutMgr = new mxLayoutManager(graph);
@@ -121,9 +139,6 @@ class Graph extends Component {
         layoutMgr.executeLayout(layout, graph.getDefaultParent())
 
         layout.execute(graph.getDefaultParent());
-
-
-
 
         // Changes the default style for edges "in-place" and assigns
         // an alternate edge style which is applied in mxGraph.flip
@@ -190,13 +205,31 @@ class Graph extends Component {
                 var cells = model.getElementsByTagName("mxCell");
 
                 var cellArr = Array.from(cells);
+                console.log("cellArr")
+                console.log(cellArr)
                 var vertexes = [];
                 var vertexesAll = [];
 
                 var shotArray = this.props.shotArray
+                console.log("ShotArray")
+                console.log(shotArray)
                 let index = 0
                 let IndexEdge = 0
                 var stack = []
+                var vertexArray = []
+
+                //add  selected Shots
+                var shots = this.props.project.shots
+                shots.forEach((shot, index) => {
+                    if (shotArray.includes(shot.id.toString())) {
+                        vertexes[shot.id] = graph.insertVertex(parent, shot.id,  shot.name, 950, 50 + index * 150, 150, 50, "");
+                        vertexes[shot.id].visible = true
+                        stack.push(vertexes[shot.id])
+                    } else {
+                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
+                        vertexes[shot.id].visible = false
+                    }
+                })
 
                 for (var i = 0; i < cellArr.length; i++) {
                     let element = cellArr[i]
@@ -205,8 +238,9 @@ class Graph extends Component {
                     var style = element.getAttribute("style")
 
 
+
                     //If element is Vertex/cell
-                    if (element.hasAttribute("vertex")) {
+                    if (element.hasAttribute("vertex") && value != null) {
 
 
                         var geometry = element.getElementsByTagName("mxGeometry");
@@ -216,57 +250,76 @@ class Graph extends Component {
                         var height = geometry[0].getAttribute("height")
 
                         //add shots selected shots vertex
-                        if (value.startsWith("Shot") && shotArray.includes(id)) {
-
-                            vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
-                            vertexes[id].visible = true
-                            stack.push(vertexes[id])
-                        }
-                        else {
-                            vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
+                        if (!value.startsWith("Shot")) {                           
+                      
+                            vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height);
                             vertexes[id].visible = false
                         }
 
                     }
 
                     // Sequence element > edge
-                    else if (element.hasAttribute("edge")) {
-
+                    if (element.hasAttribute("edge")) {
 
                         var color = "blue"
-
                         var sourceElement = vertexes[element.getAttribute("source")]
                         var targetElement = vertexes[element.getAttribute("target")]
 
                         graph.insertEdge(parent, id, value, sourceElement, targetElement, 'strokeColor=' + color)
 
                     }
-                }
-                console.log("stack")
-                console.log(stack)
+                }/*
+                console.log("vertexArray")
+                console.log(vertexArray)
+                //add new created
+                var shots = this.props.project.shots
+                console.log("shots")
+                console.log(shots)
+                shots.forEach( shot =>{
+                    console.log("forEach")
+                    console.log(shot)
+                    
+                    if(!vertexArray.includes(shot.id.toString())){
+                        console.log("pridava: ")
+                        console.log(shot.id)
+
+                        //Should be visible
+                        if(shotArray.includes(shot.id.toString())){
+                            var v1 = graph.insertVertex(parent, null, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
+                            v1.visible = true
+                        }else{
+                            var v1 = graph.insertVertex(parent, null, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
+                            v1.visible = false
+                        }
+                        
+                        //stack.push(vertexes[shot.id])
+                    }
+                }*/
+
 
 
                 //while stack is empty
+                console.log("stack")
+                console.log(stack)
 
                 while (stack.length !== 0) {
 
 
                     var cell = stack.pop()
 
-                    console.log(cell)
                     cell.visible = true
                     var inEdges = graph.getModel().getIncomingEdges(cell)
-                    console.log(inEdges)
+
 
                     inEdges.forEach((edge, index) => {
-                        console.log("vertex")
+
                         var vertex = edge.source
 
-                        console.log(vertex)
+
                         stack.push(vertex)
                     })
 
-                    console.log(stack)
+
 
                 }
 
@@ -282,56 +335,32 @@ class Graph extends Component {
         finally {
 
             // Updates the display
-            graph.refresh()
+
             graph.getModel().endUpdate();
 
             //Need to move othervise the dragging canvas is broken
-            graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
-            graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
+            graph.moveCells(graph.getChildCells(null, true, false), 1, 0);
+            graph.moveCells(graph.getChildCells(null, true, false), -1, 0);
 
             this.setState({ readingXMLdone: true })
             graph.center()
+            graph.refresh()
 
         }
     }
 
-    addSidebarIcon(graph, sidebar, label, image) {
+
+
+    addSidebarIcon = (editor, graph, sidebar, label, image) => {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
         // the mousepointer if there is one.
+
+
         var funct = function (graph, evt, cell, x, y) {
-            var parent = graph.getDefaultParent();
-            var model = graph.getModel();
 
-            var v1 = null;
+            this.popupMenu(evt, x, y)
 
-            model.beginUpdate();
-            try {
-                // NOTE: For non-HTML labels the image must be displayed via the style
-                // rather than the label markup, so use 'image=' + image for the style.
-                // as follows: v1 = graph.insertVertex(parent, null, label,
-                // pt.x, pt.y, 120, 120, 'image=' + image);
-
-                var number = ('0' + this.state.nodesLength + '0').slice(-3)
-                var title = `${number}`
-
-
-                var index = model.nextId
-                v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
-
-                this.setState({
-                    nodesLength: this.state.nodesLength + 1
-                })
-
-
-
-
-            }
-            finally {
-                model.endUpdate();
-            }
-
-            graph.setSelectionCell(v1);
         }
 
         // Creates the image which is used as the sidebar icon (drag source)
@@ -348,11 +377,71 @@ class Graph extends Component {
         dragElt.style.height = '50px';
 
         // Creates the image which is used as the drag icon (preview)
+
+
+
         var ds = mxUtils.makeDraggable(img, graph, funct.bind(this), dragElt, 0, 0, true, true);
         ds.setGuidesEnabled(true);
+
+
     };
 
-    addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
+    addVertex(asset) {
+        console.log("addVertex")
+
+        var graph = this.editor.graph
+
+        var parent = graph.getDefaultParent();
+        var model = graph.getModel();
+
+        var popUp = document.getElementById("popUpMenu")
+
+        var x = this.state.clientCoord.x
+        var y = this.state.clientCoord.y
+
+
+        var v1 = null;
+
+        model.beginUpdate();
+        try {
+            // NOTE: For non-HTML labels the image must be displayed via the style
+            // rather than the label markup, so use 'image=' + image for the style.
+            // as follows: v1 = graph.insertVertex(parent, null, label,
+            // pt.x, pt.y, 120, 120, 'image=' + image);
+
+            var number = ('0' + this.state.nodesLength + '0').slice(-3)
+            var title = asset
+            var name = number
+            var node = `<div>
+            <h4 id="title">${title}</h4>
+
+            <h3 id ="name">${name}</h3>
+            </div>`
+
+            console.log(typeof node)
+
+
+
+            var index = model.nextId
+            v1 = graph.insertVertex(parent, null, node, x, y, 100, 75);
+
+
+            this.setState({
+                nodesLength: this.state.nodesLength + 1
+            })
+
+
+
+
+        }
+        finally {
+            model.endUpdate();
+        }
+
+        graph.setSelectionCell(v1);
+    }
+
+    addToolbarButton = (editor, toolbar, action, label, image, isTransparent) => {
         var button = document.createElement('button');
         button.setAttribute("id", action + "Button");
         button.style.fontSize = '10';
@@ -381,8 +470,6 @@ class Graph extends Component {
 
 
     loadGraph() {
-
-
 
         console.log("project")
         console.log(this.props.project.shots)
@@ -413,10 +500,22 @@ class Graph extends Component {
             // Creates a wrapper editor with a graph inside the given container.
             // The editor is used to create certain functionality for the
             // graph, such as the rubberband selection
-            var editor = new mxEditor();
-            var graph = editor.graph;
+            this.editor = new mxEditor();
+            var graph = this.editor.graph;
             var model = graph.getModel();
 
+            var keyHandler = new mxDefaultKeyHandler(this.editor);
+            keyHandler.bindAction(46, 'delete');
+            keyHandler.bindAction(90, 'undo', true);
+            keyHandler.bindAction(89, 'redo', true);
+            keyHandler.bindAction(88, 'cut', true);
+            keyHandler.bindAction(67, 'copy', true);
+            keyHandler.bindAction(86, 'paste', true);
+            keyHandler.bindAction(107, 'zoomIn');
+            keyHandler.bindAction(109, 'zoomOut');
+
+            // Disables built-in context menu
+            mxEvent.disableContextMenu(container);
 
 
 
@@ -428,16 +527,11 @@ class Graph extends Component {
             // Optional disabling of sizing
             graph.setCellsResizable(false);
 
-            editor.setGraphContainer(container);
-
-
-            // var rubberband = new mxRubberband(graph);
+            this.editor.setGraphContainer(container);
 
 
             //Set styles
-            this.setStyle(graph, editor)
-
-
+            this.setStyle(graph, this.editor)
 
 
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
@@ -446,7 +540,7 @@ class Graph extends Component {
                 graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
             }
 
-            var keyHandler = new mxDefaultKeyHandler(editor);
+            var keyHandler = new mxDefaultKeyHandler(this.editor);
             keyHandler.bindAction(46, 'delete');
             keyHandler.bindAction(90, 'undo', true);
             keyHandler.bindAction(89, 'redo', true);
@@ -460,22 +554,34 @@ class Graph extends Component {
             graph.dblClick = (evt, cell) => {
                 console.log(cell)
 
-                /*
-                                history.push({
-                                    pathname: '/projects/' + this.props.project._id + '/' + cell.id + '/',
-                                    state: { project: this.props.project }
-                                })*/
+                if (cell === undefined || cell.value === null) {
+                    return
+                }
+
+                if (!cell.value.includes("Shot")) {
+
+                    history.push({
+                        pathname: '/projects/' + this.props.project._id + "/asset/" + cell.id,
+                        state: { project: this.props.project }
+                    })
+
+                }
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
             };
 
+            //Hover Icons
+            mxIconSet.prototype.destroy = function () {
+                if (this.images != null) {
+                    for (var i = 0; i < this.images.length; i++) {
+                        var img = this.images[i];
+                        img.parentNode.removeChild(img);
+                    }
+                }
 
-
-
-
-
-
+                this.images = null;
+            };
 
 
             // Gets the default parent for inserting new cells. This
@@ -486,11 +592,10 @@ class Graph extends Component {
             this.readFromXML(graph, parent)
 
 
-
-            this.addSidebarIcon(graph, sidebar, null,
+            this.addSidebarIcon(this.editor, graph, sidebar, null,
                 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
 
-            this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
+            this.addToolbarButton(this.editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
 
             graph.setHtmlLabels(true);
 
@@ -500,7 +605,7 @@ class Graph extends Component {
             // Enables moving with right click ang drag
             graph.setPanning(true);
 
-            graph.setTooltips(true);
+            // graph.setTooltips(true);
             // graph.setMultigraph(false);
 
 
@@ -530,7 +635,7 @@ class Graph extends Component {
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                 var assetsXML = mxUtils.getPrettyXml(node)
-                console.log(assetsXML)
+                console.log(node)
 
 
                 // this.props.updateGraphOnServer(xml, seq, shots)
@@ -558,116 +663,14 @@ class Graph extends Component {
             })
             toolbar.appendChild(button)
 
+            //Rubberband selection in functions
+            RubberBandSelection(container)
 
-            var clientX
-            var clientY
+            addMouseListeners(graph)
 
-            container.addEventListener("mousedown", handleMouseDown, false);
-
-            var handleMouseDown = (evt) => {
-                let selection = document.createElement('div');
-                selection.setAttribute('id', "selectionDiv");
-
-                clientX = evt.clientX
-                clientY = evt.clientY
-                console.log(clientX)
-                console.log(clientY)
-
-                selection.style.position = "fixed",
-                    selection.style.display = "block",
-                    selection.style.background = "blue",
-                    selection.style.top = clientY + "px",
-                    selection.style.left = clientX + "px",
-
-                    selection.style.zIndex = 1000
-
-                container.addEventListener('mousemove', handleMouseMove, false)
-                container.addEventListener('mouseup', handleMouseUp, false)
-
-                container.appendChild(selection)
-            }
-
-            var handleMouseMove = (evt) =>{
-                var selection = document.getElementById('selectionDiv');
-                console.log(evt)
-                if (evt.clientX < clientX) {
-                    selection.style.left = evt.clientX + "px"
-                    selection.style.width = clientX - evt.clientX + "px"
-                }
-                else {
-                    selection.style.left = clientX + "px",
-                        selection.style.width = evt.clientX - clientX + "px"
-                }
-                if (evt.clientY < clientY) {
-                    selection.style.top = evt.clientY + "px"
-                    selection.style.height = clientY - evt.clientY + "px"
-                }
-                else {
-                    selection.style.top = clientY + "px"
-                    selection.style.height = evt.clientY - clientY + "px"
-                }
-            }
-            var handleMouseUp =  (evt) => {
-
-                console.log("KOKOT")
-                var selection = document.getElementById('selectionDiv');
-                selection.remove()
-                container.removeEventListener("mousemove", handleMouseMove, false);
-            }
-
-
-            /*
-            mxEvent.addListener(container, 'mousedown', (evt) => {
-                console.log(evt)
-                let selection = document.createElement('div');
-                selection.setAttribute('id', "selectionDiv");
-
-                clientX = evt.clientX
-                clientY = evt.clientY
-                console.log(clientX)
-                console.log(clientY)
-
-                selection.style.position = "fixed",
-                    selection.style.display = "block",
-                    selection.style.background = "blue",
-                    selection.style.top = clientY + "px",
-                    selection.style.left = clientX + "px",
-
-                    selection.style.zIndex = 1000
-
-                mxEvent.addListener(container, 'mousemove', (evt) => {
-                    console.log(evt)
-                    if (evt.clientX < clientX) {
-                        selection.style.left = evt.clientX + "px"
-                        selection.style.width = clientX - evt.clientX + "px"
-                    }
-                    else {
-                        selection.style.left = clientX + "px",
-                            selection.style.width = evt.clientX - clientX + "px"
-                    }
-                    if (evt.clientY < clientY) {
-                        selection.style.top = evt.clientY + "px"
-                        selection.style.height = clientY - evt.clientY + "px"
-                    }
-                    else {
-                        selection.style.top = clientY + "px"
-                        selection.style.height = evt.clientY - clientY + "px"
-                    }
-
-
-                })
-                container.appendChild(selection)
-            });
-            mxEvent.addListener(container, 'mouseup', (evt) => {
-                console.log("KOKOT")
-                var selection = document.getElementById('selectionDiv');
-                selection.remove()
-                container.removeEventListener("mousemove");  
-                
-
-            })
-            */
-
+            //Need to det html from Value
+            graph.moveCells(graph.getChildCells(parent, true, false), 1, 0);
+            graph.moveCells(graph.getChildCells(parent, true, false), -1, 0);
 
         }
 
@@ -677,18 +680,63 @@ class Graph extends Component {
         this.loadGraph()
     }
 
-    render() {
+    popupMenu(evt, x, y) {
+        this.setState({ activePopUp: true })
+        this.setState({
+            clientCoord: {
+                x: x,
+                y: y
+            }
+        })
 
+        var clientX = evt.clientX
+        var clientY = evt.clientY
+
+        var popUp = document.getElementById("popUpMenu")
+        console.log(popUp)
+        popUp.style.top = clientY + "px"
+        popUp.style.left = clientX + "px"
+
+
+    }
+
+
+    setAsset(asset) {
+        console.log("setAsset")
+
+        this.setState({ activePopUp: false })
+        this.addVertex(asset)
+        console.log(asset)
+    }
+
+
+
+
+
+    render() {
+        console.log("render")
+        var popUp
+        if (this.state.activePopUp) {
+            popUp = <PopUpSelect setAsset={this.setAsset.bind(this)} />
+        }
+        else {
+            popUp = <div id="popUpMenu"></div>
+        }
 
 
         return (
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
-                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
+                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar">
+
+                </div>
 
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
-                    <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
+                    <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer">
+                        {popUp}
+                        <div id="editName"></div>
+                    </div>
                 </div>
             </div>
         );

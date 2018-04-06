@@ -4,6 +4,7 @@ import HomepageS from './components/homepage/HomepageS';
 import { Router, Route, withRouter } from "react-router-dom";
 import ProjectPage from './components/projectpage/ProjectPage';
 import ShotPage from './components/shotpage/ShotPage';
+import AssetPage from './components/assetPage/AssetPage';
 import history from './history';
 //import mxGraphGridAreaEditor from './components/projectpage/mxGraphGridAreaEditor';
 
@@ -22,7 +23,9 @@ class App extends Component {
               history={history} />} />
 
             <Route exact path="/projects/:id" component={ProjectPage} />
-            <Route path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project}/>} />
+           
+            <Route exact path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project}/>} />  
+            <Route exact path="/projects/:id/asset/:asset" render={() => <AssetPage project={this.props.project}/>} />          
             <Route path="/test" component={Footer} />
 
           </div>

@@ -5,8 +5,6 @@ import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import history from '../../history'
 import axios from 'axios';
 import LeftPane from '../layouts/leftPane/LeftPane'
-import Graph from './graph';
-
 
 
 
@@ -37,7 +35,7 @@ const style = {
 };
 
 
-class ShotPage extends Component {
+class AssetPage extends Component {
 
     constructor(props) {
         super(props);
@@ -146,10 +144,8 @@ class ShotPage extends Component {
         var graph
         if (!this.state.isLoading) {
             leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} />
-            graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray}/>
         } else {
             leftPane = <div>Loading Shot</div>
-            graph = <div>Loading Graph</div>
         }
 
         //console.log(this.props.location.state.project)
@@ -159,7 +155,7 @@ class ShotPage extends Component {
                 <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots}/>
                 <div style={style.Container}>
                     {leftPane}
-                    {graph}
+                    <div></div>
 
                     {/*<RightPane />*/}
 
@@ -171,4 +167,4 @@ class ShotPage extends Component {
     }
 }
 
-export default ShotPage;
+export default AssetPage;

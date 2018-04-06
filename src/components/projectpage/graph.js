@@ -44,6 +44,7 @@ import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
 import { Router, Route, Link, withRouter } from "react-router-dom";
 import Footer from "../layouts/Footer"
 import history from '../../history';
+import { RubberBandSelection } from '../../functions/rubberband'
 
 
 const style = {
@@ -77,7 +78,7 @@ class Graph extends Component {
             selectCell: "",
             readingXMLdone: false,
             nodesLength: 1,
-            shots:[]
+            shots: []
         };
 
     }
@@ -119,7 +120,7 @@ class Graph extends Component {
         styleNode[mxConstants.STYLE_FONTSTYLE] = 0;
         styleNode[mxConstants.STYLE_FONTCOLOR] = '#000000';
 
-        
+
     }
 
 
@@ -183,7 +184,7 @@ class Graph extends Component {
                     var sourceElement = vertexes[element.getAttribute("source")]
                     var targetElement = vertexes[element.getAttribute("target")]
 
-                    console.log(color)
+                    
                     var doc = mxUtils.createXmlDocument();
                     var edge = doc.createElement('Sequence')
                     edge.setAttribute('seq', index);
@@ -231,14 +232,15 @@ class Graph extends Component {
                 // rather than the label markup, so use 'image=' + image for the style.
                 // as follows: v1 = graph.insertVertex(parent, null, label,
                 // pt.x, pt.y, 120, 120, 'image=' + image);
-                
-                var number = ('0' + this.state.nodesLength + '0').slice(-3)
+                var index = model.nextId
+
+                var number = ('0' + index  + '0').slice(-3)
                 var title = `Shot ${number}`
 
 
-                var index = model.nextId
-                v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
                 
+                v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
+
                 this.setState({
                     nodesLength: this.state.nodesLength + 1
                 })
@@ -304,15 +306,12 @@ class Graph extends Component {
 
 
 
-        console.log("project")
-        console.log(this.props.project.seq)
-
-        console.log(typeof this.props.project.seq)
+    
 
         this.setState({ seq: Array.from(this.props.project.seq) })
         this.setState({ activeSeq: this.props.project.seq[0] })
 
-        console.log(this.state.seq)
+        
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -366,7 +365,7 @@ class Graph extends Component {
                 var node = encoder.encode(graph.getModel());
                 //console.log(node)
                 var activeSeq = this.state.activeSeq.id
-                console.log(activeSeq)
+               
                 var seqs = node.getElementsByTagName("Sequence")
                 seqs = Array.from(seqs);
 
@@ -380,7 +379,7 @@ class Graph extends Component {
                     cell.source = cell.getAttribute("source")
                     cell.target = cell.getAttribute("target")
 
-                    if (cell.source == source.id || cell.target == target.id || cell.source == target.id) {
+                    if (cell.source == source.id || cell.target == target.id ) {
                         alert("Cannot connect")
                         flag = false
                         return false
@@ -417,16 +416,16 @@ class Graph extends Component {
             graph.dblClick = (evt, cell) => {
 
                 // history.push('/projects/' + this.props.project._id + '/' + cell.id);
-                
-                if(cell.edge === true){
+
+                if (cell.edge === true) {
                     return
                 }
- 
+
                 history.push({
-                    pathname: '/projects/' + this.props.project._id + '/' + cell.id + '/',
+                    pathname: '/projects/' + this.props.project._id + '/' + cell.id,
                     state: { project: this.props.project }
                 })
-                
+
 
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
@@ -462,7 +461,7 @@ class Graph extends Component {
             // Enables moving with right click ang drag
             graph.setPanning(true);
 
-            graph.setTooltips(true);
+            //graph.setTooltips(true);
             // graph.setMultigraph(false);
 
 
@@ -488,34 +487,33 @@ class Graph extends Component {
                 var nodes = node.getElementsByTagName("mxCell")
                 var cellArr = Array.from(nodes);
                 var vertexes = [];
-    
+
                 for (var i = 0; i < cellArr.length; i++) {
                     let element = cellArr[i]
                     var id = element.getAttribute("id")
                     var value = element.getAttribute("value")
                     var style = element.getAttribute("style")
-                    console.log(element)                        
-    
+                    
+
                     //If element is Vertex/cell
                     if (element.hasAttribute("vertex")) {
                         let shot = {
                             id: id,
                             name: value,
                             desc: "",
-                            comments:[],
-                            artists:[],
-                            supervisor:this.props.project.supervisor,
-                            status:"notstarted"
-        
+                            comments: [],
+                            artists: [],
+                            supervisor: this.props.project.supervisor,
+                            status: "notstarted"
+
                         }
                         vertexes.push(shot)
-                        
+
                     }
                 }
                 this.setState({
                     shots: vertexes
-                })
-                console.log(this.state.shots)
+                })              
 
 
                 var xml = mxUtils.getPrettyXml(node)
@@ -538,24 +536,29 @@ class Graph extends Component {
 
             var button = mxUtils.button('Open selected shots', () => {
                 var selection = graph.getSelectionCells()
-                selection = selection.filter( cell => {
+                selection = selection.filter(cell => {
                     return cell.isVertex()
                 })
-                console.log(selection)
+                
                 var url = ''
-                selection.forEach( (cell)=>{
-                    url = url + cell.id + '/'
-                   
-                })
-                console.log(url)
-            
+                selection.forEach((cell, index) => {
+                    if(index < selection.length -1 ){
+                        url = url + cell.id + '_'
+                    }else {
+                        url = url + cell.id
+                    }                   
+
+                })             
+
 
                 history.push({
-                    pathname: '/projects/' + this.props.project._id + '/' + url,                   
-                })                
+                    pathname: '/projects/' + this.props.project._id + '/' + url,
+                })
             })
             toolbar.appendChild(button)
         }
+        //Rubberband selection in functions
+        RubberBandSelection(container)
 
     }
     componentDidMount() {
