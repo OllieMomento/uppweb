@@ -48,7 +48,32 @@ var ProjectsSchema = new Schema({
         status: String
 
     }],
-    assetsXML: String
+    assetsXML: String,
+    assets: [{
+        id: Number,
+        name: String,
+        typeOf: String,
+        desc: String,
+        comments: [{
+            author: String,
+            date: String,
+            text: String,
+            id: Number
+        }],
+        artists: [String],
+        supervisor: String,
+        status: String,
+        versions: [{
+            id: Number,
+            name: String,
+            artist: String,
+            desc: String,
+            date: String,
+            path: String,
+            commentsImplemented: [Number]
+        }]
+
+    }]
 });
 
 //export our module to use in server.js

@@ -5,6 +5,7 @@ import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import history from '../../history'
 import axios from 'axios';
 import LeftPane from '../layouts/leftPane/LeftPane'
+import RightPane from '../assetPage/RightPane'
 
 
 
@@ -42,29 +43,23 @@ class AssetPage extends Component {
         this.state = {
             project: {},
             people: [],
-            shotID: "",
             isLoading: true,
-            shots: [],
-            shotArray: []
+            asset: ""
+
         };
 
     }
-    getSelectedSeq =() => {
+    getAsset =() => {
         var url = window.location.href
-        var shotIDs = url.split("/");
-
-        var shotArray = shotIDs[5].split("_")    
-        
-        
-        this.setState({shotArray: shotArray})
+        var assetID = url.split("/")[6]
        
-        var shots = this.state.project.shots.filter( shot =>{
-            return shotArray.includes(shot.id.toString())
+        var asset = this.state.project.assets.filter( asset =>{
+            return asset.id === parseInt(assetID)
         })      
-        
-        this.setState({shots: shots})
+        console.log(asset[0])
+        this.setState({asset: asset[0]})
         this.setState({ isLoading: false })
-        return shots
+        return asset
 
     }
 
@@ -74,18 +69,13 @@ class AssetPage extends Component {
         var url = window.location.href
 
         var projectURL = url.split("/")[4];
-        var shotID = url.split("/")[5];
-
-        this.setState({
-            shotID: shotID
-        })
 
         axios.get('http://localhost:3001/api/projects/' + projectURL)
             .then(res => {
                 this.setState({ project: res.data });               
                 console.log("dostal jsme project Shot")
                 
-                this.getSelectedSeq()
+                this.getAsset()
 
             })
     }
@@ -141,11 +131,15 @@ class AssetPage extends Component {
     render() {
 
         var leftPane
+        var rightPane
         var graph
         if (!this.state.isLoading) {
-            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} />
+            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={null} asset={this.state.asset}/>
+            rightPane = <RightPane project={this.state.project} people={this.state.people} asset={this.state.asset}/>
+
         } else {
             leftPane = <div>Loading Shot</div>
+            rightPane = <div></div>
         }
 
         //console.log(this.props.location.state.project)
@@ -155,9 +149,9 @@ class AssetPage extends Component {
                 <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots}/>
                 <div style={style.Container}>
                     {leftPane}
-                    <div></div>
+                    {rightPane}
 
-                    {/*<RightPane />*/}
+                    
 
                 </div>
 

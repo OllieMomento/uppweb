@@ -28,7 +28,7 @@ const style = {
 
 
 
-class ShotNameAndStatus extends Component {
+class AssetNameAndStatus extends Component {
 
     getStatus(status) {
         var icon
@@ -58,47 +58,25 @@ class ShotNameAndStatus extends Component {
     }
 
 
-    render() {     
-       
-
-        var shots = this.props.shots
-
-        console.log(shots)
-
-        var names = shots.map((shot, index)=>{
-            let number = shot.name.replace("Shot ", "")
-            if(index != shots.length-1){  
-                number = number + ', '             
-            }          
-            
-            return number
-        })
-        
-        var caption = 'Shot'
-        if(shots.length > 1){
-            caption = 'Shots'
-        }
-        
-        
-
+    render() {
         return (
             <div style={style.Div}>
                 <div className="ProjectName">
                     <Typography variant="caption" color="inherit" >
-                        {caption}
+                        Asset
+                    </Typography>
+                    <Typography variant="subheading" color="inherit" >
+                        {this.props.asset.typeOf}
                     </Typography>
                     <Typography variant="title" color="inherit" >
-                        {names}
+                        {this.props.asset.name}
                     </Typography>
                 </div>
                 {this.getStatus(this.props.project.status)}
-
-
-
 
             </div>
         );
     }
 }
 
-export default ShotNameAndStatus;
+export default AssetNameAndStatus;

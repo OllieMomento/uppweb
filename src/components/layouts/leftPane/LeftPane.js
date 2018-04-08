@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import ShotNameAndStatus from './ShotNameAndStatus';
 import ProjectNameAndStatus from './ProjectNameAndStatus';
+import AssetNameAndStatus from './AssetNameAndStatus';
 import TabsBar from './TabsBar';
 //import SearchBar from 'material-ui-search-bar'
 
@@ -29,17 +30,24 @@ class LeftPane extends Component {
 
     render() {
 
-        if (this.props.shotID === null) {
+        //Project
+        if (this.props.shots === null && this.props.asset === null) {
             var nameAndStatus = <ProjectNameAndStatus project={this.props.project} />
         }
-        else {
+        //Shots
+        else if (this.props.shots !== null && this.props.asset === null) {
             var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
+        }
+        // Asset
+        else{
+
+            var nameAndStatus = <AssetNameAndStatus project={this.props.project} shots={this.props.shots} asset={this.props.asset}/>
         }
 
         return (
             <div style={style.LeftPane}>
                 <div style={style.Div}>
-                  {nameAndStatus}
+                    {nameAndStatus}
 
 
 

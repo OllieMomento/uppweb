@@ -127,6 +127,7 @@ router.route('/projects')
         project.seq = req.body.seq;
         project.shots = req.body.shots
         project.assetsXML = req.body.assetsXML
+        project.assets = req.body.assets
 
 
         project.save(function (err) {
@@ -169,6 +170,7 @@ router.route('/projects/:project_id')
             (req.body.seq) ? project.seq = req.body.seq : null;
             (req.body.shots) ? project.shots = req.body.shots : null;
             (req.body.assetsXML) ? project.assetsXML = req.body.assetsXML : null;
+            (req.body.assets) ? project.assets = req.body.assets : null;
 
             //save project
             project.save(function (err) {

@@ -4,7 +4,6 @@ import axios from 'axios';
 import Header from '../layouts/Header'
 import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import LeftPane from '../layouts/leftPane/LeftPane'
-import RightPane from '../layouts/rightPane/RightPane'
 import Grid from 'material-ui/Grid'
 import { Router, Route } from 'react-router-dom'
 import ShotPage from '../shotpage/ShotPage'
@@ -111,10 +110,8 @@ class ProjectPage extends Component {
                 <BreadcrumbsAndButton project={this.state.project} />
 
                 <div style={style.Container}>
-                    <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shotID={null}/>
-                    {graph}
-
-                    {/*<RightPane />*/}
+                    <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={null} asset={null}/>
+                    {graph}          
 
                 </div>
                 <div> footer</div>

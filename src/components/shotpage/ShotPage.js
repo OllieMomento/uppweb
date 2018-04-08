@@ -122,18 +122,23 @@ class ShotPage extends Component {
             });
     }
 
-    updateGraphAssetsOnServer(assetsXML) {
+    updateGraphAssetsOnServer(assetsXML, assets) {
 
-        console.log(this.props.project)
+
+        console.log("assets")
+        console.log(assets)
+        console.log('http://localhost:3001/api/projects/' + this.state.project._id)
 
         axios.put('http://localhost:3001/api/projects/' + this.state.project._id, {
-            assetsXML: assetsXML,           
+            assetsXML: assetsXML,    
+            assets: assets       
          
         })
             .then(response => {
-                //console.log(response);
+                console.log(response);
             })
             .catch(err => {
+                
                 console.log(err);
             });
     }
@@ -145,7 +150,7 @@ class ShotPage extends Component {
         var leftPane
         var graph
         if (!this.state.isLoading) {
-            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} />
+            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null}/>
             graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray}/>
         } else {
             leftPane = <div>Loading Shot</div>
@@ -159,9 +164,7 @@ class ShotPage extends Component {
                 <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots}/>
                 <div style={style.Container}>
                     {leftPane}
-                    {graph}
-
-                    {/*<RightPane />*/}
+                    {graph}                 
 
                 </div>
 

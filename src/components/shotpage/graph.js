@@ -95,7 +95,8 @@ class Graph extends Component {
             shots: [],
             activePopUp: false,
             selectedAsset: "",
-            clientCoord: ""
+            clientCoord: "",
+            assets: []
         };
 
     }
@@ -222,7 +223,7 @@ class Graph extends Component {
                 var shots = this.props.project.shots
                 shots.forEach((shot, index) => {
                     if (shotArray.includes(shot.id.toString())) {
-                        vertexes[shot.id] = graph.insertVertex(parent, shot.id,  shot.name, 950, 50 + index * 150, 150, 50, "");
+                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 150, 50, "");
                         vertexes[shot.id].visible = true
                         stack.push(vertexes[shot.id])
                     } else {
@@ -250,8 +251,8 @@ class Graph extends Component {
                         var height = geometry[0].getAttribute("height")
 
                         //add shots selected shots vertex
-                        if (!value.startsWith("Shot")) {                           
-                      
+                        if (!value.startsWith("Shot")) {
+
                             vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height);
                             vertexes[id].visible = false
                         }
@@ -626,11 +627,76 @@ class Graph extends Component {
 
             var button = mxUtils.button('Save Graph', () => {
 
+                var vertexes = [];
                 var cells = graph.getModel().cells
+                console.log(cells)
 
                 for (var id in cells) {
-                    cells[id].visible = true
+                    let cell = cells[id]
+                    cell.visible = true
+                    console.log(cell)
+
+
+
+                    // parent nodes and shots
+                    if (cell.value === undefined || cell.value === null) {
+
+                    }
+
+                    else if (!cell.value.startsWith("Shot")) {
+                        var template = document.createElement('template');
+                        var value = cell.value.trim()
+                        template.innerHTML = value;
+                        value = template.content.firstChild;
+
+                        var title = value.getElementsByTagName("h4")[0].innerHTML
+                        var name = value.getElementsByTagName("h3")[0].innerHTML
+
+                        var flag = false
+                        var DBasset
+                        this.props.project.assets.map(asset => {
+ 
+                            if (asset.id === parseInt(cell.id)) {
+      
+                                flag = true
+                                DBasset = asset
+                            }
+                        })
+                        //already added in DB
+                        if (flag) {
+                            DBasset.name = name,
+                            DBasset.typeOf= title
+                            vertexes.push(DBasset)                            
+                        //add new asset in DB
+                        } else {
+                            let asset = {
+                                id: parseInt(cell.id),
+                                name: name,
+                                typeOf: title,
+                                desc: "",
+                                comments: [],
+                                artists: [],
+                                supervisor: this.props.project.supervisor,
+                                status: "notstarted",
+                                versions: []
+
+                            }
+                            
+                            vertexes.push(asset)
+                        }
+
+                    }
                 }
+
+
+                console.log(vertexes)
+
+                this.setState({
+                    assets: vertexes
+                })
+                var assets = this.state.assets
+                console.log("assets")
+                console.log(assets)
 
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
@@ -638,8 +704,9 @@ class Graph extends Component {
                 console.log(node)
 
 
+
                 // this.props.updateGraphOnServer(xml, seq, shots)
-                this.props.updateGraphAssetsOnServer(assetsXML)
+                this.props.updateGraphAssetsOnServer(assetsXML, assets)
 
             });
             toolbar.appendChild(button)
