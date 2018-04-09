@@ -24,7 +24,7 @@ class App extends Component {
 
             <Route exact path="/projects/:id" component={ProjectPage} />
            
-            <Route exact path="/projects/:id/:shot" render={() => <ShotPage project={this.props.project}/>} />  
+            <Route exact path="/projects/:id/shots/:shot" render={() => <ShotPage project={this.props.project}/>} />  
             <Route exact path="/projects/:id/asset/:asset" render={() => <AssetPage project={this.props.project}/>} />          
             <Route path="/test" component={Footer} />
 

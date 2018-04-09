@@ -422,7 +422,7 @@ class Graph extends Component {
                 }
 
                 history.push({
-                    pathname: '/projects/' + this.props.project._id + '/' + cell.id,
+                    pathname: '/projects/' + this.props.project._id + '/shots/' + cell.id,
                     state: { project: this.props.project }
                 })
 
@@ -461,7 +461,7 @@ class Graph extends Component {
             // Enables moving with right click ang drag
             graph.setPanning(true);
 
-            //graph.setTooltips(true);
+            graph.setTooltips(false);
             // graph.setMultigraph(false);
 
 
@@ -552,7 +552,7 @@ class Graph extends Component {
 
 
                 history.push({
-                    pathname: '/projects/' + this.props.project._id + '/' + url,
+                    pathname: '/projects/' + this.props.project._id + '/shots/' + url,
                 })
             })
             toolbar.appendChild(button)

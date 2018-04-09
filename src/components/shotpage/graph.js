@@ -606,7 +606,7 @@ class Graph extends Component {
             // Enables moving with right click ang drag
             graph.setPanning(true);
 
-            // graph.setTooltips(true);
+             graph.setTooltips(false);
             // graph.setMultigraph(false);
 
 

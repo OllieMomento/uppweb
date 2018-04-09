@@ -6,24 +6,31 @@ import Comment from './Comment';
 class CommentList extends Component {
 
     render() {
-        let commentNodes = this.props.project.comments.map((comment, index) => {
+        let comments
 
+        if (this.props.asset != null) {
+            comments = this.props.asset.comments
+        } else {
+            comments = this.props.project.comments
+        }
+            let commentNodes = comments.map((comment, index) => {
+
+                return (
+                    <Comment
+                        onCommentDelete={this.props.onCommentDelete}
+                        onCommentUpdate={this.props.onCommentUpdate}
+                        key={index}
+                        comment={comment}
+                        people={this.props.people}
+                    />
+                )
+            })
             return (
-                <Comment
-                    onCommentDelete={this.props.onCommentDelete}
-                    onCommentUpdate={this.props.onCommentUpdate}
-                    key={index}
-                    comment={comment}
-                    people={this.props.people}
-                />
+                <div >
+                    {commentNodes}
+                </div>
             )
-        })
-        return (
-            <div >
-                {commentNodes}
-            </div>
-        )
+        }
     }
-}
 
-export default CommentList;
+    export default CommentList;

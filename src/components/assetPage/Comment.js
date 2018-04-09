@@ -13,18 +13,8 @@ const style = {
 class Comment extends Component {
   constructor(props) {
     super(props);
-    this.handleMouseHover = this.handleMouseHover.bind(this);
     this.state = {
-      toBeUpdated: false,
-      isHovering: false
-    };
-  }
-  handleMouseHover() {
-    this.setState(this.toggleHoverState);
-  }
-  toggleHoverState(state) {
-    return {
-      isHovering: !state.isHovering,
+      toBeUpdated: false
     };
   }
 
@@ -79,22 +69,9 @@ class Comment extends Component {
   render() {
     //console.log(this.props.author)
     //console.log(this.props.people)
-    if (this.state.isHovering) {
-      var deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
-        <a href='button' onClick={this.deleteComment}>delete</a>
-      </Typography>
-    }
-    else{
-      var deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
-        <a href='button' onClick={this.deleteComment}>delete</a>
-      </Typography>
-
-    }
     return (
       <div >
-        <div style={{ marginBottom: '1em' }}
-          onMouseEnter={this.handleMouseHover}
-          onMouseLeave={this.handleMouseHover}>
+        <div style={{ marginBottom: '1em' }}>
           <div style={style.firstRow}>
             <Typography variant="body2" color="inherit" >
               {this.getNameFromID(this.props.comment.author)}
@@ -107,9 +84,11 @@ class Comment extends Component {
           <Typography variant="body1" color="inherit">
             {this.props.comment.text}
           </Typography>
-          {deleteButt}
+          <Typography variant="caption" color="inherit">
+            <a href='button' onClick={this.deleteComment}>delete</a>
+          </Typography>
         </div>
-
+        
       </div>
     )
   }

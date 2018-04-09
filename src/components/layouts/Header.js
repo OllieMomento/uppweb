@@ -14,7 +14,8 @@ import { BrowserRouter as Link } from "react-router-dom";
 
 const styles = {
   root: {
-    
+    height: "50px",
+
   },
   flex: {
     flex: 1,
@@ -45,7 +46,7 @@ class MenuAppBar extends Component {
     const open = Boolean(anchorEl);
 
     return (
-      <div className={classes.root}>
+      <div style={styles.root}>
 
         <AppBar position="static">
           <Toolbar>

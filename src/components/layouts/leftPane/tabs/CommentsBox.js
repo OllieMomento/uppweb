@@ -15,7 +15,8 @@ const style = {
     },
     Div: {
         backgroundColor: "#eeeeee",
-        padding: "2em"
+        padding: "2em",
+
     },
     Divdiv: {
         marginBottom: "1em"
@@ -34,15 +35,13 @@ class CommentsBox extends Component {
             comments: []
         };
     }
-
-
-    handleCommentSubmit = (comment) => {
-        let comments = this.props.project.comments;
+    handleCommentSubmitProject = (comment) => {
+        let comments = this.props.project.comments.reverse();
         comment.id = Date.now();
-        let newComments = comments.concat([comment]);
-        this.setState({ data: newComments });
+        let newComments = comments.concat([comment]).reverse();
+        this.setState({ comments: newComments });
         let project = this.props.project
-        project.comments = newComments
+        this.props.project.comments = newComments
 
 
         axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
@@ -54,17 +53,87 @@ class CommentsBox extends Component {
                 console.log(err);
             });
     }
-    handleCommentDelete = (id) => {
+
+    handleCommentSubmitAsset = (comment) => {
+        let comments = this.props.asset.comments.reverse();
+        comment.id = Date.now();
+        let newComments = comments.concat([comment]).reverse();
+        this.setState({ comments: newComments });
+
+        let asset = this.props.asset
+        asset.comments = newComments
+        let assetID = asset.id
+        let assets = this.props.project.assets
+
+
+        let index = assets.findIndex(x => x.id == assetID);
+        this.props.project.assets[index].comments = newComments
+
+
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
+            assets: assets
+        }).then(response => {
+            //console.log(response);
+        })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
+
+
+    handleCommentSubmit = (comment) => {
+
+        if (this.props.asset != null) {
+            this.handleCommentSubmitAsset(comment)
+
+        } else {
+            this.handleCommentSubmitProject(comment)
+        }
+    }
+
+    handleCommentDeleteAsset = (id) => {
+
+        let comments = this.props.asset.comments;
+
+        let newComments = comments
+            .filter(comment => {
+                return (comment.id !== id)
+            })
+
+        this.setState({ comments: newComments });
+        let asset = this.props.asset
+        asset.comments = newComments
+        let assetID = asset.id
+        let assets = this.props.project.assets
+
+
+        let index = assets.findIndex(x => x.id == assetID);
+        this.props.project.assets[index].comments = newComments
+
+
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
+            assets: assets
+        }).then(response => {
+            //console.log(response);
+        })
+            .catch(err => {
+                console.log(err);
+            });
+
+    }
+    handleCommentDeleteProject = (id) => {
 
         let comments = this.props.project.comments;
-        
+
         let newComments = comments
-        .filter(comment =>{
-            return( comment.id !== id )
-        })
+            .filter(comment => {
+                return (comment.id !== id)
+            })
 
-
-        this.setState({ data: newComments });
+        this.setState({ comments: newComments });
         let project = this.props.project
         project.comments = newComments
 
@@ -76,6 +145,22 @@ class CommentsBox extends Component {
             .catch(err => {
                 console.log(err);
             });
+
+    }
+
+
+    handleCommentDelete = (id) => {
+
+        if (this.props.asset != null) {
+            this.handleCommentDeleteAsset(id)
+
+        } else {
+            this.handleCommentDeleteProject(id)
+        }
+
+
+
+
     }
 
 
@@ -83,12 +168,15 @@ class CommentsBox extends Component {
 
         return (
 
+
             <div style={style.Div}>
+                <CommentForm onCommentSubmit={this.handleCommentSubmit} />
                 <CommentList
                     onCommentDelete={this.handleCommentDelete}
                     project={this.props.project}
-                    people={this.props.people} />
-                <CommentForm onCommentSubmit={this.handleCommentSubmit} />
+                    people={this.props.people}
+                    asset={this.props.asset} />
+
             </div>
         )
     }

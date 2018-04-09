@@ -13,7 +13,17 @@ const style = {
         border: '1px solid #ccc',
         borderRadius: '4px',
         boxSizing: 'border-box'
+    },
+    form:{
+        marginBottom: "1em",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
 
+    },
+    button:{
+       
+      flex: "flex-shrink"
     }
 }
 
@@ -41,14 +51,14 @@ class CommentForm extends Component {
     }
     render() {
         return (
-            <form onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handleSubmit} style={style.form}>
 
                 <input style={style.text}
                     type='text'
                     placeholder='Type your comment...'
                     value={this.state.text}
                     onChange={this.handleTextChange} />
-                <Button variant="raised" type="submit">
+                <Button variant="raised" type="submit" style={style.button}>
                     Comment
                 </Button>
             </form>

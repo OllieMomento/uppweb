@@ -55,7 +55,7 @@ class ShotPage extends Component {
         var url = window.location.href
         var shotIDs = url.split("/");
 
-        var shotArray = shotIDs[5].split("_")    
+        var shotArray = shotIDs[6].split("_")    
         
         
         this.setState({shotArray: shotArray})
@@ -76,7 +76,7 @@ class ShotPage extends Component {
         var url = window.location.href
 
         var projectURL = url.split("/")[4];
-        var shotID = url.split("/")[5];
+        var shotID = url.split("/")[6];
 
         this.setState({
             shotID: shotID
@@ -93,8 +93,7 @@ class ShotPage extends Component {
     }
 
     loadPeopleFromServer = () => {
-        //console.log("loadFromSercer")
-        //console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
+        
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });

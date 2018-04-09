@@ -4,6 +4,7 @@ import Tabs, { Tab } from 'material-ui/Tabs';
 import Info from './tabs/Info';
 import CommentsBox from './tabs/CommentsBox';
 import Team from './tabs/Team';
+import CommentsBoxAsset from '../../assetPage/CommentsBox'
 
 
 
@@ -35,6 +36,14 @@ class TabsBar extends Component {
 
 
     render() {
+        var url = window.location.href    
+        var commentBox  
+        if (url.includes("asset")) {
+            commentBox =  <CommentsBoxAsset project={this.props.project} people={this.props.people} asset={this.props.asset} />
+ 
+         } else {
+            commentBox = (<CommentsBox project={this.props.project} people={this.props.people} asset={this.props.asset} />)
+         }
 
         const { value } = this.state;
 
@@ -53,9 +62,9 @@ class TabsBar extends Component {
                         <Tab style={style.Tab} label="Team" />
                     </Tabs>
                 </AppBar>
-                {value === 0 && <Info  project={this.props.project} />}
-                {value === 1 && <CommentsBox  project={this.props.project} people={this.props.people}/>}
-                {value === 2 && <Team  project={this.props.project} people={this.props.people}/>}
+                {value === 0 && <Info  project={this.props.project} asset={this.props.asset}/>}
+                {value === 1 && <CommentsBox project={this.props.project} people={this.props.people} asset={this.props.asset} />}
+                {value === 2 && <Team  project={this.props.project} people={this.props.people}  asset={this.props.asset}/>}
             </div >
         );
     }

@@ -33,15 +33,17 @@ class LeftPane extends Component {
         //Project
         if (this.props.shots === null && this.props.asset === null) {
             var nameAndStatus = <ProjectNameAndStatus project={this.props.project} />
+            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} />
         }
         //Shots
         else if (this.props.shots !== null && this.props.asset === null) {
             var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
+            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} shots={this.props.shots} />
         }
         // Asset
         else{
-
             var nameAndStatus = <AssetNameAndStatus project={this.props.project} shots={this.props.shots} asset={this.props.asset}/>
+            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} asset={this.props.asset}/>
         }
 
         return (
@@ -52,7 +54,8 @@ class LeftPane extends Component {
 
 
                 </div>
-                <TabsBar project={this.props.project} people={this.props.people} />
+                {tabsBar}
+                
             </div>
         );
     }
