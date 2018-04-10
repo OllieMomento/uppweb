@@ -44,12 +44,13 @@ class AssetPage extends Component {
             project: {},
             people: [],
             isLoading: true,
-            asset: ""
+            asset: "",         
 
         };
 
     }
-    getAsset =() => {
+   
+       getAsset =() => {
         var url = window.location.href
         var assetID = url.split("/")[6]
        

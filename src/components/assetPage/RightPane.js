@@ -4,6 +4,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import CommentsBox from '../assetPage/CommentsBox'
+import AddNewVersion from '../assetPage/AddNewVersion';
 
 //import SearchBar from 'material-ui-search-bar'
 
@@ -19,12 +20,12 @@ const styles = {
         width: '100%',
         overflowX: 'auto',
     },
-    
+
     tableAndButtons: {
         margin: "1em"
-     
+
     },
-    
+
     tableAndComments: {
         display: "flex",
         //justifyContent: "space-between"
@@ -46,19 +47,19 @@ class RightPane extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { 
+        this.state = {
             selected: 1,
             selectedVersion: this.props.asset.versions[0]
-         };
+        };
     }
 
     handleClick = (event, id, n) => {
-        console.log( n)
+        console.log(n)
         this.setState({
-             selected: id,
-             selectedVersion: n
-         })
-        
+            selected: id,
+            selectedVersion: n
+        })
+
     }
 
     isSelected(id) {
@@ -82,7 +83,7 @@ class RightPane extends Component {
                     <TableCell >Path</TableCell>
                 </TableRow>
             </TableHead>
-            <TableBody>            
+            <TableBody>
                 {this.props.asset.versions.map(n => {
                     const isSelected = this.isSelected(n.id);
                     return (
@@ -105,29 +106,27 @@ class RightPane extends Component {
         </Table>
 
         return (
-            
-                <div style={styles.root}>
-                    <Typography variant="title" color="inherit" style={styles.title}>
-                        Versions of {this.props.asset.typeOf} {this.props.asset.name}
-                    </Typography>
 
-                    <div style={styles.tableAndComments}>
-                        <div style={styles.tableAndButtons}>
-                            {table}
-                            <div style={styles.buttons}>
-                                <Button variant="raised" color="primary" style={styles.buttonAdd}>
-                                    Add New Version
+            <div style={styles.root}>
+                <Typography variant="title" color="inherit" style={styles.title}>
+                    Versions of {this.props.asset.typeOf} {this.props.asset.name}
+                </Typography>
+
+                <div style={styles.tableAndComments}>
+                    <div style={styles.tableAndButtons}>
+                        {table}
+                        <div style={styles.buttons}>
+                            <AddNewVersion asset={this.props.asset}/>
+                            <Button variant="raised" style={styles.buttonAdd}>
+                                Approve version
                         </Button>
-                                <Button variant="raised" style={styles.buttonAdd}>
-                                    Approve version
-                        </Button>
-                            </div>
                         </div>
-                        <CommentsBox project={this.props.project} people={this.props.people} selectedVersion={this.state.selectedVersion}/>
                     </div>
-                </div>             
+                    <CommentsBox project={this.props.project} people={this.props.people} selectedVersion={this.state.selectedVersion} />
+                </div>
+            </div>
 
-           
+
         );
     }
 }
