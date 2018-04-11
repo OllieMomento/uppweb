@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { Component, createElement } from 'react';
 
 import Button from 'material-ui/Button';
 import Input from 'material-ui/Input';
+import dateFormat from 'dateformat'
 
 import Dialog, {
     DialogActions,
@@ -14,6 +15,7 @@ import Typography from 'material-ui/Typography';
 //import SearchBar from 'material-ui-search-bar'
 import List, { ListItem, ListItemSecondaryAction, ListItemText, ListSubheader } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
+import axios from 'axios';
 
 const styles = {
 
@@ -51,16 +53,41 @@ class AddNewVersion extends Component {
 
     addNewVersionHandler = () => {
         var desc = document.getElementById("descriptionWindow")
-        var file = document.getElementById("inputWindow") /*
-        console.log(file.files[0].name)
-        console.log(desc.value)
-        console.log(this.state.checked)
-        this.setState({ 
-            open: false,
-            decs: desc.value,
-         });
+        var file = document.getElementById("inputWindow")
+        console.log(file.files[0])
+        if (file.files[0] != null) {
+           
+            
 
-*/
+            var newVersion = {
+                id: Date.now(),
+                commentsImplemented: this.state.checked,                
+                name: file.files[0].name,
+                artist: "Karel Novák",
+                desc: desc.value,
+                date: dateFormat(Date.now(), "mmmm dS, yyyy, h:MM:ss TT"),
+                path: "C:/path/" + file.files[0].name
+            }
+
+            this.updateVersionsOnServer(newVersion)
+            this.setState({
+                open: false,
+                decs: desc.value,
+            });
+
+
+
+
+        } else {
+            var button = document.getElementById("fileDiv")
+            var para = document.createElement("p")
+            var text = document.createTextNode("File is required");
+            para.appendChild(text)
+            para.style.color = "red"
+            button.appendChild(para)
+        }
+
+
     }
 
     handleToggle = value => () => {
@@ -79,6 +106,34 @@ class AddNewVersion extends Component {
         });
     };
 
+    updateVersionsOnServer(newVersion) {
+
+        var assetID = this.props.asset.id
+
+        let assets = this.props.project.assets
+        let index = assets.findIndex(x => x.id == assetID);
+
+        var versions = assets[index].versions.reverse()
+        versions.push(newVersion)
+        versions.reverse()
+
+        this.props.updateTable(versions)
+
+        assets[index].versions = versions
+        
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
+            assets: assets,           
+         
+        })
+            .then(response => {
+                //console.log(response);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }
+
 
     render() {
         return (
@@ -95,11 +150,13 @@ class AddNewVersion extends Component {
                         <DialogContentText id="alert-dialog-description">
 
                         </DialogContentText>
-                        <Button >
-                            <form>
-                                <input id="inputWindow" type="file" required />
-                            </form>
-                        </Button>
+                        <div id="fileDiv">
+                            <Button id="buttonFile">
+                                <form method="post" >
+                                    <input id="inputWindow" type="file" required />
+                                </form>
+                            </Button>
+                        </div>
                         <TextField
                             autoFocus
                             margin="dense"

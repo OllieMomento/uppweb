@@ -48,9 +48,18 @@ class RightPane extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected: 1,
-            selectedVersion: this.props.asset.versions[0]
+            selected: this.props.asset.versions[0].id,
+            selectedVersion: this.props.asset.versions[0],
+            versions: this.props.asset.versions
         };
+    }
+
+    updateTable = (newVersions) => {
+        this.setState({
+            versions: newVersions,
+            selectedVersion: newVersions[0],
+            selected: newVersions[0].id
+        })
     }
 
     handleClick = (event, id, n) => {
@@ -84,7 +93,7 @@ class RightPane extends Component {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {this.props.asset.versions.map(n => {
+                {this.state.versions.map(n => {
                     const isSelected = this.isSelected(n.id);
                     return (
                         <TableRow
@@ -116,7 +125,7 @@ class RightPane extends Component {
                     <div style={styles.tableAndButtons}>
                         {table}
                         <div style={styles.buttons}>
-                            <AddNewVersion asset={this.props.asset}/>
+                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable}/>
                             <Button variant="raised" style={styles.buttonAdd}>
                                 Approve version
                         </Button>
