@@ -7,8 +7,23 @@ const style = {
   firstRow: {
     display: 'flex',
     justifyContent: 'space-between'
+  },
+  pendingComment: {
+    padding: '1em'
+
+  },
+  doneComment: {
+    background: "#81C784",
+    padding: '1em'
+  },
+  deleteAndText:{
+    display: "flex",
+    justifyContent: "space-between"
   }
 }
+
+
+
 
 class Comment extends Component {
   constructor(props) {
@@ -16,7 +31,8 @@ class Comment extends Component {
     this.handleMouseHover = this.handleMouseHover.bind(this);
     this.state = {
       toBeUpdated: false,
-      isHovering: false
+      isHovering: false,
+
     };
   }
   handleMouseHover() {
@@ -53,7 +69,7 @@ class Comment extends Component {
     let id = this.props.comment.id
 
     this.props.onCommentDelete(id);
-    console.log('oops deleted ' + id);
+    console.log('oops deleted2 ' + id);
   }
   handleTextChange = (e) => {
     this.setState({ text: e.target.value });
@@ -77,14 +93,35 @@ class Comment extends Component {
     return (name)
   }
   render() {
-    //console.log(this.props.author)
-    //console.log(this.props.people)
-    if (this.state.isHovering) {
-      var deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
-        <a href='button' onClick={this.deleteComment}>delete</a>
-      </Typography>
+
+    var commentStyle = style.pendingComment
+    var textVersion = ""
+    if (this.props.asset != null) {
+
+      this.props.asset.versions.map(version => {
+        version.commentsImplemented.map(commentID => {
+          if (commentID === this.props.comment.id) {
+            commentStyle = style.doneComment
+            textVersion = version.name
+
+          }
+        })
+      })
     }
-    else{
+
+
+    if (textVersion != "") {
+      var deleteButt =
+        <div style={style.deleteAndText}>
+          <Typography variant="caption" color="inherit" style={style.delete}>
+            <a href='button' onClick={this.deleteComment}>delete</a>
+          </Typography>
+          <Typography variant="caption" color="inherit" style={style.delete}>
+            Implemented in: {textVersion}
+          </Typography>
+        </div>
+    }
+    else {
       var deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
         <a href='button' onClick={this.deleteComment}>delete</a>
       </Typography>
@@ -92,11 +129,11 @@ class Comment extends Component {
     }
     return (
       <div >
-        <div style={{ marginBottom: '1em' }}
+        <div style={commentStyle}
           onMouseEnter={this.handleMouseHover}
           onMouseLeave={this.handleMouseHover}>
           <div style={style.firstRow}>
-            <Typography variant="body2" color="inherit" >
+            <Typography variant="caption" color="inherit" >
               {this.getNameFromID(this.props.comment.author)}
             </Typography>
             <Typography variant="caption" color="inherit">

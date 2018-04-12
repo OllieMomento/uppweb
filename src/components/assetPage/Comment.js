@@ -43,7 +43,7 @@ class Comment extends Component {
     let id = this.props.comment.id
 
     this.props.onCommentDelete(id);
-    console.log('oops deleted ' + id);
+    console.log('oops deleted3 ' + id);
   }
   handleTextChange = (e) => {
     this.setState({ text: e.target.value });

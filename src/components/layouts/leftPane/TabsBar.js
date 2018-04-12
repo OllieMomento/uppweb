@@ -34,16 +34,18 @@ class TabsBar extends Component {
         this.setState({ value });
     };
 
+    componentDidMount(){
+        if(this.props.asset != null){
+            this.setState({value:1})
+        }
+
+    }
+
 
     render() {
-        var url = window.location.href    
-        var commentBox  
-        if (url.includes("asset")) {
-            commentBox =  <CommentsBoxAsset project={this.props.project} people={this.props.people} asset={this.props.asset} />
- 
-         } else {
-            commentBox = (<CommentsBox project={this.props.project} people={this.props.people} asset={this.props.asset} />)
-         }
+
+        
+        
 
         const { value } = this.state;
 

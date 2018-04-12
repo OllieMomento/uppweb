@@ -6,6 +6,7 @@ import Comment from './Comment';
 class CommentList extends Component {
 
     render() {
+       
         let comments
 
         if (this.props.asset != null) {
@@ -21,6 +22,7 @@ class CommentList extends Component {
                         onCommentUpdate={this.props.onCommentUpdate}
                         key={index}
                         comment={comment}
+                        asset={this.props.asset}
                         people={this.props.people}
                     />
                 )

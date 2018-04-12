@@ -136,6 +136,27 @@ class AddNewVersion extends Component {
 
 
     render() {
+
+        Array.prototype.unique = function() {
+            return this.filter(function (value, index, self) { 
+              return self.indexOf(value) === index;
+            });
+          }
+
+        var commentsImplemented = []
+        console.log("ASSSSSSETIK")
+        console.log(this.props.asset)
+        this.props.asset.versions.map( version =>{
+            version.commentsImplemented.map(comment =>{
+                commentsImplemented.push(comment)
+            })
+           
+        })
+        commentsImplemented = commentsImplemented.unique()
+    
+        var pendingComments = this.props.asset.comments.filter(comment => {
+            return( !commentsImplemented.includes(comment.id))
+        })
         return (
             <div >
                 <Button variant="raised" color="primary" style={styles.buttonAdd} onClick={this.handleClickOpen}> Add New Version </Button>
@@ -168,7 +189,7 @@ class AddNewVersion extends Component {
                         <div>
 
                             <List subheader={<ListSubheader style={styles.listItem} component="div">Check comments you solved</ListSubheader>}>
-                                {this.props.asset.comments.map(value => (
+                                {pendingComments.map(value => (
                                     <ListItem
                                         key={value.id}
                                         role={undefined}

@@ -126,7 +126,7 @@ class CommentsBox extends Component {
     }
     handleCommentDeleteProject = (id) => {
 
-        let comments = this.props.project.comments;
+         let comments = this.props.project.comments;
 
         let newComments = comments
             .filter(comment => {
