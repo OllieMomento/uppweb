@@ -4,8 +4,6 @@ import Tabs, { Tab } from 'material-ui/Tabs';
 import Info from './tabs/Info';
 import CommentsBox from './tabs/CommentsBox';
 import Team from './tabs/Team';
-import CommentsBoxAsset from '../../assetPage/CommentsBox'
-
 
 
 

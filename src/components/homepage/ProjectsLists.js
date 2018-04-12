@@ -18,20 +18,12 @@ const styles = {
 class ProjectsLists extends Component {
     constructor(props) {
         super(props);
-        this.state = { data: [] };
+        
     }
 
-    componentDidMount() {
-        this.loadProjectsFromServer();
-        //setInterval(this.loadProjectsFromServer, this.props.pollInterval);
-    }
+    
 
-    loadProjectsFromServer = () => {
-        axios.get(this.props.url)
-            .then(res => {
-                this.setState({ data: res.data });
-            })
-    }
+   
 
     getYourId() {
         return 2;
@@ -42,8 +34,9 @@ class ProjectsLists extends Component {
         //const projects = this.props.projects;
         const filterText = this.props.filterText;
 
-        const projectList = this.state.data
+        const projectList = this.props.data
             .filter(project => {
+                console.log(project)
                 if (type === 1) {
                     return project.supervisor === this.getYourId();
                 }
@@ -57,6 +50,7 @@ class ProjectsLists extends Component {
                 return project.name.toLowerCase().indexOf(filterText.toLowerCase()) >= 0
             })
             .map(project => {
+                
                 return (
                     <ProjectItem key={project._id} project={project} />
                 )

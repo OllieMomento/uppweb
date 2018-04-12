@@ -3,7 +3,7 @@ import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
-import CommentsBox from '../assetPage/CommentsBox'
+import ImplementedComments from '../assetPage/ImplementedComments'
 import AddNewVersion from '../assetPage/AddNewVersion';
 
 //import SearchBar from 'material-ui-search-bar'
@@ -48,8 +48,8 @@ class RightPane extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selected: this.props.asset.versions[0].id,
-            selectedVersion: this.props.asset.versions[0],
+            selected: "",
+            selectedVersion: "",
             versions: this.props.asset.versions
         };
     }
@@ -125,13 +125,13 @@ class RightPane extends Component {
                     <div style={styles.tableAndButtons}>
                         {table}
                         <div style={styles.buttons}>
-                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable}/>
+                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable} />
                             <Button variant="raised" style={styles.buttonAdd}>
                                 Approve version
                         </Button>
                         </div>
                     </div>
-                    <CommentsBox project={this.props.project} people={this.props.people} selectedVersion={this.state.selectedVersion} />
+                    <ImplementedComments project={this.props.project} people={this.props.people} selectedVersion={this.state.selectedVersion} asset={this.props.asset} />
                 </div>
             </div>
 

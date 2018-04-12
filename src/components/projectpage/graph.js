@@ -303,6 +303,7 @@ class Graph extends Component {
 
 
     loadGraph() {
+        console.log(Array.from(this.props.project.seq))
 
 
 

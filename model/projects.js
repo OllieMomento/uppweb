@@ -12,7 +12,6 @@ var ProjectsSchema = new Schema({
     desc: String,
     start: Date,
     end: Date,
-    image: Buffer,
     status: String,
     path: String,
     artists: [String],

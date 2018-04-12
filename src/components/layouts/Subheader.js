@@ -25,6 +25,8 @@ class Subheader extends Component {
                     <SearchAndButtonBar
                         filterText={this.props.filterText}
                         filterUpdate={this.props.filterUpdate.bind(this)}
+                        loadProjectsFromServer={this.props.loadProjectsFromServer}
+                        
                     />
                 </div>
             </div>

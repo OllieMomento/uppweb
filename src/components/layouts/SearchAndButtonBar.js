@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Button from 'material-ui/Button';
 import { Link } from "react-router-dom";
 //import SearchBar from 'material-ui-search-bar'
+import AddNewProject from './../homepage/AddNewProject'
 
 
 
@@ -32,11 +33,7 @@ class SearchAndButtonBar extends Component {
     render() {
         return (
             <div style={style.Div}>
-                <Link to='/test'  style={{ textDecoration: 'none' }}>
-                    <Button variant="raised" color="default">
-                        Create Project
-                    </Button>
-                </Link>
+                 <AddNewProject project={this.props.project}  loadProjectsFromServer={this.props.loadProjectsFromServer}/>
 
                 <form>
                     <input
