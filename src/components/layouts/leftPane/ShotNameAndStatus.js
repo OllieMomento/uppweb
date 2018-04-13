@@ -63,6 +63,7 @@ class ShotNameAndStatus extends Component {
 
         var shots = this.props.shots
 
+        console.log("12SHOT")
         console.log(shots)
 
         var names = shots.map((shot, index)=>{

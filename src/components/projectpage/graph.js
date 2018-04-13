@@ -40,11 +40,14 @@ import {
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
-import { FormControl, InputLabel, Select, MenuItem } from 'material-ui';
+import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
+import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import { Router, Route, Link, withRouter } from "react-router-dom";
 import Footer from "../layouts/Footer"
 import history from '../../history';
 import { RubberBandSelection } from '../../functions/rubberband'
+import SequenceTool from './SequenceTool';
+
 
 
 const style = {
@@ -59,6 +62,13 @@ const style = {
     },
     Container: {
         flexGrow: '1'
+    },
+    toolbar: {
+        display: 'flex',
+        justifyContent: 'space-between'
+    },
+    seq: {
+        display: "flex"
     }
 };
 
@@ -67,6 +77,7 @@ class Graph extends Component {
 
     constructor(props) {
         console.log("constructor")
+        var editor
         super(props);
         this.state = {
             adj: [],
@@ -78,7 +89,8 @@ class Graph extends Component {
             selectCell: "",
             readingXMLdone: false,
             nodesLength: 1,
-            shots: []
+            shots: [],
+            activeSeqName: this.props.project.seq[0].name
         };
 
     }
@@ -179,18 +191,18 @@ class Graph extends Component {
                     var parentNode = element.parentNode
 
                     var index = parentNode.getAttribute("seq")
-                    var color = this.getColor(index)
+                                     
 
                     var sourceElement = vertexes[element.getAttribute("source")]
                     var targetElement = vertexes[element.getAttribute("target")]
 
-                    
+
                     var doc = mxUtils.createXmlDocument();
                     var edge = doc.createElement('Sequence')
                     edge.setAttribute('seq', index);
 
                     this.setState({ activeSeq: this.state.seq[index] })
-                    graph.insertEdge(parent, id, edge, sourceElement, targetElement, 'strokeColor=' + color)
+                    graph.insertEdge(parent, id, edge, sourceElement, targetElement, 'strokeColor=' + index)
 
                 }
 
@@ -234,11 +246,11 @@ class Graph extends Component {
                 // pt.x, pt.y, 120, 120, 'image=' + image);
                 var index = model.nextId
 
-                var number = ('0' + index  + '0').slice(-3)
+                var number = ('0' + index + '0').slice(-3)
                 var title = `Shot ${number}`
 
 
-                
+
                 v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
 
                 this.setState({
@@ -297,22 +309,115 @@ class Graph extends Component {
             editor.execute(action);
         });
         mxUtils.write(button, label);
-        toolbar.appendChild(button);
+        var divEdit = document.getElementById("graph-edit")
+        divEdit.appendChild(button);
     };
 
+    saveGraph(editor) {
+        console.log("SAVE")
+        console.log(editor)
+
+        var encoder = new mxCodec();
+        var graph = editor.graph
+        var node = encoder.encode(graph.getModel());
+        console.log(node)
+        var nodes = node.getElementsByTagName("mxCell")
+        var cellArr = Array.from(nodes);
+        var vertexes = [];
+
+        for (var i = 0; i < cellArr.length; i++) {
+            let element = cellArr[i]
+            var id = element.getAttribute("id")
+            var value = element.getAttribute("value")
+            var style = element.getAttribute("style")
+
+
+            //If element is Vertex/cell
+            if (element.hasAttribute("vertex")) {
+                let shot = {
+                    id: id,
+                    name: value,
+                    desc: "",
+                    comments: [],
+                    artists: [],
+                    supervisor: this.props.project.supervisor,
+                    status: "notstarted"
+
+                }
+                vertexes.push(shot)
+
+            }
+        }
+
+        this.setState({
+            shots: vertexes
+        })
+
+
+        var xml = mxUtils.getPrettyXml(node)
+        var seq = this.state.seq
+        var shots = vertexes
+
+        this.props.updateGraphOnServer(xml, seq, shots)
+
+
+    }
+    
+    openSelectedShots(editor) {
+
+        var selection = editor.graph.getSelectionCells()
+        selection = selection.filter(cell => {
+            return cell.isVertex()
+        })
+
+        var url = ''
+        selection.forEach((cell, index) => {
+            if (index < selection.length - 1) {
+                url = url + cell.id + '_'
+            } else {
+                url = url + cell.id
+            }
+
+        })
+
+
+        history.push({
+            pathname: '/projects/' + this.props.project._id + '/shots/' + url,
+        })
+
+    }
+
+    handleChangeActiveSeq = (event) => {
+        console.log("EVENT")
+        console.log(event)
+
+        //activeSeq
+        var active = this.props.project.seq.filter(seq => {
+            return (seq.name === event.target.value)
+        })
+        this.setState({ 
+            activeSeq: active[0],
+            activeSeqName: active[0].name
+         });
+
+    }
+    setActiveSeq = () =>{
+
+        this.setState({ 
+            activeSeq: this.props.project.seq[0],
+            activeSeqName: this.props.project.seq[0].name
+         });
+    }
 
 
     loadGraph() {
         console.log(Array.from(this.props.project.seq))
 
 
-
-    
-
         this.setState({ seq: Array.from(this.props.project.seq) })
         this.setState({ activeSeq: this.props.project.seq[0] })
 
-        
+
 
         // Checks if the browser is supported
         if (!mxClient.isBrowserSupported()) {
@@ -336,11 +441,11 @@ class Graph extends Component {
             // The editor is used to create certain functionality for the
             // graph, such as the rubberband selection, but most parts
             // of the UI are custom in this example.
-            var editor = new mxEditor();
-            var graph = editor.graph;
+
+            var graph = this.editor.graph;
             var model = graph.getModel();
 
-            editor.validation = true
+            this.editor.validation = true
 
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
@@ -349,7 +454,7 @@ class Graph extends Component {
             // Optional disabling of sizing
             graph.setCellsResizable(false);
 
-            editor.setGraphContainer(container);
+            this.editor.setGraphContainer(container);
 
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
@@ -359,19 +464,19 @@ class Graph extends Component {
 
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-                var index = this.state.seq.map(function (e) { return e.name; }).indexOf(this.state.activeSeq.name);
-
+            
                 //var sequence = graph.getModel().getElementsByTagName("Sequence");
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                 //console.log(node)
                 var activeSeq = this.state.activeSeq.id
-               
+                var color = this.state.activeSeq.color
+
                 var seqs = node.getElementsByTagName("Sequence")
                 seqs = Array.from(seqs);
 
                 var edges = seqs.filter(seq => {
-                    return seq.getAttribute("seq") == this.state.activeSeq.id
+                    return seq.getAttribute("seq") == this.state.activeSeq.color
                 })
                 var flag = true;
                 edges.every(edge => {
@@ -380,7 +485,7 @@ class Graph extends Component {
                     cell.source = cell.getAttribute("source")
                     cell.target = cell.getAttribute("target")
 
-                    if (cell.source == source.id || cell.target == target.id ) {
+                    if (cell.source == source.id || cell.target == target.id) {
                         alert("Cannot connect")
                         flag = false
                         return false
@@ -390,17 +495,17 @@ class Graph extends Component {
                 })
 
                 if (flag) {
-                    var color = this.getColor(index)
+                   
                     var doc = mxUtils.createXmlDocument();
                     var edge = doc.createElement('Sequence')
-                    edge.setAttribute('seq', index);
+                    edge.setAttribute('seq', color);
 
                     graph.insertEdge(parent, id, edge, source, target, 'strokeColor=' + color)
 
                 }
             }
 
-            var keyHandler = new mxDefaultKeyHandler(editor);
+            var keyHandler = new mxDefaultKeyHandler(this.editor);
             keyHandler.bindAction(46, 'delete');
             keyHandler.bindAction(90, 'undo', true);
             keyHandler.bindAction(89, 'redo', true);
@@ -421,6 +526,7 @@ class Graph extends Component {
                 if (cell.edge === true) {
                     return
                 }
+                console.log(cell)
 
                 history.push({
                     pathname: '/projects/' + this.props.project._id + '/shots/' + cell.id,
@@ -431,12 +537,6 @@ class Graph extends Component {
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
             };
-
-
-
-
-
-
 
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
@@ -450,9 +550,8 @@ class Graph extends Component {
 
 
             this.addSidebarIcon(graph, sidebar, null,
-
                 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
-            this.addToolbarButton(editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
+
 
             graph.setHtmlLabels(true);
 
@@ -481,100 +580,98 @@ class Graph extends Component {
             // Enables snapping waypoints to terminals
             mxEdgeHandler.prototype.snapToTerminals = true;
 
-            var button = mxUtils.button('Save Graph', () => {
-                var encoder = new mxCodec();
-                var node = encoder.encode(graph.getModel());
-                console.log(node)
-                var nodes = node.getElementsByTagName("mxCell")
-                var cellArr = Array.from(nodes);
-                var vertexes = [];
-
-                for (var i = 0; i < cellArr.length; i++) {
-                    let element = cellArr[i]
-                    var id = element.getAttribute("id")
-                    var value = element.getAttribute("value")
-                    var style = element.getAttribute("style")
-                    
-
-                    //If element is Vertex/cell
-                    if (element.hasAttribute("vertex")) {
-                        let shot = {
-                            id: id,
-                            name: value,
-                            desc: "",
-                            comments: [],
-                            artists: [],
-                            supervisor: this.props.project.supervisor,
-                            status: "notstarted"
-
-                        }
-                        vertexes.push(shot)
-
-                    }
-                }
-                this.setState({
-                    shots: vertexes
-                })              
-
-
-                var xml = mxUtils.getPrettyXml(node)
-                var seq = this.state.seq
-                var shots = this.state.shots
-
-                this.props.updateGraphOnServer(xml, seq, shots)
-
-            });
-            toolbar.appendChild(button)
-
-
-
-            this.state.seq.map((seq, index) => {
-                var button = mxUtils.button(seq.name, () => {
-                    this.setState({ activeSeq: seq })
-                })
-                toolbar.appendChild(button)
+            /*
+        var divSeq = document.getElementById("graph-seq")
+        this.state.seq.map((seq, index) => {
+            var button = mxUtils.button(seq.name, () => {
+                this.setState({ activeSeq: seq })
             })
+            divSeq.appendChild(button)
+        })
+        */
 
+            /*
             var button = mxUtils.button('Open selected shots', () => {
                 var selection = graph.getSelectionCells()
                 selection = selection.filter(cell => {
                     return cell.isVertex()
                 })
-                
+
                 var url = ''
                 selection.forEach((cell, index) => {
-                    if(index < selection.length -1 ){
+                    if (index < selection.length - 1) {
                         url = url + cell.id + '_'
-                    }else {
+                    } else {
                         url = url + cell.id
-                    }                   
+                    }
 
-                })             
+                })
 
 
                 history.push({
                     pathname: '/projects/' + this.props.project._id + '/shots/' + url,
                 })
             })
-            toolbar.appendChild(button)
+            var divOpen = document.getElementById("graph-open")
+            divOpen.appendChild(button)
+            */
         }
         //Rubberband selection in functions
         RubberBandSelection(container)
 
     }
     componentDidMount() {
+        this.editor = new mxEditor();
         this.loadGraph()
     }
 
     render() {
+        console.log("ACTIVE SEQ")
+        console.log(this.state.activeSeq)
+        console.log(this.props.project.seq)
+
+        console.log("AGE")
+        console.log(this.state.activeSeqName)
+
+
 
 
 
         return (
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
-                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" />
+                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar" style={style.toolbar}>
+                    <div className="graph-toolbar-edit" id="graph-edit">
+                        <Button variant="raised" color="primary" type="submit" style={style.button} onClick={() => this.saveGraph(this.editor)}>
+                            Save Graph
+                        </Button>
+                        <IconButton onClick={() => this.editor.execute("delete")} aria-label="Delete">
+                            <Delete />
+                        </IconButton>
+                        <IconButton onClick={() => this.editor.execute("undo")} aria-label="Delete">
+                            <Undo />
+                        </IconButton>
+                        <IconButton onClick={() => this.editor.execute("redo")} aria-label="Delete">
+                            <Redo />
+                        </IconButton>
+                    </div>
+                    <SequenceTool project={this.props.project}
+                        activeSeq={this.state.activeSeq}
+                        activeSeqName={this.state.activeSeqName}
+                        handleChangeActiveSeq={this.handleChangeActiveSeq}
+                        setActiveSeq={this.setActiveSeq}
+                    />
 
+
+
+
+
+                    <div className="graph-toolbar-open" id="graph-open">
+                        <Button variant="raised" color="primary" type="submit" style={style.button} onClick={() => this.openSelectedShots(this.editor)}>
+                            Open selected shots
+                        </Button>
+                    </div>
+                </div>
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
@@ -589,5 +686,5 @@ class Graph extends Component {
 export default Graph;
 
 /*<div id="outlineContainer"
-                        style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
-                    </div>*/
+                    style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
+                </div>*/

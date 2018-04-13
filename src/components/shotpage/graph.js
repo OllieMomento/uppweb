@@ -42,8 +42,8 @@ import {
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/connector.gif'
-import { FormControl, InputLabel, Select, MenuItem, Typography } from 'material-ui';
-import { Router, Route, Link, withRouter } from "react-router-dom";
+import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
+import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import Footer from "../layouts/Footer"
 import history from '../../history';
 import { isAbsolute } from 'path';
@@ -193,6 +193,10 @@ class Graph extends Component {
         try {
 
             var assetsXML = this.props.project.assetsXML;
+            console.log("PROJECT")
+            console.log(this.props.project)
+
+            console.log(assetsXML)
 
             //Create new vertexes represention shots nodes
             if (assetsXML == '') {
@@ -442,37 +446,94 @@ class Graph extends Component {
         graph.setSelectionCell(v1);
     }
 
-    addToolbarButton = (editor, toolbar, action, label, image, isTransparent) => {
-        var button = document.createElement('button');
-        button.setAttribute("id", action + "Button");
-        button.style.fontSize = '10';
-        if (image != null) {
-            var img = document.createElement('img');
-            img.setAttribute('src', image);
-            img.style.width = '16px';
-            img.style.height = '16px';
-            img.style.verticalAlign = 'middle';
-            img.style.marginRight = '2px';
-            button.appendChild(img);
-        }
-        if (isTransparent) {
-            button.style.background = 'transparent';
-            button.style.color = '#FFFFFF';
-            button.style.border = 'none';
+
+    saveGraph(editor) {
+        var vertexes = [];
+        var cells = editor.graph.getModel().cells
+        console.log(cells)
+
+        for (var id in cells) {
+            let cell = cells[id]
+            cell.visible = true
+            console.log(cell)
+
+
+
+            // parent nodes and shots
+            if (cell.value === undefined || cell.value === null) {
+
+            }
+
+            else if (!cell.value.startsWith("Shot")) {
+                var template = document.createElement('template');
+                var value = cell.value.trim()
+                template.innerHTML = value;
+                value = template.content.firstChild;
+
+                var title = value.getElementsByTagName("h4")[0].innerHTML
+                var name = value.getElementsByTagName("h3")[0].innerHTML
+
+                var flag = false
+                var DBasset
+                this.props.project.assets.map(asset => {
+
+                    if (asset.id === parseInt(cell.id)) {
+
+                        flag = true
+                        DBasset = asset
+                    }
+                })
+                //already added in DB
+                if (flag) {
+                    DBasset.name = name,
+                        DBasset.typeOf = title
+                    vertexes.push(DBasset)
+                    //add new asset in DB
+                } else {
+                    let asset = {
+                        id: parseInt(cell.id),
+                        name: name,
+                        typeOf: title,
+                        desc: "",
+                        comments: [],
+                        artists: [],
+                        supervisor: this.props.project.supervisor,
+                        status: "notstarted",
+                        versions: []
+
+                    }
+
+                    vertexes.push(asset)
+                }
+
+            }
         }
 
-        mxEvent.addListener(button, 'click', (evt) => {
-            editor.execute(action);
-        });
-        mxUtils.write(button, label);
-        toolbar.appendChild(button);
-    };
 
+        console.log(vertexes)
+
+        this.setState({
+            assets: vertexes
+        })
+        var assets = vertexes
+        console.log("assets")
+        console.log(assets)
+
+        var encoder = new mxCodec();
+        var node = encoder.encode(editor.graph.getModel());
+        var assetsXML = mxUtils.getPrettyXml(node)
+        console.log(node)
+
+
+
+        // this.props.updateGraphOnServer(xml, seq, shots)
+        this.props.updateGraphAssetsOnServer(assetsXML, assets)
+    }
 
 
     loadGraph() {
 
-        console.log("project")
+        console.log("project shots")
         console.log(this.props.project.shots)
 
 
@@ -596,7 +657,6 @@ class Graph extends Component {
             this.addSidebarIcon(this.editor, graph, sidebar, null,
                 'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
 
-            this.addToolbarButton(this.editor, toolbar, 'delete', 'Delete', 'images/delete2.png')
 
             graph.setHtmlLabels(true);
 
@@ -606,7 +666,7 @@ class Graph extends Component {
             // Enables moving with right click ang drag
             graph.setPanning(true);
 
-             graph.setTooltips(false);
+            graph.setTooltips(false);
             // graph.setMultigraph(false);
 
 
@@ -625,111 +685,7 @@ class Graph extends Component {
             // Enables snapping waypoints to terminals
             mxEdgeHandler.prototype.snapToTerminals = true;
 
-            var button = mxUtils.button('Save Graph', () => {
-
-                var vertexes = [];
-                var cells = graph.getModel().cells
-                console.log(cells)
-
-                for (var id in cells) {
-                    let cell = cells[id]
-                    cell.visible = true
-                    console.log(cell)
-
-
-
-                    // parent nodes and shots
-                    if (cell.value === undefined || cell.value === null) {
-
-                    }
-
-                    else if (!cell.value.startsWith("Shot")) {
-                        var template = document.createElement('template');
-                        var value = cell.value.trim()
-                        template.innerHTML = value;
-                        value = template.content.firstChild;
-
-                        var title = value.getElementsByTagName("h4")[0].innerHTML
-                        var name = value.getElementsByTagName("h3")[0].innerHTML
-
-                        var flag = false
-                        var DBasset
-                        this.props.project.assets.map(asset => {
- 
-                            if (asset.id === parseInt(cell.id)) {
-      
-                                flag = true
-                                DBasset = asset
-                            }
-                        })
-                        //already added in DB
-                        if (flag) {
-                            DBasset.name = name,
-                            DBasset.typeOf= title
-                            vertexes.push(DBasset)                            
-                        //add new asset in DB
-                        } else {
-                            let asset = {
-                                id: parseInt(cell.id),
-                                name: name,
-                                typeOf: title,
-                                desc: "",
-                                comments: [],
-                                artists: [],
-                                supervisor: this.props.project.supervisor,
-                                status: "notstarted",
-                                versions: []
-
-                            }
-                            
-                            vertexes.push(asset)
-                        }
-
-                    }
-                }
-
-
-                console.log(vertexes)
-
-                this.setState({
-                    assets: vertexes
-                })
-                var assets = this.state.assets
-                console.log("assets")
-                console.log(assets)
-
-                var encoder = new mxCodec();
-                var node = encoder.encode(graph.getModel());
-                var assetsXML = mxUtils.getPrettyXml(node)
-                console.log(node)
-
-
-
-                // this.props.updateGraphOnServer(xml, seq, shots)
-                this.props.updateGraphAssetsOnServer(assetsXML, assets)
-
-            });
-            toolbar.appendChild(button)
-
-
-
-            var button = mxUtils.button('Open selected shots', () => {
-                var selection = graph.getSelectionCells()
-                console.log(selection)
-                var url = ''
-                selection.forEach((cell) => {
-                    url = url + cell.id + '/'
-
-                })
-                console.log(url)
-
-
-                history.push({
-                    pathname: '/projects/' + this.props.project._id + '/' + url,
-                })
-            })
-            toolbar.appendChild(button)
-
+        
             //Rubberband selection in functions
             RubberBandSelection(container)
 
@@ -794,8 +750,19 @@ class Graph extends Component {
         return (
 
             <div style={style.Graph} className="graph" ref="divGraph" id="divGraph">
-                <div className="graph-toolbar" ref="graphToolbar" id="graphToolbar">
-
+                <div className="graph-toolbar-edit" id="graph-edit" ref="graphToolbar">
+                    <Button variant="raised" color="primary" type="submit" style={style.button} onClick={() => this.saveGraph(this.editor)}>
+                        Save Graph
+                        </Button>
+                    <IconButton onClick={() => this.editor.execute("delete")} aria-label="Delete">
+                        <Delete />
+                    </IconButton>
+                    <IconButton onClick={() => this.editor.execute("undo")} aria-label="Delete">
+                        <Undo />
+                    </IconButton>
+                    <IconButton onClick={() => this.editor.execute("redo")} aria-label="Delete">
+                        <Redo />
+                    </IconButton>
                 </div>
 
                 <div className="graph-tbcont" style={style.TbCont}>

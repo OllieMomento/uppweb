@@ -39,6 +39,8 @@ class LeftPane extends Component {
         }
         //Shots
         else if (this.props.shots !== null && this.props.asset === null) {
+            console.log("SHOTTTTIK")
+            console.log(this.props.shots)
             
             var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
             var tabsBar = <TabsBar project={this.props.project} people={this.props.people} shots={this.props.shots} />

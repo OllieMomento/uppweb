@@ -149,6 +149,8 @@ class ShotPage extends Component {
         var leftPane
         var graph
         if (!this.state.isLoading) {
+            console.log("23SHOT")
+            console.log(this.state.shots)
             leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null}/>
             graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray}/>
         } else {

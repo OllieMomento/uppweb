@@ -53,8 +53,13 @@ class AssetPage extends Component {
        getAsset =() => {
         var url = window.location.href
         var assetID = url.split("/")[6]
+        console.log("ASET ID")
+        console.log(assetID)
+        console.log(this.state.project)
        
         var asset = this.state.project.assets.filter( asset =>{
+            console.log(asset)
+         
             return asset.id === parseInt(assetID)
         })      
         console.log(asset[0])
@@ -137,6 +142,8 @@ class AssetPage extends Component {
         var rightPane
         var graph
         if (!this.state.isLoading) {
+            console.log("ASET12")
+            console.log(this.state.asset)
             leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={null} asset={this.state.asset}/>
             rightPane = <RightPane project={this.state.project} people={this.state.people} asset={this.state.asset}/>
 
@@ -145,11 +152,13 @@ class AssetPage extends Component {
             rightPane = <div></div>
         }
 
+      
         //console.log(this.props.location.state.project)
         return (
+            
             <div className="ShotPage" style={style.Page}>
                 <Header />
-                <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots}/>
+                <BreadcrumbsAndButton project={this.state.project} shots={this.state.project.shots} asset={this.state.asset}/>
                 <div style={style.Container}>
                     {leftPane}
                     {rightPane}

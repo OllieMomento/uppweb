@@ -59,6 +59,8 @@ class AssetNameAndStatus extends Component {
 
 
     render() {
+        console.log("ASETTTTTTTTTTTTTTTTT")
+        console.log(this.props.asset)
         return (
             <div style={style.Div}>
                 <div className="ProjectName">

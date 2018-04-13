@@ -9,6 +9,7 @@ import {
 import Delete from '../images/delete2.png'
 import Duplicate from '../images/copy.png'
 import Edit from '../images/edit.png'
+import AddAssignee from '../images/editAssignee.png'
 
 export function mxIconSet(state) {
     this.images = [];
@@ -44,6 +45,34 @@ export function mxIconSet(state) {
     img.style.width = '16px';
     img.style.height = '16px';
     img.style.left = (state.x + state.width) + 'px';
+    img.style.top = (state.y - 16) + 'px';
+
+    mxEvent.addGestureListeners(img,
+        mxUtils.bind(this, function (evt) {
+            // Disables dragging the image
+            mxEvent.consume(evt);
+        })
+    );
+
+    mxEvent.addListener(img, 'click',
+        mxUtils.bind(this, function (evt) {
+            graph.removeCells([state.cell]);
+            mxEvent.consume(evt);
+            this.destroy();
+        })
+    );
+
+    state.view.graph.container.appendChild(img);
+    this.images.push(img);
+
+    // Add Assignee
+    var img = mxUtils.createImage(AddAssignee);
+    img.setAttribute('title', 'Add Assignee');
+    img.style.position = 'absolute';
+    img.style.cursor = 'pointer';
+    img.style.width = '16px';
+    img.style.height = '16px';
+    img.style.left = ( state.width) + 'px';
     img.style.top = (state.y - 16) + 'px';
 
     mxEvent.addGestureListeners(img,
@@ -145,24 +174,7 @@ export function mxIconSet(state) {
                    // 
                 }
             });
-            /*
-            state.view.graph.container.addEventListener('click', (e) => {                
-               
-                    console.log("kikot")
                      
-                    nameEl.textContent = input.value
-                    console.log(value)                  
-                    div.style.display = "none"
-                    state.cell.setValue(value.innerHTML)
-                    div.removeChild(input)
-                    console.log(value.innerHTML)
-                    graph.refresh()
-                    state.view.graph.container.removeEventListener("click", e)
-                
-            });
-            */
-
-            
 
             //graph.refresh()
             mxEvent.consume(evt);

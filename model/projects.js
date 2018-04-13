@@ -30,7 +30,8 @@ var ProjectsSchema = new Schema({
         edge: [{
             source: Number,
             target: Number
-        }]
+        }],
+        color: String
     }],
     shots: [{
         id: Number,

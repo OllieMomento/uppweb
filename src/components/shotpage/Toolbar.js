@@ -69,9 +69,6 @@ class Toolbar extends Component {
     };
     getSuggestionValue(suggestion) {
 
-        // console.log(this.props.project)
-        //this.putDataOnServer(suggestion, this.props.project)
-
         return suggestion.label;
     }
 

@@ -89,14 +89,20 @@ class AddNewProject extends Component {
             name: name.value,
             desc: desc.value,
             start: start.value,
-            end: end.value,      
+            end: end.value,
             status: "inprogress",
             path: "C:/path/" + name.value.replace(" ", "_"),
             artists: [],
             supervisor: "None",
             comments: [],
             xml: "",
-            seq: [],
+            seq: [{
+                "nodes": [],
+                "edge": [],
+                "id": 0,                
+                "name": "Normal",
+                "color" :"#f44336"
+            }],
             shots: [],
             assetsXML: "",
             assets: [],
@@ -110,7 +116,7 @@ class AddNewProject extends Component {
                 console.log(err);
             });
 
-       // this.updateProjectOnServer(newProject)
+        // this.updateProjectOnServer(newProject)
         this.setState({
             open: false,
             decs: desc.value,
@@ -130,14 +136,14 @@ class AddNewProject extends Component {
 
 
     }
-  
+
 
 
     render() {
         //console.log('filterText state from parent component', this.state.filterText)
 
         return (
-            <div className="HomepageS">
+            <div >
                 <Button variant="raised" color="primary" onClick={this.handleClickOpen}> Add New Project </Button>
                 <Dialog
                     open={this.state.open}
