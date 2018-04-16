@@ -92,7 +92,7 @@ class Graph extends Component {
             shots: [],
             activeSeqName: this.props.project.seq[0].name
         };
-
+        
     }
     getColors() {
         var colors = ['red', 'green', 'pink', 'yellow']
@@ -191,7 +191,7 @@ class Graph extends Component {
                     var parentNode = element.parentNode
 
                     var index = parentNode.getAttribute("seq")
-                                     
+
 
                     var sourceElement = vertexes[element.getAttribute("source")]
                     var targetElement = vertexes[element.getAttribute("target")]
@@ -223,6 +223,7 @@ class Graph extends Component {
             //Need to move othervise the dragging canvas is broken
             graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
             graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
+            graph.center()
 
             this.setState({ readingXMLdone: true })
         }
@@ -262,7 +263,10 @@ class Graph extends Component {
 
             }
             finally {
+
                 model.endUpdate();
+
+
             }
 
             graph.setSelectionCell(v1);
@@ -358,11 +362,11 @@ class Graph extends Component {
         var seq = this.state.seq
         var shots = vertexes
 
-        this.props.updateGraphOnServer(xml, seq, shots)
+        this.props.updateGraphOnServer(xml, shots)
 
 
     }
-    
+
     openSelectedShots(editor) {
 
         var selection = editor.graph.getSelectionCells()
@@ -395,18 +399,18 @@ class Graph extends Component {
         var active = this.props.project.seq.filter(seq => {
             return (seq.name === event.target.value)
         })
-        this.setState({ 
+        this.setState({
             activeSeq: active[0],
             activeSeqName: active[0].name
-         });
+        });
 
     }
-    setActiveSeq = () =>{
+    setActiveSeq = () => {
 
-        this.setState({ 
+        this.setState({
             activeSeq: this.props.project.seq[0],
             activeSeqName: this.props.project.seq[0].name
-         });
+        });
     }
 
 
@@ -464,7 +468,7 @@ class Graph extends Component {
 
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-            
+
                 //var sequence = graph.getModel().getElementsByTagName("Sequence");
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
@@ -495,7 +499,7 @@ class Graph extends Component {
                 })
 
                 if (flag) {
-                   
+
                     var doc = mxUtils.createXmlDocument();
                     var edge = doc.createElement('Sequence')
                     edge.setAttribute('seq', color);
@@ -520,6 +524,7 @@ class Graph extends Component {
 
 
             graph.dblClick = (evt, cell) => {
+
 
                 // history.push('/projects/' + this.props.project._id + '/' + cell.id);
 

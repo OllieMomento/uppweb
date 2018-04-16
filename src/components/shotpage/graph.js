@@ -41,7 +41,7 @@ import {
     mxPopupMenu
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
-import Connector from '../../images/connector.gif'
+import Connector from '../../images/arrow.svg'
 import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
 import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import Footer from "../layouts/Footer"
@@ -96,9 +96,15 @@ class Graph extends Component {
             activePopUp: false,
             selectedAsset: "",
             clientCoord: "",
-            assets: []
+            assets: [],
+            openPerson: false
         };
 
+        this.getThis = this.getThis.bind(this)
+
+    }
+    getThis(){
+        return this.activeSeq
     }
 
 
@@ -544,12 +550,12 @@ class Graph extends Component {
         }
         else {
 
-            mxConstants.MIN_HOTSPOT_SIZE = 16;
-            mxConstants.DEFAULT_HOTSPOT = 1;
+            mxConstants.MIN_HOTSPOT_SIZE = 20;
+            mxConstants.DEFAULT_HOTSPOT = 10;
 
 
 
-            mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
+            mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 20, 20);
 
             var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
             var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
@@ -616,16 +622,22 @@ class Graph extends Component {
             graph.dblClick = (evt, cell) => {
                 console.log(cell)
 
+                //click outside of cell
                 if (cell === undefined || cell.value === null) {
                     return
                 }
 
-                if (!cell.value.includes("Shot")) {
+                //Click on asset not shot
+                if (!cell.value.includes("Shot")) {                    
+                  
+/*
 
                     history.push({
                         pathname: '/projects/' + this.props.project._id + "/asset/" + cell.id,
                         state: { project: this.props.project }
-                    })
+                    })*/
+
+                    
 
                 }
 
@@ -643,6 +655,13 @@ class Graph extends Component {
                 }
 
                 this.images = null;
+            };
+
+            mxIconSet.prototype.openWindow = (cell) => {
+                this.setState({
+                    openPerson: true
+                })
+                console.log(this.state.openPerson)
             };
 
 

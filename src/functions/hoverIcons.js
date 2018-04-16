@@ -3,13 +3,16 @@ import ReactDOM from 'react-dom'
 import {
     mxUtils,
     mxEvent,
-    mxRectangle
+    mxRectangle,
+    mxWindow
 
 } from "mxgraph-js";
-import Delete from '../images/delete2.png'
-import Duplicate from '../images/copy.png'
-import Edit from '../images/edit.png'
-import AddAssignee from '../images/editAssignee.png'
+import Delete from '../images/delete.svg'
+import Duplicate from '../images/copy.svg'
+import Edit from '../images/edit.svg'
+import AddAssignee from '../images/addPerson.svg'
+import graphik from './../components/shotpage/graph'
+
 
 export function mxIconSet(state) {
     this.images = [];
@@ -20,8 +23,8 @@ export function mxIconSet(state) {
     img.setAttribute('title', 'Duplicate');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
-    img.style.width = '16px';
-    img.style.height = '16px';
+    img.style.width = '20px';
+    img.style.height = '20px';
     img.style.left = (state.x + state.width) + 'px';
     img.style.top = (state.y + state.height) + 'px';
 
@@ -39,13 +42,15 @@ export function mxIconSet(state) {
 
     // Delete
     var img = mxUtils.createImage(Delete);
+
     img.setAttribute('title', 'Delete');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
-    img.style.width = '16px';
-    img.style.height = '16px';
+    img.style.width = '20px';
+    img.style.height = '20px';
     img.style.left = (state.x + state.width) + 'px';
-    img.style.top = (state.y - 16) + 'px';
+    img.style.top = (state.y - 20) + 'px';
+    img.style.fill = "red"
 
     mxEvent.addGestureListeners(img,
         mxUtils.bind(this, function (evt) {
@@ -70,10 +75,10 @@ export function mxIconSet(state) {
     img.setAttribute('title', 'Add Assignee');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
-    img.style.width = '16px';
-    img.style.height = '16px';
-    img.style.left = ( state.width) + 'px';
-    img.style.top = (state.y - 16) + 'px';
+    img.style.width = '20px';
+    img.style.height = '20px';
+    img.style.left = (state.x - 20) + 'px';
+    img.style.top = (state.y - 20) + 'px';
 
     mxEvent.addGestureListeners(img,
         mxUtils.bind(this, function (evt) {
@@ -84,9 +89,7 @@ export function mxIconSet(state) {
 
     mxEvent.addListener(img, 'click',
         mxUtils.bind(this, function (evt) {
-            graph.removeCells([state.cell]);
-            mxEvent.consume(evt);
-            this.destroy();
+            this.openWindow(state.cell)      
         })
     );
 
@@ -98,9 +101,9 @@ export function mxIconSet(state) {
     img.setAttribute('title', 'Edit');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
-    img.style.width = '16px';
-    img.style.height = '16px';
-    img.style.left = (state.x - 16) + 'px';
+    img.style.width = '20px';
+    img.style.height = '20px';
+    img.style.left = (state.x - 20) + 'px';
     img.style.top = (state.y + state.height) + 'px';
 
     mxEvent.addGestureListeners(img,
@@ -123,8 +126,8 @@ export function mxIconSet(state) {
             div.style.position = "fixed"
             div.style.display = "block"
             div.style.top = y + origin.y + "px"
-            div.style.left = x + origin.x + "px"
-            div.style.paddingTop = "1.5em"
+            div.style.left = x + origin.x + 1 + "px"
+            div.style.paddingTop = "3em"
             div.style.height = "100px"
             div.style.width = "100px"
             div.style.zIndex = 1009
@@ -144,11 +147,15 @@ export function mxIconSet(state) {
             var input = document.createElement("input");
             input.setAttribute("id", "inputPop");
             input.setAttribute("type", "text");
+
             input.setAttribute("value", nameEl.textContent);
 
-            input.style.width = "100%"
+
+            input.style.width = "99%"
             input.style.padding = "5px 5px"
             input.style.boxSizing = "border-box"
+            input.setAttribute("autofocus", "autofocus");
+            input.setAttribute("onfocus", "this.select()");
             div.appendChild(input)
 
             div.addEventListener('keypress', (e) => {
@@ -158,23 +165,23 @@ export function mxIconSet(state) {
 
                     nameEl.textContent = input.value
                     console.log(value)
-                    
+
                     div.style.display = "none"
                     state.cell.setValue('<div>' + value.innerHTML + '</div>')
-                    console.log( state.cell.getValue())
-                
+                    console.log(state.cell.getValue())
+
 
                     div.removeEventListener("keypress", e)
                     console.log(div.childNodes)
-                    
+
                     graph.refresh()
-                    if(div.childNodes.length >0){
+                    if (div.childNodes.length > 0) {
                         div.removeChild(div.childNodes[0])
                     }
-                   // 
+                    // 
                 }
             });
-                     
+
 
             //graph.refresh()
             mxEvent.consume(evt);
@@ -188,7 +195,7 @@ export function mxIconSet(state) {
 
 export function addMouseListeners(graph) {
 
-    var iconTolerance = 20;
+    var iconTolerance = 25;
 
     // Shows icons if the mouse is over a cell
     graph.addMouseListener(
