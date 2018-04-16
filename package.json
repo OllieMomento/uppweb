@@ -15,6 +15,7 @@
     "keycode": "^2.1.9",
     "marked": "^0.3.17",
     "material-ui": "^1.0.0-beta.35",
+    "material-ui-chip-input": "^0.18.7",
     "material-ui-icons": "^1.0.0-beta.35",
     "material-ui-search-bar": "^1.0.0-beta.3",
     "mongodb": "^3.0.4",

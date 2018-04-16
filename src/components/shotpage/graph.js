@@ -55,6 +55,7 @@ import Toolbar from '../shotpage/Toolbar'
 
 import PopUpSelect from '../shotpage/PopUpSelect'
 import './graph.css'
+import AddAssignee from './addAssignee';
 
 
 
@@ -97,14 +98,20 @@ class Graph extends Component {
             selectedAsset: "",
             clientCoord: "",
             assets: [],
-            openPerson: false
+            handleAddAssigneeOpen: false,
+            clickedCell: ""
+
         };
 
-        this.getThis = this.getThis.bind(this)
-
     }
-    getThis(){
-        return this.activeSeq
+    handleWindowOpen = (bool) => {
+        console.log(bool)
+
+        this.saveGraph(this.editor)
+
+        this.setState({
+            handleAddAssigneeOpen: bool,
+        })
     }
 
 
@@ -424,10 +431,10 @@ class Graph extends Component {
             var title = asset
             var name = number
             var node = `<div>
-            <h4 id="title">${title}</h4>
-
-            <h3 id ="name">${name}</h3>
-            </div>`
+            <h4 id="title">${title}</h4><h3 id=assignee></h3><h3 id ="name">${name}</h3></div>`
+            
+            
+           
 
             console.log(typeof node)
 
@@ -628,16 +635,16 @@ class Graph extends Component {
                 }
 
                 //Click on asset not shot
-                if (!cell.value.includes("Shot")) {                    
-                  
-/*
+                if (!cell.value.includes("Shot")) {
+
+
 
                     history.push({
                         pathname: '/projects/' + this.props.project._id + "/asset/" + cell.id,
                         state: { project: this.props.project }
-                    })*/
+                    })
 
-                    
+
 
                 }
 
@@ -658,10 +665,10 @@ class Graph extends Component {
             };
 
             mxIconSet.prototype.openWindow = (cell) => {
-                this.setState({
-                    openPerson: true
-                })
-                console.log(this.state.openPerson)
+                console.log("prototype")
+                this.handleWindowOpen(true),
+                    this.setState({ clickedCell: cell })
+
             };
 
 
@@ -704,7 +711,7 @@ class Graph extends Component {
             // Enables snapping waypoints to terminals
             mxEdgeHandler.prototype.snapToTerminals = true;
 
-        
+
             //Rubberband selection in functions
             RubberBandSelection(container)
 
@@ -783,6 +790,12 @@ class Graph extends Component {
                         <Redo />
                     </IconButton>
                 </div>
+                <AddAssignee
+                    project={this.props.project}
+                    handleWindowOpen={this.handleWindowOpen}
+                    open={this.state.handleAddAssigneeOpen}
+                    cell={this.state.clickedCell}
+                    people={this.props.people} />
 
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />

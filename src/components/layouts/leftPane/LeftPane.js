@@ -29,8 +29,7 @@ class LeftPane extends Component {
 
 
     render() {
-        console.log("PRDEL")
-
+ 
         //Project
         if (this.props.shots === null && this.props.asset === null) {
            
@@ -39,7 +38,7 @@ class LeftPane extends Component {
         }
         //Shots
         else if (this.props.shots !== null && this.props.asset === null) {
-            console.log("SHOTTTTIK")
+    
             console.log(this.props.shots)
             
             var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
@@ -47,7 +46,7 @@ class LeftPane extends Component {
         }
         // Asset
         else{
-            console.log(this.props.asset)
+  
             var nameAndStatus = <AssetNameAndStatus project={this.props.project} shots={this.props.shots} asset={this.props.asset}/>
             var tabsBar = <TabsBar project={this.props.project} people={this.props.people} asset={this.props.asset}/>
         }

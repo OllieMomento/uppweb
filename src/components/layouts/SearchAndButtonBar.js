@@ -33,7 +33,7 @@ class SearchAndButtonBar extends Component {
     render() {
         return (
             <div style={style.Div}>
-                 <AddNewProject project={this.props.project}  loadProjectsFromServer={this.props.loadProjectsFromServer}/>
+                 <AddNewProject project={this.props.project}  loadProjectsFromServer={this.props.loadProjectsFromServer} people={this.props.people}/>
 
                 <form>
                     <input

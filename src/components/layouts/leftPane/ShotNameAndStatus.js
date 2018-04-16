@@ -63,9 +63,6 @@ class ShotNameAndStatus extends Component {
 
         var shots = this.props.shots
 
-        console.log("12SHOT")
-        console.log(shots)
-
         var names = shots.map((shot, index)=>{
             let number = shot.name.replace("Shot ", "")
             if(index != shots.length-1){  
@@ -78,8 +75,7 @@ class ShotNameAndStatus extends Component {
         var caption = 'Shot'
         if(shots.length > 1){
             caption = 'Shots'
-        }
-        
+        }        
         
 
         return (

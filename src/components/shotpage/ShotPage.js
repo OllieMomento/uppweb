@@ -152,7 +152,7 @@ class ShotPage extends Component {
             console.log("23SHOT")
             console.log(this.state.shots)
             leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null}/>
-            graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray}/>
+            graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray} people={this.state.people}/>
         } else {
             leftPane = <div>Loading Shot</div>
             graph = <div>Loading Graph</div>

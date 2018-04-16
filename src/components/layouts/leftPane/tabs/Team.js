@@ -54,8 +54,11 @@ class Team extends Component {
     }
 
     getNameFromID(id) {
+        //not assigned supervisor
+        if(id === ""){
+            return ""
+        }
         const name = this.props.people
-
             .filter(human => {
                 return human._id === id
             }).map(human => {
@@ -107,11 +110,8 @@ class Team extends Component {
         return suggestion.label;
     }
 
-    render() {
-        /*
-        this.setState({
-            value:(this.getNameFromID(this.props.project.supervisor))
-        })*/
+    render() {       
+        
 
         return (
             <div style={style.Div} >

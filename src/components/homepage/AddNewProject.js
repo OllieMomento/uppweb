@@ -16,6 +16,8 @@ import Typography from 'material-ui/Typography';
 import List, { ListItem, ListItemSecondaryAction, ListItemText, ListSubheader } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
 import axios from 'axios';
+import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion } from '../../functions/autosuggest'
+import Autosuggest from 'react-autosuggest';
 
 const style = {
 
@@ -36,15 +38,74 @@ class AddNewProject extends Component {
         this.state = {
             filterText: '',
             open: false,
-            data: ""
+            data: "",
+            value: "",
+            suggestions: [],
+            supervisorID:""
+
 
         }
     }
-    filterUpdate(value) {
-        this.setState({
-            filterText: value
-        })
+
+    getNameFromID(id) {
+        //not assigned supervisor
+        if(id === ""){
+            return ""
+        }
+        const name = this.props.people
+            .filter(human => {
+                return human._id === id
+            }).map(human => {
+                return (
+                    human.name
+                )
+            })
+        return (name[0])
     }
+
+    getSupervisors() {
+        console.log(this.props.people)
+        const people = this.props.people
+            .filter(human => {
+                return human.supervisor === 1
+            })
+            .map(human => {
+                return { label: human.name, id: human._id }
+            })
+        return (people)
+    }
+
+    handleSuggestionsFetchRequested = ({ value }) => {
+        console.log("VALUE")
+        console.log(value)
+        this.setState({
+            suggestions: getSuggestions(this.getSupervisors(), value),
+        });
+    };
+
+    handleSuggestionsClearRequested = () => {
+
+        this.setState({
+            suggestions: [],
+        });
+    };
+
+    handleChange = (event, { newValue }) => {
+        this.setState({
+            value: newValue,
+        });
+    };
+
+    getSuggestionValue(suggestion) {
+        this.setState({
+            supervisorID: suggestion.id
+        })
+        return suggestion.label; 
+    }
+
+
+
+
     handleClickOpen = () => {
         this.setState({ open: true });
     };
@@ -53,26 +114,6 @@ class AddNewProject extends Component {
         this.setState({ open: false });
     };
 
-    updateProjectOnServer(newProject) {
-
-        var projects = this.state.data
-        projects.push(newProject)
-        console.log(projects)
-
-
-
-        axios.post('http://localhost:3001/api/projects/', {
-            newProject,
-
-        })
-            .then(response => {
-                console.log(response);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-
-    }
     addNewProjectHandler = () => {
         var name = document.getElementById("nameWindow")
         var desc = document.getElementById("descriptionWindow")
@@ -93,15 +134,15 @@ class AddNewProject extends Component {
             status: "inprogress",
             path: "C:/path/" + name.value.replace(" ", "_"),
             artists: [],
-            supervisor: "None",
+            supervisor: this.state.supervisorID,
             comments: [],
             xml: "",
             seq: [{
                 "nodes": [],
                 "edge": [],
-                "id": 0,                
+                "id": 0,
                 "name": "Normal",
-                "color" :"#f44336"
+                "color": "#f44336"
             }],
             shots: [],
             assetsXML: "",
@@ -121,19 +162,6 @@ class AddNewProject extends Component {
             open: false,
             decs: desc.value,
         });
-
-
-
-        /*
-                } else {
-                    var button = document.getElementById("fileDiv")
-                    var para = document.createElement("p")
-                    var text = document.createTextNode("File is required");
-                    para.appendChild(text)
-                    para.style.color = "red"
-                    button.appendChild(para)
-                }*/
-
 
     }
 
@@ -183,6 +211,21 @@ class AddNewProject extends Component {
                             />
                         </form>
 
+                         <Autosuggest
+                            renderInputComponent={renderInput}
+                            suggestions={this.state.suggestions}
+                            onSuggestionsFetchRequested={this.handleSuggestionsFetchRequested}
+                            onSuggestionsClearRequested={this.handleSuggestionsClearRequested}
+                            renderSuggestionsContainer={renderSuggestionsContainer}
+                            getSuggestionValue={this.getSuggestionValue.bind(this)}
+                            renderSuggestion={renderSuggestion}
+                            inputProps={{
+                                placeholder: 'Search a supervisor',
+                                value: this.state.value,
+                                onChange: this.handleChange,
+                            }}
+                        />
+
                         <TextField
                             style={style.elementWindow}
                             autoFocus
@@ -192,6 +235,8 @@ class AddNewProject extends Component {
                             type="text"
                             fullWidth
                         />
+
+                       
 
                         <div id="fileDiv" style={style.elementWindow}>
                             <Typography variant="caption" color="inherit" style={style.delete}>

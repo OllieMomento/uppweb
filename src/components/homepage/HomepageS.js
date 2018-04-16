@@ -20,7 +20,8 @@ class HomepageS extends Component {
     this.state = {
       filterText: '',
       url: 'http://localhost:3001/api/projects',
-      data: ""
+      data: "",
+      people: ""
 
     }
   }
@@ -39,8 +40,18 @@ class HomepageS extends Component {
       })
   }
 
+  loadPeopleFromServer = () => {
+
+    axios.get('http://localhost:3001/api/people/')
+        .then(res => {
+            this.setState({ people: res.data });
+
+        })
+}
+
   componentDidMount() {
     this.loadProjectsFromServer();
+    this.loadPeopleFromServer()
     //setInterval(this.loadProjectsFromServer, this.props.pollInterval);
 }
 
@@ -61,16 +72,23 @@ class HomepageS extends Component {
     }else{
       projectList = "Loading"
     }
+    var subheader
+    if(this.state.people != "") {
+      subheader = <Subheader
+            filterText={this.state.filterText}
+            filterUpdate={this.filterUpdate.bind(this)}
+            loadProjectsFromServer={this.loadProjectsFromServer}
+            people={this.state.people}
+          />
+    }else{
+      subheader = "Loading"
+    }
 
     return (
       <div className="HomepageS">
         <Header />
         <div style={style.Div}>
-          <Subheader
-            filterText={this.state.filterText}
-            filterUpdate={this.filterUpdate.bind(this)}
-            loadProjectsFromServer={this.loadProjectsFromServer}
-          />
+          {subheader}
         {projectList}
         </div>
 

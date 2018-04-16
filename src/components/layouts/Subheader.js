@@ -26,6 +26,7 @@ class Subheader extends Component {
                         filterText={this.props.filterText}
                         filterUpdate={this.props.filterUpdate.bind(this)}
                         loadProjectsFromServer={this.props.loadProjectsFromServer}
+                        people={this.props.people}
                         
                     />
                 </div>
