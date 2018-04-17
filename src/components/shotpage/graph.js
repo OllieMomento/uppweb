@@ -286,35 +286,7 @@ class Graph extends Component {
                         graph.insertEdge(parent, id, value, sourceElement, targetElement, 'strokeColor=' + color)
 
                     }
-                }/*
-                console.log("vertexArray")
-                console.log(vertexArray)
-                //add new created
-                var shots = this.props.project.shots
-                console.log("shots")
-                console.log(shots)
-                shots.forEach( shot =>{
-                    console.log("forEach")
-                    console.log(shot)
-                    
-                    if(!vertexArray.includes(shot.id.toString())){
-                        console.log("pridava: ")
-                        console.log(shot.id)
-
-                        //Should be visible
-                        if(shotArray.includes(shot.id.toString())){
-                            var v1 = graph.insertVertex(parent, null, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
-                            v1.visible = true
-                        }else{
-                            var v1 = graph.insertVertex(parent, null, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
-                            v1.visible = false
-                        }
-                        
-                        //stack.push(vertexes[shot.id])
-                    }
-                }*/
-
-
+                }
 
                 //while stack is empty
                 console.log("stack")
@@ -431,7 +403,7 @@ class Graph extends Component {
             var title = asset
             var name = number
             var node = `<div>
-            <h4 id="title">${title}</h4><h3 id=assignee></h3><h3 id ="name">${name}</h3></div>`
+            <h4 id="title">${title}</h4><h5 id=assignee></h5><h3 id ="name">${name}</h3></div>`
             
             console.log(typeof node)
 
@@ -478,6 +450,7 @@ class Graph extends Component {
 
                 var title = value.getElementsByTagName("h4")[0].innerHTML
                 var name = value.getElementsByTagName("h3")[0].innerHTML
+                var artists = value.getElementsByTagName("h5")[0].getAttribute("data-artistID")
 
                 var flag = false
                 var DBasset
@@ -492,7 +465,8 @@ class Graph extends Component {
                 //already added in DB
                 if (flag) {
                     DBasset.name = name,
-                        DBasset.typeOf = title
+                    DBasset.typeOf = title
+                    DBasset.artists = artists
                     vertexes.push(DBasset)
                     //add new asset in DB
                 } else {
@@ -502,7 +476,7 @@ class Graph extends Component {
                         typeOf: title,
                         desc: "",
                         comments: [],
-                        artists: [],
+                        artists: artists,
                         supervisor: this.props.project.supervisor,
                         status: "notstarted",
                         versions: []
@@ -791,6 +765,7 @@ class Graph extends Component {
                     cell={this.state.clickedCell}
                     people={this.props.people}
                     assets={this.state.assets}
+                    editor={this.editor}
                      />
 
                 <div className="graph-tbcont" style={style.TbCont}>

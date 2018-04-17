@@ -111,6 +111,7 @@ class AddAssignee extends Component {
     };
 
     assignArtist = () => {
+       
         console.log("CELL")
         console.log(this.props.cell)
         var assetID = parseInt(this.props.cell.id)
@@ -120,20 +121,40 @@ class AddAssignee extends Component {
         console.log(assets)
         let index = assets.findIndex(x => x.id == assetID);
 
-       
+
         console.log("INDEX")
         console.log(index)
 
 
-        var curAsset = assets[index]
-        console.log("CUR ASSET")
-        console.log(curAsset)
+        assets[index].artists = [this.state.artistID]
 
-        curAsset.artists = this.state.artistID
-        assets[index] = curAsset
+      
 
-        this.updateAssetsOnServer(assets)
+        //this.updateAssetsOnServer(assets)
+        
 
+        var template = document.createElement('template');
+        var value = this.props.cell.value.trim()
+        template.innerHTML = value;
+        value = template.content.firstChild;
+
+        var assignee = value.getElementsByTagName("h5")[0].innerHTML
+        value.getElementsByTagName("h5")[0].setAttribute = ("data-artistID", this.state.artistID)
+        value.getElementsByTagName("h5")[0].innerHTML = this.state.value
+
+        console.log("VALUE INNER")
+        console.log(value.innerHTML)
+
+        this.props.cell.setValue("<div>" + value.innerHTML + "</div>")
+        console.log("ASSIGNEE")
+        console.log(assignee)
+        this.props.editor.graph.refresh()
+
+        this.setState({
+            artistID:"",
+            value:""
+        })
+        
 
 
 
