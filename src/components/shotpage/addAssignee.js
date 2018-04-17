@@ -111,22 +111,30 @@ class AddAssignee extends Component {
     };
 
     assignArtist = () => {
+        console.log("CELL")
         console.log(this.props.cell)
         var assetID = parseInt(this.props.cell.id)
+
+        var assets = this.props.assets
+        console.log("ASSETS")
+        console.log(assets)
+        let index = assets.findIndex(x => x.id == assetID);
+
+       
+        console.log("INDEX")
         console.log(index)
 
-        console.log(this.props.project)
-        var assets = this.props.project.assets
-        let index = assets.findIndex(x => x.id == assetID);
-        console.log(index)
+
         var curAsset = assets[index]
+        console.log("CUR ASSET")
         console.log(curAsset)
+
         curAsset.artists = this.state.artistID
         assets[index] = curAsset
 
-        console.log(assets)
+        this.updateAssetsOnServer(assets)
 
-        // this.updateAssetsOnServer(assets)
+
 
 
     }
@@ -136,20 +144,11 @@ class AddAssignee extends Component {
         this.setState({ color: color.hex });
     };
 
-    updateSequenceOnServer(newSequence) {
-
-        var seq = this.props.project.seq
-
-
-        seq.reverse().push(newSequence)
-        seq.reverse()
-
-
-
+    updateAssetsOnServer(assets) {
 
 
         axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
-            seq: seq,
+            assets: assets,
 
         })
             .then(response => {
@@ -159,7 +158,8 @@ class AddAssignee extends Component {
                 console.log(err);
             });
 
-        this.props.setActiveSeq()
+        this.props.handleWindowOpen(false)
+
     }
 
 

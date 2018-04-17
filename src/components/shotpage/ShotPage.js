@@ -51,20 +51,20 @@ class ShotPage extends Component {
         };
 
     }
-    getSelectedSeq =() => {
+    getSelectedSeq = () => {
         var url = window.location.href
         var shotIDs = url.split("/");
 
-        var shotArray = shotIDs[6].split("_")    
-        
-        
-        this.setState({shotArray: shotArray})
-       
-        var shots = this.state.project.shots.filter( shot =>{
+        var shotArray = shotIDs[6].split("_")
+
+
+        this.setState({ shotArray: shotArray })
+
+        var shots = this.state.project.shots.filter(shot => {
             return shotArray.includes(shot.id.toString())
-        })      
-        
-        this.setState({shots: shots})
+        })
+
+        this.setState({ shots: shots })
         this.setState({ isLoading: false })
         return shots
 
@@ -84,16 +84,16 @@ class ShotPage extends Component {
 
         axios.get('http://localhost:3001/api/projects/' + projectURL)
             .then(res => {
-                this.setState({ project: res.data });               
+                this.setState({ project: res.data });
                 console.log("dostal jsme project Shot")
-                
+
                 this.getSelectedSeq()
 
             })
     }
 
     loadPeopleFromServer = () => {
-        
+
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });
@@ -103,7 +103,7 @@ class ShotPage extends Component {
 
     componentDidMount() {
         this.loadProjectsFromServer();
-        this.loadPeopleFromServer();        
+        this.loadPeopleFromServer();
     }
 
     updateGraphOnServer(xml, seq, shots) {
@@ -111,10 +111,11 @@ class ShotPage extends Component {
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,
             seq: seq,
-         
+
         })
             .then(response => {
                 //console.log(response);
+            }).then(respones => {               
             })
             .catch(err => {
                 console.log(err);
@@ -129,15 +130,15 @@ class ShotPage extends Component {
         console.log('http://localhost:3001/api/projects/' + this.state.project._id)
 
         axios.put('http://localhost:3001/api/projects/' + this.state.project._id, {
-            assetsXML: assetsXML,    
-            assets: assets       
-         
+            assetsXML: assetsXML,
+            assets: assets
+
         })
             .then(response => {
-                console.log(response);
+                console.log(response);                
             })
             .catch(err => {
-                
+
                 console.log(err);
             });
     }
@@ -151,8 +152,8 @@ class ShotPage extends Component {
         if (!this.state.isLoading) {
             console.log("23SHOT")
             console.log(this.state.shots)
-            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null}/>
-            graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray} people={this.state.people}/>
+            leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null} />
+            graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray} people={this.state.people} />
         } else {
             leftPane = <div>Loading Shot</div>
             graph = <div>Loading Graph</div>
@@ -162,10 +163,10 @@ class ShotPage extends Component {
         return (
             <div className="ShotPage" style={style.Page}>
                 <Header />
-                <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots}/>
+                <BreadcrumbsAndButton project={this.state.project} shots={this.state.shots} />
                 <div style={style.Container}>
                     {leftPane}
-                    {graph}                 
+                    {graph}
 
                 </div>
 

@@ -433,11 +433,7 @@ class Graph extends Component {
             var node = `<div>
             <h4 id="title">${title}</h4><h3 id=assignee></h3><h3 id ="name">${name}</h3></div>`
             
-            
-           
-
             console.log(typeof node)
-
 
 
             var index = model.nextId
@@ -447,9 +443,6 @@ class Graph extends Component {
             this.setState({
                 nodesLength: this.state.nodesLength + 1
             })
-
-
-
 
         }
         finally {
@@ -667,7 +660,8 @@ class Graph extends Component {
             mxIconSet.prototype.openWindow = (cell) => {
                 console.log("prototype")
                 this.handleWindowOpen(true),
-                    this.setState({ clickedCell: cell })
+                
+                this.setState({ clickedCell: cell })
 
             };
 
@@ -795,7 +789,9 @@ class Graph extends Component {
                     handleWindowOpen={this.handleWindowOpen}
                     open={this.state.handleAddAssigneeOpen}
                     cell={this.state.clickedCell}
-                    people={this.props.people} />
+                    people={this.props.people}
+                    assets={this.state.assets}
+                     />
 
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
