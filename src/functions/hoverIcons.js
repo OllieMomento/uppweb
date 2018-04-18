@@ -241,7 +241,10 @@ export function addMouseListeners(graph) {
                 }
             },
             mouseUp: function (sender, me) { },
-            dragEnter: function (evt, state) {
+            dragEnter: function (evt, state) {             
+                if(state.cell.value.startsWith("Shot")){
+                    return
+                }
                 if (this.currentIconSet == null) {
                     this.currentIconSet = new mxIconSet(state);
                 }

@@ -5,6 +5,7 @@ import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import ImplementedComments from '../assetPage/ImplementedComments'
 import AddNewVersion from '../assetPage/AddNewVersion';
+import axios from 'axios';
 
 //import SearchBar from 'material-ui-search-bar'
 
@@ -50,7 +51,10 @@ class RightPane extends Component {
         this.state = {
             selected: "",
             selectedVersion: "",
-            versions: this.props.asset.versions
+            versions: this.props.asset.versions,
+            status: this.props.asset.status,
+            assets: this.props.project.assets
+            
         };
     }
 
@@ -63,7 +67,6 @@ class RightPane extends Component {
     }
 
     handleClick = (event, id, n) => {
-        console.log(n)
         this.setState({
             selected: id,
             selectedVersion: n
@@ -76,6 +79,50 @@ class RightPane extends Component {
             return true
         }
         return false
+    }
+    isApproved(n) {
+        if (n.approved) {
+            return "#81C784"
+        }
+        return ""
+    }
+    approveVersion = () => {
+        console.log(this.state.versions)
+        var index = this.state.versions.indexOf(this.state.selectedVersion)
+        var assets = this.props.project.assets
+        var indexAsset = assets.indexOf(this.asset)
+
+        var versions = this.state.versions
+        versions[index].approved = true
+
+        var asset = this.props.asset
+        console.log(assets)
+        asset.versions = versions
+        
+        assets[indexAsset] = asset
+
+        
+        if(versions.every(version => version.approved)){
+            assets[indexAsset].status = "done"            
+        }
+
+        this.props.updateAsset(assets[indexAsset])
+
+        axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
+            assets: assets,
+
+        })
+            .then(response => {
+                //console.log(response);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+
+        
+
+
+
     }
 
 
@@ -98,10 +145,12 @@ class RightPane extends Component {
                     return (
                         <TableRow
                             key={n.id}
+                            style={{ background: this.isApproved(n) }}
                             hover
                             onClick={event => this.handleClick(event, n.id, n)}
                             role="radiobutton"
                             selected={isSelected}
+                            
                         >
                             <TableCell>{n.name}</TableCell>
                             <TableCell numeric>{n.artist}</TableCell>
@@ -125,8 +174,8 @@ class RightPane extends Component {
                     <div style={styles.tableAndButtons}>
                         {table}
                         <div style={styles.buttons}>
-                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable} />
-                            <Button variant="raised" style={styles.buttonAdd}>
+                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable} updateAsset={this.props.updateAsset}/>
+                            <Button variant="raised" style={styles.buttonAdd} onClick={this.approveVersion}>
                                 Approve version
                         </Button>
                         </div>

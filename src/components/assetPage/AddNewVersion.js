@@ -55,8 +55,8 @@ class AddNewVersion extends Component {
         var desc = document.getElementById("descriptionWindow")
         var file = document.getElementById("inputWindow")
         console.log(file.files[0])
-        if (file.files[0] != null) {
-           
+
+        if (file.files[0] != null) {           
             
 
             var newVersion = {
@@ -66,13 +66,15 @@ class AddNewVersion extends Component {
                 artist: "Karel Novák",
                 desc: desc.value,
                 date: dateFormat(Date.now(), "mmmm dS, yyyy, h:MM:ss TT"),
-                path: "C:/path/" + file.files[0].name
+                path: "C:/path/" + file.files[0].name,
+                approved: false
             }
 
             this.updateVersionsOnServer(newVersion)
             this.setState({
                 open: false,
                 decs: desc.value,
+                checked: []
             });
 
 
@@ -120,6 +122,10 @@ class AddNewVersion extends Component {
         this.props.updateTable(versions)
 
         assets[index].versions = versions
+        assets[index].status ="inprogress"
+
+        this.props.updateAsset(assets[index])
+       
         
 
         axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
@@ -127,7 +133,7 @@ class AddNewVersion extends Component {
          
         })
             .then(response => {
-                //console.log(response);
+                
             })
             .catch(err => {
                 console.log(err);
@@ -144,8 +150,7 @@ class AddNewVersion extends Component {
           }
 
         var commentsImplemented = []
-        console.log("ASSSSSSETIK")
-        console.log(this.props.asset)
+
         this.props.asset.versions.map( version =>{
             version.commentsImplemented.map(comment =>{
                 commentsImplemented.push(comment)

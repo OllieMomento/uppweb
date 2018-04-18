@@ -35,11 +35,11 @@ class BreadcrumbsAndButton extends Component {
             name: this.props.project.name,
             path: "http://localhost:3000/projects/" + this.props.project._id
         })
-        console.log("KIKOOOT")
-        if (this.props.project.shots != null) {
+
+        if (this.props.shots != null) {
             var path = ""
             var name = ""
-            this.props.project.shots.map(shot => {
+            this.props.shots.map(shot => {
                 if(path===""){
                     path = shot.id
                     name = shot.name.replace("Shot","")
@@ -49,14 +49,22 @@ class BreadcrumbsAndButton extends Component {
                 }
                 
             })
-            console.log(path)
-            console.log(name)
+
             paths.push({
                 name: "Shots " + name,
                 path: "http://localhost:3000/projects/" + this.props.project._id + "/shots/" + path
             })
-
         }
+    
+        if (this.props.asset != null) {
+            console.log("TADDDDDDDDDDDDDDDDDDDDDDDDDDy")         
+            
+            paths.push({
+                name: this.props.asset.typeOf + "  "+this.props.asset.name,
+                path: ""
+            })
+        }
+        
 
 
 

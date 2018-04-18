@@ -36,10 +36,11 @@ import {
     mxEdgeLabelLayout,
     mxLog,
     mxDefaultKeyHandler,
-    mxVertexHandler
+    mxVertexHandler,
+    mxUndoManager
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
-import Connector from '../../images/connector.gif'
+import Connector from '../../images/arrow.svg'
 import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
 import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import { Router, Route, Link, withRouter } from "react-router-dom";
@@ -90,9 +91,10 @@ class Graph extends Component {
             readingXMLdone: false,
             nodesLength: 1,
             shots: [],
-            activeSeqName: this.props.project.seq[0].name
+            activeSeqName: this.props.project.seq[0].name,
+            changed: false
         };
-        
+
     }
     getColors() {
         var colors = ['red', 'green', 'pink', 'yellow']
@@ -128,10 +130,14 @@ class Graph extends Component {
         graph.alternateEdgeStyle = 'elbow=vertical';
 
         var styleNode = graph.getStylesheet().getDefaultVertexStyle();
-        styleNode[mxConstants.STYLE_FONTSIZE] = '12';
+        styleNode[mxConstants.STYLE_FONTSIZE] = '13';
         styleNode[mxConstants.STYLE_FONTSTYLE] = 0;
-        styleNode[mxConstants.STYLE_FONTCOLOR] = '#000000';
+        styleNode[mxConstants.STYLE_FONTCOLOR] = '#FAFAFA';
+        styleNode[mxConstants.STYLE_FILLCOLOR] = '#757575';
+        styleNode[mxConstants.STYLE_STROKECOLOR] = '#616161';
+        styleNode[mxConstants.STYLE_STROKEWIDTH] = 2;
 
+        mxConstants.VERTEX_SELECTION_STROKEWIDTH = 2;
 
     }
 
@@ -143,11 +149,16 @@ class Graph extends Component {
         var layout = new mxParallelEdgeLayout(graph);
         var layoutMgr = new mxLayoutManager(graph);
 
+        
+
         layoutMgr.getLayout = function (cell) {
             if (cell.getChildCount() > 0) {
                 return layout;
             }
         };
+
+       
+
 
         graph.getModel().beginUpdate();
         try {
@@ -225,8 +236,15 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
             graph.center()
 
-            this.setState({ readingXMLdone: true })
+            this.setState({
+                readingXMLdone: true,
+                changed: false
+            })
+            
         }
+
+
+
     }
 
     addSidebarIcon(graph, sidebar, label, image) {
@@ -364,6 +382,10 @@ class Graph extends Component {
 
         this.props.updateGraphOnServer(xml, shots)
 
+        this.setState({
+            changed: false
+        })
+
 
     }
 
@@ -431,7 +453,7 @@ class Graph extends Component {
         else {
 
 
-            mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 16, 16);
+            mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 20, 20);
 
             var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
             var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
@@ -531,17 +553,30 @@ class Graph extends Component {
                 if (cell.edge === true) {
                     return
                 }
-                console.log(cell)
 
-                history.push({
-                    pathname: '/projects/' + this.props.project._id + '/shots/' + cell.id,
-                    state: { project: this.props.project }
-                })
+                if (this.state.changed) {
+                    alert("Graph wasn't saved")
+                }
+                else {
+                    history.push({
+                        pathname: '/projects/' + this.props.project._id + '/shots/' + cell.id,
+                        state: { project: this.props.project }
+                    })
 
 
+                }
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
+
+
+
             };
+
+            graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) => {
+                this.setState({
+                    changed: true
+                })
+            })
 
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
@@ -549,6 +584,8 @@ class Graph extends Component {
             // console.log("parent:  " + parent)
 
             this.readFromXML(graph, parent)
+
+
 
 
 
@@ -585,41 +622,6 @@ class Graph extends Component {
             // Enables snapping waypoints to terminals
             mxEdgeHandler.prototype.snapToTerminals = true;
 
-            /*
-        var divSeq = document.getElementById("graph-seq")
-        this.state.seq.map((seq, index) => {
-            var button = mxUtils.button(seq.name, () => {
-                this.setState({ activeSeq: seq })
-            })
-            divSeq.appendChild(button)
-        })
-        */
-
-            /*
-            var button = mxUtils.button('Open selected shots', () => {
-                var selection = graph.getSelectionCells()
-                selection = selection.filter(cell => {
-                    return cell.isVertex()
-                })
-
-                var url = ''
-                selection.forEach((cell, index) => {
-                    if (index < selection.length - 1) {
-                        url = url + cell.id + '_'
-                    } else {
-                        url = url + cell.id
-                    }
-
-                })
-
-
-                history.push({
-                    pathname: '/projects/' + this.props.project._id + '/shots/' + url,
-                })
-            })
-            var divOpen = document.getElementById("graph-open")
-            divOpen.appendChild(button)
-            */
         }
         //Rubberband selection in functions
         RubberBandSelection(container)
@@ -631,15 +633,6 @@ class Graph extends Component {
     }
 
     render() {
-        console.log("ACTIVE SEQ")
-        console.log(this.state.activeSeq)
-        console.log(this.props.project.seq)
-
-        console.log("AGE")
-        console.log(this.state.activeSeqName)
-
-
-
 
 
         return (

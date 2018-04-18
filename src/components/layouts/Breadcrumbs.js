@@ -27,6 +27,10 @@ class Breadcrumbs extends Component {
 
     getPath(paths) {
         var pathTmp = paths.map(( path, index) => {
+
+            if(paths.length-1 === index){
+                return (<li key={index}> {path.name}</li>)
+            }
             return (<li key={index}> <a href={path.path}>{path.name}</a></li>)
         })
         

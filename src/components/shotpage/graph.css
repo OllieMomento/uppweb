@@ -1,16 +1,25 @@
 #title{
     font-size: 0.875rem;
-font-weight: 500;
-font-family: Roboto, Helvetica, Arial, sans-serif;
-line-height: 1.71429em;
-color: rgba(0, 0, 0, 0.87);
-margin: 0.1em
+    font-weight: 500;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    
+    color: rgba(0, 0, 0, 0.87);
+    margin: 0em
+}
+#assignee{
+    font-size: 1em;
+    color: rgba(0, 0, 0, 0.87);
+    margin: 0em;
+    height: 1em;
+    margin-top: 0.7em;
+    margin-bottom: 0.7em;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 #name{
-    font-size: 1rem;
-font-weight: 400;
-font-family: Roboto, Helvetica, Arial, sans-serif;
-line-height: 1.5em;
-color: rgba(0, 0, 0, 0.87);
-margin: 0.1em
+    font-size: 1.3em;
+    font-weight: 400;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+
+    color: rgba(0, 0, 0, 0.87);
+    margin: 0em
 }

@@ -87,7 +87,7 @@ class ProjectPage extends Component {
 
         })
             .then(response => {
-                //console.log(response);
+                
             })
             .catch(err => {
                 console.log(err);

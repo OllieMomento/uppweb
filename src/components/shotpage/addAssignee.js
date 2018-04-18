@@ -112,50 +112,27 @@ class AddAssignee extends Component {
 
     assignArtist = () => {
        
-        console.log("CELL")
-        console.log(this.props.cell)
-        var assetID = parseInt(this.props.cell.id)
-
-        var assets = this.props.assets
-        console.log("ASSETS")
-        console.log(assets)
-        let index = assets.findIndex(x => x.id == assetID);
-
-
-        console.log("INDEX")
-        console.log(index)
-
-
-        assets[index].artists = [this.state.artistID]
-
-      
-
-        //this.updateAssetsOnServer(assets)
-        
-
         var template = document.createElement('template');
         var value = this.props.cell.value.trim()
         template.innerHTML = value;
         value = template.content.firstChild;
 
-        var assignee = value.getElementsByTagName("h5")[0].innerHTML
-        value.getElementsByTagName("h5")[0].setAttribute = ("data-artistID", this.state.artistID)
+        //Assiginee
+        
         value.getElementsByTagName("h5")[0].innerHTML = this.state.value
+        value.getElementsByTagName("h5")[0].dataset.artist = this.state.artistID
 
-        console.log("VALUE INNER")
-        console.log(value.innerHTML)
 
         this.props.cell.setValue("<div>" + value.innerHTML + "</div>")
-        console.log("ASSIGNEE")
-        console.log(assignee)
+
         this.props.editor.graph.refresh()
 
         this.setState({
-            artistID:"",
-            value:""
+            artistID: "",
+            value: ""
         })
-        
 
+        this.props.handleWindowOpen(false)
 
 
     }
@@ -164,24 +141,6 @@ class AddAssignee extends Component {
         console.log(color)
         this.setState({ color: color.hex });
     };
-
-    updateAssetsOnServer(assets) {
-
-
-        axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
-            assets: assets,
-
-        })
-            .then(response => {
-                //console.log(response);
-            })
-            .catch(err => {
-                console.log(err);
-            });
-
-        this.props.handleWindowOpen(false)
-
-    }
 
 
     render() {

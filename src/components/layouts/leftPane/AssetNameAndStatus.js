@@ -59,8 +59,7 @@ class AssetNameAndStatus extends Component {
 
 
     render() {
-        console.log("ASETTTTTTTTTTTTTTTTT")
-        console.log(this.props.asset)
+        
         return (
             <div style={style.Div}>
                 <div className="ProjectName">
@@ -74,7 +73,7 @@ class AssetNameAndStatus extends Component {
                         {this.props.asset.name}
                     </Typography>
                 </div>
-                {this.getStatus(this.props.project.status)}
+                {this.getStatus(this.props.asset.status)}
 
             </div>
         );

@@ -70,7 +70,8 @@ var ProjectsSchema = new Schema({
             desc: String,
             date: String,
             path: String,
-            commentsImplemented: [Number]
+            commentsImplemented: [Number],
+            approved: Boolean
         }]
 
     }]

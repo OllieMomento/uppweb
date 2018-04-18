@@ -99,7 +99,8 @@ class Graph extends Component {
             clientCoord: "",
             assets: [],
             handleAddAssigneeOpen: false,
-            clickedCell: ""
+            clickedCell: "",
+            changed: false
 
         };
 
@@ -173,6 +174,8 @@ class Graph extends Component {
         styleNode[mxConstants.STYLE_FONTSIZE] = '12';
         styleNode[mxConstants.STYLE_FONTSTYLE] = 0;
         styleNode[mxConstants.STYLE_FONTCOLOR] = '#000000';
+        styleNode[mxConstants.STYLE_STROKEWIDTH] = 2;
+        mxConstants.VERTEX_SELECTION_STROKEWIDTH = 2;
 
 
     }
@@ -186,7 +189,7 @@ class Graph extends Component {
         console.log(shots)
         console.log(shotsSelected)
         shots.forEach((shot, index) => {
-            vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 150, 50, "");
+            vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
 
             if (shotsSelected.includes(shot)) {
                 vertexes[shot.id].visible = true
@@ -240,11 +243,14 @@ class Graph extends Component {
                 var shots = this.props.project.shots
                 shots.forEach((shot, index) => {
                     if (shotArray.includes(shot.id.toString())) {
-                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 150, 50, "");
+                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
                         vertexes[shot.id].visible = true
+
+                        
+
                         stack.push(vertexes[shot.id])
                     } else {
-                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + vertexArray.length * 150, 150, 50, "");
+                        vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + vertexArray.length * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
                         vertexes[shot.id].visible = false
                     }
                 })
@@ -257,8 +263,25 @@ class Graph extends Component {
 
 
 
+
+
+
                     //If element is Vertex/cell
                     if (element.hasAttribute("vertex") && value != null) {
+
+                        var index = this.props.project.assets.map(function (e) { return e.id; }).indexOf(parseInt(id));
+                        console.log(index)
+                        console.log(this.props.project.assets)
+                        if (index != -1) {
+                            if (this.props.project.assets[index].status == "done") {
+                                style = "fillColor=#A5D6A7;strokeColor=#43A047"
+                            }
+                            else if (this.props.project.assets[index].status == "inprogress") {
+                                style = "fillColor=#FFCC80;strokeColor=#FF8A65"
+                            }
+                        }
+
+                        console.log(style)
 
 
                         var geometry = element.getElementsByTagName("mxGeometry");
@@ -270,7 +293,8 @@ class Graph extends Component {
                         //add shots selected shots vertex
                         if (!value.startsWith("Shot")) {
 
-                            vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height);
+
+                            vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
                             vertexes[id].visible = false
                         }
 
@@ -279,7 +303,7 @@ class Graph extends Component {
                     // Sequence element > edge
                     if (element.hasAttribute("edge")) {
 
-                        var color = "blue"
+                        var color = "#212121"
                         var sourceElement = vertexes[element.getAttribute("source")]
                         var targetElement = vertexes[element.getAttribute("target")]
 
@@ -300,11 +324,12 @@ class Graph extends Component {
                     cell.visible = true
                     var inEdges = graph.getModel().getIncomingEdges(cell)
 
+                    
+
 
                     inEdges.forEach((edge, index) => {
 
                         var vertex = edge.source
-
 
                         stack.push(vertex)
                     })
@@ -312,6 +337,7 @@ class Graph extends Component {
 
 
                 }
+                
 
             }
 
@@ -324,6 +350,7 @@ class Graph extends Component {
         }
         finally {
 
+
             // Updates the display
 
             graph.getModel().endUpdate();
@@ -332,11 +359,17 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(null, true, false), 1, 0);
             graph.moveCells(graph.getChildCells(null, true, false), -1, 0);
 
-            this.setState({ readingXMLdone: true })
+
             graph.center()
             graph.refresh()
 
+            this.setState({
+                readingXMLdone: true,
+                changed: false
+            })
+
         }
+
     }
 
 
@@ -402,14 +435,13 @@ class Graph extends Component {
             var number = ('0' + this.state.nodesLength + '0').slice(-3)
             var title = asset
             var name = number
-            var node = `<div>
-            <h4 id="title">${title}</h4><h5 id=assignee></h5><h3 id ="name">${name}</h3></div>`
-            
+            var node = `<div><h4 id="title">${title}</h4><h5 id=assignee>\u0020</h5><h3 id ="name">${name}</h3></div>`
+
             console.log(typeof node)
 
 
             var index = model.nextId
-            v1 = graph.insertVertex(parent, null, node, x, y, 100, 75);
+            v1 = graph.insertVertex(parent, null, node, x, y, 100, 75, 'fillColor=#e57373;strokeColor=#d32f2f');
 
 
             this.setState({
@@ -432,7 +464,7 @@ class Graph extends Component {
 
         for (var id in cells) {
             let cell = cells[id]
-            cell.visible = true
+            //cell.visible = true
             console.log(cell)
 
 
@@ -450,7 +482,9 @@ class Graph extends Component {
 
                 var title = value.getElementsByTagName("h4")[0].innerHTML
                 var name = value.getElementsByTagName("h3")[0].innerHTML
-                var artists = value.getElementsByTagName("h5")[0].getAttribute("data-artistID")
+                var artists = value.getElementsByTagName("h5")[0].dataset.artist
+                console.log("VALUE")
+                console.log(value)
 
                 var flag = false
                 var DBasset
@@ -465,7 +499,7 @@ class Graph extends Component {
                 //already added in DB
                 if (flag) {
                     DBasset.name = name,
-                    DBasset.typeOf = title
+                        DBasset.typeOf = title
                     DBasset.artists = artists
                     vertexes.push(DBasset)
                     //add new asset in DB
@@ -487,6 +521,7 @@ class Graph extends Component {
                 }
 
             }
+
         }
 
 
@@ -508,6 +543,10 @@ class Graph extends Component {
 
         // this.props.updateGraphOnServer(xml, seq, shots)
         this.props.updateGraphAssetsOnServer(assetsXML, assets)
+
+        this.setState({
+            changed: false
+        })
     }
 
 
@@ -530,6 +569,8 @@ class Graph extends Component {
 
 
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 20, 20);
+
+
 
             var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
             var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
@@ -562,6 +603,7 @@ class Graph extends Component {
 
 
 
+
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
 
@@ -578,7 +620,7 @@ class Graph extends Component {
 
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
 
-                var color = "blue"
+                var color = "#212121"
                 graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
             }
 
@@ -601,15 +643,19 @@ class Graph extends Component {
                     return
                 }
 
+
                 //Click on asset not shot
                 if (!cell.value.includes("Shot")) {
 
+                    if (this.state.changed) {
+                        alert("Graph wasn't saved")
+                    } else {
+                        history.push({
+                            pathname: '/projects/' + this.props.project._id + "/asset/" + cell.id,
+                            state: { project: this.props.project }
+                        })
+                    }
 
-
-                    history.push({
-                        pathname: '/projects/' + this.props.project._id + "/asset/" + cell.id,
-                        state: { project: this.props.project }
-                    })
 
 
 
@@ -634,10 +680,16 @@ class Graph extends Component {
             mxIconSet.prototype.openWindow = (cell) => {
                 console.log("prototype")
                 this.handleWindowOpen(true),
-                
-                this.setState({ clickedCell: cell })
+
+                    this.setState({ clickedCell: cell })
 
             };
+
+            graph.getModel().addListener(mxEvent.CHANGE, (sender, evt) => {
+                this.setState({
+                    changed: true
+                })
+            })
 
 
             // Gets the default parent for inserting new cells. This
@@ -645,7 +697,7 @@ class Graph extends Component {
             var parent = graph.getDefaultParent();
             // console.log("parent:  " + parent)
 
-            this.readFromXML(graph, parent)
+
 
 
             this.addSidebarIcon(this.editor, graph, sidebar, null,
@@ -688,6 +740,8 @@ class Graph extends Component {
             //Need to det html from Value
             graph.moveCells(graph.getChildCells(parent, true, false), 1, 0);
             graph.moveCells(graph.getChildCells(parent, true, false), -1, 0);
+
+            this.readFromXML(graph, parent)
 
         }
 
@@ -766,7 +820,7 @@ class Graph extends Component {
                     people={this.props.people}
                     assets={this.state.assets}
                     editor={this.editor}
-                     />
+                />
 
                 <div className="graph-tbcont" style={style.TbCont}>
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
