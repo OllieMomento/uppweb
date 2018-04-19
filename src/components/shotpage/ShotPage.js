@@ -170,7 +170,7 @@ class ShotPage extends Component {
 
                 </div>
 
-                <div> footer</div>
+                <div>_</div>
             </div>
         );
     }

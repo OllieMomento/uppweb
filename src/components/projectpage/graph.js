@@ -41,6 +41,7 @@ import {
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/arrow.svg'
+import newNode from '../../images/newNode.png'
 import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
 import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import { Router, Route, Link, withRouter } from "react-router-dom";
@@ -138,6 +139,10 @@ class Graph extends Component {
         styleNode[mxConstants.STYLE_STROKEWIDTH] = 2;
 
         mxConstants.VERTEX_SELECTION_STROKEWIDTH = 2;
+        mxConstants.OUTLINE_COLOR= '#3f51b5'
+        mxConstants.OUTLINE_HANDLE_FILLCOLOR= '#e91e63'
+        mxConstants.OUTLINE_HANDLE_STROKECOLOR= '#e91e63'
+    
 
     }
 
@@ -270,6 +275,8 @@ class Graph extends Component {
                 var number = ('0' + index + '0').slice(-3)
                 var title = `Shot ${number}`
 
+                 
+
 
 
                 v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
@@ -358,6 +365,7 @@ class Graph extends Component {
 
             //If element is Vertex/cell
             if (element.hasAttribute("vertex")) {
+                
                 let shot = {
                     id: id,
                     name: value,
@@ -463,6 +471,8 @@ class Graph extends Component {
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
 
+            var outline = ReactDOM.findDOMNode(this.refs.outlineContainer);
+
             container.style.background = "url(" + Grid + ")"
 
             // Creates a wrapper editor with a graph inside the given container.
@@ -551,7 +561,7 @@ class Graph extends Component {
 
                 console.log(cell)
                 // history.push('/projects/' + this.props.project._id + '/' + cell.id);
-/*
+
                 if (cell.edge === true) {
                     return
                 }
@@ -566,7 +576,7 @@ class Graph extends Component {
                     })
 
 
-                }*/
+                }
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
 
@@ -594,7 +604,7 @@ class Graph extends Component {
 
 
             this.addSidebarIcon(graph, sidebar, null,
-                'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
+                newNode);
 
 
             graph.setHtmlLabels(true);
@@ -628,11 +638,15 @@ class Graph extends Component {
         //Rubberband selection in functions
         RubberBandSelection(container)
 
+        var outln = new mxOutline(this.editor.graph, outline);
+
     }
     componentDidMount() {
         this.editor = new mxEditor();
         this.loadGraph()
     }
+
+ 
 
     render() {
 
@@ -676,6 +690,9 @@ class Graph extends Component {
                     <div className="graph-sidebar" ref="graphSidebar" id="graphSidebar" />
                     <div style={style.Container} className="graph-container" ref="graphContainer" id="graphContainer" />
                 </div>
+                <div id="outlineContainer" ref="outlineContainer"
+                    style={{ position: "absolute", zIndex: '1', overflow: 'hidden', top: '150px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
+                </div>
             </div>
         );
 
@@ -684,7 +701,3 @@ class Graph extends Component {
 }
 
 export default Graph;
-
-/*<div id="outlineContainer"
-                    style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
-                </div>*/

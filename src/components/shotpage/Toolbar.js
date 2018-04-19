@@ -44,7 +44,7 @@ class Toolbar extends Component {
             "Simulation",
             "Rotoscoping",
             "Grading",
-            "LooK Development",
+            "Look Dev",
             "Light & Render",
             "Matte Painting",
             "Compositing"

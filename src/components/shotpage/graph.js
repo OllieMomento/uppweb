@@ -42,6 +42,7 @@ import {
 } from "mxgraph-js";
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/arrow.svg'
+import newNode from '../../images/newNode.png'
 import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
 import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
 import Footer from "../layouts/Footer"
@@ -106,7 +107,7 @@ class Graph extends Component {
 
     }
     handleWindowOpen = (bool) => {
-        console.log(bool)
+        //console.log(bool)
 
         this.saveGraph(this.editor)
 
@@ -176,6 +177,9 @@ class Graph extends Component {
         styleNode[mxConstants.STYLE_FONTCOLOR] = '#000000';
         styleNode[mxConstants.STYLE_STROKEWIDTH] = 2;
         mxConstants.VERTEX_SELECTION_STROKEWIDTH = 2;
+        mxConstants.OUTLINE_COLOR= '#3f51b5'
+        mxConstants.OUTLINE_HANDLE_FILLCOLOR= '#e91e63'
+        mxConstants.OUTLINE_HANDLE_STROKECOLOR= '#e91e63'
 
 
     }
@@ -186,8 +190,8 @@ class Graph extends Component {
         var parent = graph.getDefaultParent();
         var shots = this.props.project.shots
         var shotsSelected = this.props.shots
-        console.log(shots)
-        console.log(shotsSelected)
+        //console.log(shots)
+        //console.log(shotsSelected)
         shots.forEach((shot, index) => {
             vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
 
@@ -209,10 +213,10 @@ class Graph extends Component {
         try {
 
             var assetsXML = this.props.project.assetsXML;
-            console.log("PROJECT")
-            console.log(this.props.project)
+            //console.log("PROJECT")
+            // console.log(this.props.project)
 
-            console.log(assetsXML)
+            //console.log(assetsXML)
 
             //Create new vertexes represention shots nodes
             if (assetsXML == '') {
@@ -222,18 +226,18 @@ class Graph extends Component {
                 var doc = mxUtils.parseXml(assetsXML);
                 var codec = new mxCodec(doc);
                 var model = codec.decode(doc.documentElement, graph.getModel())
-                console.log(model)
+                // console.log(model)
                 var cells = model.getElementsByTagName("mxCell");
 
                 var cellArr = Array.from(cells);
-                console.log("cellArr")
-                console.log(cellArr)
+                // console.log("cellArr")
+                // console.log(cellArr)
                 var vertexes = [];
                 var vertexesAll = [];
 
                 var shotArray = this.props.shotArray
-                console.log("ShotArray")
-                console.log(shotArray)
+                //console.log("ShotArray")
+                //console.log(shotArray)
                 let index = 0
                 let IndexEdge = 0
                 var stack = []
@@ -246,9 +250,8 @@ class Graph extends Component {
                         vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + index * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
                         vertexes[shot.id].visible = true
 
-                        
-
                         stack.push(vertexes[shot.id])
+
                     } else {
                         vertexes[shot.id] = graph.insertVertex(parent, shot.id, shot.name, 950, 50 + vertexArray.length * 150, 100, 50, 'fillColor=#757575;strokeColor=#616161;fontColor=#FAFAFA');
                         vertexes[shot.id].visible = false
@@ -270,8 +273,8 @@ class Graph extends Component {
                     if (element.hasAttribute("vertex") && value != null) {
 
                         var index = this.props.project.assets.map(function (e) { return e.id; }).indexOf(parseInt(id));
-                        console.log(index)
-                        console.log(this.props.project.assets)
+                        //console.log(index)
+                        //console.log(this.props.project.assets)
                         if (index != -1) {
                             if (this.props.project.assets[index].status == "done") {
                                 style = "fillColor=#A5D6A7;strokeColor=#43A047"
@@ -281,7 +284,7 @@ class Graph extends Component {
                             }
                         }
 
-                        console.log(style)
+                        //  console.log(style)
 
 
                         var geometry = element.getElementsByTagName("mxGeometry");
@@ -312,19 +315,27 @@ class Graph extends Component {
                     }
                 }
 
+                Array.prototype.unique = function () {
+                    return this.filter(function (value, index, self) {
+                        return self.indexOf(value) === index;
+                    });
+                }
+
                 //while stack is empty
                 console.log("stack")
                 console.log(stack)
+
 
                 while (stack.length !== 0) {
 
 
                     var cell = stack.pop()
 
+
                     cell.visible = true
                     var inEdges = graph.getModel().getIncomingEdges(cell)
 
-                    
+
 
 
                     inEdges.forEach((edge, index) => {
@@ -333,11 +344,9 @@ class Graph extends Component {
 
                         stack.push(vertex)
                     })
-
-
-
                 }
-                
+
+
 
             }
 
@@ -369,6 +378,7 @@ class Graph extends Component {
             })
 
         }
+
 
     }
 
@@ -577,6 +587,7 @@ class Graph extends Component {
 
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
+            var outline = ReactDOM.findDOMNode(this.refs.outlineContainer);
 
             container.style.background = "url(" + Grid + ")"
 
@@ -587,15 +598,7 @@ class Graph extends Component {
             var graph = this.editor.graph;
             var model = graph.getModel();
 
-            var keyHandler = new mxDefaultKeyHandler(this.editor);
-            keyHandler.bindAction(46, 'delete');
-            keyHandler.bindAction(90, 'undo', true);
-            keyHandler.bindAction(89, 'redo', true);
-            keyHandler.bindAction(88, 'cut', true);
-            keyHandler.bindAction(67, 'copy', true);
-            keyHandler.bindAction(86, 'paste', true);
-            keyHandler.bindAction(107, 'zoomIn');
-            keyHandler.bindAction(109, 'zoomOut');
+
 
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
@@ -633,6 +636,7 @@ class Graph extends Component {
             keyHandler.bindAction(86, 'paste', true);
             keyHandler.bindAction(107, 'zoomIn');
             keyHandler.bindAction(109, 'zoomOut');
+
 
 
             graph.dblClick = (evt, cell) => {
@@ -700,8 +704,7 @@ class Graph extends Component {
 
 
 
-            this.addSidebarIcon(this.editor, graph, sidebar, null,
-                'http://icons.iconarchive.com/icons/froyoshark/enkel/128/Telegram-icon.png');
+            this.addSidebarIcon(this.editor, graph, sidebar, null, newNode);
 
 
             graph.setHtmlLabels(true);
@@ -742,6 +745,8 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(parent, true, false), -1, 0);
 
             this.readFromXML(graph, parent)
+
+            var outln = new mxOutline(this.editor.graph, outline);
 
         }
 
@@ -828,7 +833,11 @@ class Graph extends Component {
                         {popUp}
                         <div id="editName"></div>
                     </div>
+                    <div id="outlineContainer" ref="outlineContainer"
+                    style={{ position: "absolute", zIndex: '1', overflow: 'hidden', top: '150px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
                 </div>
+                </div>
+                
             </div>
         );
 
@@ -838,6 +847,3 @@ class Graph extends Component {
 
 export default Graph;
 
-/*<div id="outlineContainer"
-                        style={{ zIndex: '1', overflow: 'hidden', top: '0px', right: '0px', width: '160px', height: '120px', background: 'transparent', borderStyle: 'solid', borderColor: 'lightgray' }}>
-                    </div>*/

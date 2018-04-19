@@ -10,6 +10,7 @@ import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
 import Autosuggest from 'react-autosuggest';
 import axios from 'axios';
+import Chip from 'material-ui/Chip';
 
 import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion } from '../../../../functions/autosuggest'
 
@@ -33,14 +34,22 @@ const style = {
 
 
 
+
 class Team extends Component {
     constructor(props) {
         super(props);
         this.state = {
             value: this.getNameFromID(this.props.project.supervisor),
             suggestions: [],
+            artists: ""
         };
     }
+
+    handleDelete = data => () => {  
+
+
+    };
+  
 
     getSupervisors() {
         const people = this.props.people
@@ -55,7 +64,7 @@ class Team extends Component {
 
     getNameFromID(id) {
         //not assigned supervisor
-        if(id === ""){
+        if (id === "") {
             return ""
         }
         const name = this.props.people
@@ -110,7 +119,19 @@ class Team extends Component {
         return suggestion.label;
     }
 
-    render() {       
+
+
+    render() {  
+        
+        var artists = this.props.project.assets.map(asset => {
+            if(asset.artists != null){
+                if (asset.artists.length === 1) {
+
+                    return (this.getNameFromID(asset.artists[0]))
+                }
+            }
+            
+        })
         
 
         return (
@@ -133,6 +154,30 @@ class Team extends Component {
                         onChange: this.handleChange,
                     }}
                 />
+
+                <Typography variant="caption"  style={{marginTop: "2em"}}>
+                    Artists
+                </Typography>
+
+                {artists.map((data,index) => {
+                    let avatar = null;
+                    
+                    if(data == null){
+                        return
+                    }
+
+                    return (
+                        <Chip
+                            key={index}
+                           // avatar={avatar}
+                            label={data}
+                           // onDelete={this.handleDelete(data)}                          
+                        />
+                    );
+                })}
+
+
+
             </div>
         );
     }
