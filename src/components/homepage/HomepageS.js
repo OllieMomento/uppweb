@@ -91,8 +91,7 @@ class HomepageS extends Component {
           {subheader}
         {projectList}
         </div>
-
-        <Footer />
+       
       </div>
 
     );

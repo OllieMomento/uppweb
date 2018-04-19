@@ -116,7 +116,7 @@ class ProjectPage extends Component {
                     {graph}          
 
                 </div>
-                <div> footer</div>
+                <div>_  </div>
             </div>
         );
     }

@@ -238,7 +238,8 @@ class Graph extends Component {
 
             this.setState({
                 readingXMLdone: true,
-                changed: false
+                changed: false,
+                activeSeq: this.props.project.seq[0],
             })
             
         }
@@ -263,7 +264,8 @@ class Graph extends Component {
                 // rather than the label markup, so use 'image=' + image for the style.
                 // as follows: v1 = graph.insertVertex(parent, null, label,
                 // pt.x, pt.y, 120, 120, 'image=' + image);
-                var index = model.nextId
+                var index = graph.getChildVertices(graph.getDefaultParent()).length +1
+               // var index = model.nextId - 1
 
                 var number = ('0' + index + '0').slice(-3)
                 var title = `Shot ${number}`
@@ -547,9 +549,9 @@ class Graph extends Component {
 
             graph.dblClick = (evt, cell) => {
 
-
+                console.log(cell)
                 // history.push('/projects/' + this.props.project._id + '/' + cell.id);
-
+/*
                 if (cell.edge === true) {
                     return
                 }
@@ -564,7 +566,7 @@ class Graph extends Component {
                     })
 
 
-                }
+                }*/
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
 
