@@ -54,7 +54,7 @@ class RightPane extends Component {
             versions: this.props.asset.versions,
             status: this.props.asset.status,
             assets: this.props.project.assets
-            
+
         };
     }
 
@@ -98,12 +98,12 @@ class RightPane extends Component {
         var asset = this.props.asset
         console.log(assets)
         asset.versions = versions
-        
+
         assets[indexAsset] = asset
 
-        
-        if(versions.every(version => version.approved)){
-            assets[indexAsset].status = "done"            
+
+        if (versions.every(version => version.approved)) {
+            assets[indexAsset].status = "done"
         }
 
         this.props.updateAsset(assets[indexAsset])
@@ -119,7 +119,7 @@ class RightPane extends Component {
                 console.log(err);
             });
 
-        
+
 
 
 
@@ -128,6 +128,15 @@ class RightPane extends Component {
 
 
     render() {
+
+        var approve
+        if (this.state.selectedVersion != "") {
+            approve = <Button variant="raised" style={styles.buttonAdd} onClick={this.approveVersion}>
+                Approve version
+    </Button>
+        }else{
+            approve = ""
+        }
 
         var table = <Table style={styles.table}>
             <TableHead>
@@ -150,7 +159,7 @@ class RightPane extends Component {
                             onClick={event => this.handleClick(event, n.id, n)}
                             role="radiobutton"
                             selected={isSelected}
-                            
+
                         >
                             <TableCell>{n.name}</TableCell>
                             <TableCell numeric>{n.artist}</TableCell>
@@ -174,10 +183,8 @@ class RightPane extends Component {
                     <div style={styles.tableAndButtons}>
                         {table}
                         <div style={styles.buttons}>
-                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable} updateAsset={this.props.updateAsset}/>
-                            <Button variant="raised" style={styles.buttonAdd} onClick={this.approveVersion}>
-                                Approve version
-                        </Button>
+                            <AddNewVersion project={this.props.project} asset={this.props.asset} updateTable={this.updateTable} updateAsset={this.props.updateAsset} />
+                            {approve}
                         </div>
                     </div>
                     <ImplementedComments project={this.props.project} people={this.props.people} selectedVersion={this.state.selectedVersion} asset={this.props.asset} />
