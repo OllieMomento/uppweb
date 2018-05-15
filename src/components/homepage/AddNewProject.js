@@ -1,9 +1,5 @@
-import React, { Component, createElement } from 'react';
-
+import React, { Component } from 'react';
 import Button from 'material-ui/Button';
-import Input from 'material-ui/Input';
-import dateFormat from 'dateformat'
-
 import Dialog, {
     DialogActions,
     DialogContent,
@@ -12,9 +8,6 @@ import Dialog, {
 } from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
-//import SearchBar from 'material-ui-search-bar'
-import List, { ListItem, ListItemSecondaryAction, ListItemText, ListSubheader } from 'material-ui/List';
-import Checkbox from 'material-ui/Checkbox';
 import axios from 'axios';
 import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion } from '../../functions/autosuggest'
 import Autosuggest from 'react-autosuggest';
@@ -42,11 +35,10 @@ class AddNewProject extends Component {
             value: "",
             suggestions: [],
             supervisorID:""
-
-
         }
     }
 
+    //Get name based on ID
     getNameFromID(id) {
         //not assigned supervisor
         if(id === ""){
@@ -63,8 +55,9 @@ class AddNewProject extends Component {
         return (name[0])
     }
 
+    //get all supervisors
     getSupervisors() {
-        console.log(this.props.people)
+       //console.log(this.props.people)
         const people = this.props.people
             .filter(human => {
                 return human.supervisor === 1
@@ -76,8 +69,6 @@ class AddNewProject extends Component {
     }
 
     handleSuggestionsFetchRequested = ({ value }) => {
-        console.log("VALUE")
-        console.log(value)
         this.setState({
             suggestions: getSuggestions(this.getSupervisors(), value),
         });
@@ -104,8 +95,6 @@ class AddNewProject extends Component {
     }
 
 
-
-
     handleClickOpen = () => {
         this.setState({ open: true });
     };
@@ -114,15 +103,12 @@ class AddNewProject extends Component {
         this.setState({ open: false });
     };
 
+    //POST new project on server
     addNewProjectHandler = () => {
         var name = document.getElementById("nameWindow")
         var desc = document.getElementById("descriptionWindow")
         var start = document.getElementById("startDate")
         var end = document.getElementById("endDate")
-        var file = document.getElementById("inputWindow")
-
-        //if (file.files[0] != null) {
-
 
 
 
@@ -151,7 +137,7 @@ class AddNewProject extends Component {
         })
             .then(response => {
                 this.props.loadProjectsFromServer()
-                console.log(response);
+                //console.log(response);
             })
             .catch(err => {
                 console.log(err);
@@ -168,8 +154,6 @@ class AddNewProject extends Component {
 
 
     render() {
-        //console.log('filterText state from parent component', this.state.filterText)
-
         return (
             <div >
                 <Button variant="raised" color="primary" onClick={this.handleClickOpen}> Add New Project </Button>

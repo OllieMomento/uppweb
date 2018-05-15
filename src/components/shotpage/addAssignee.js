@@ -1,18 +1,15 @@
 
 import React, { Component } from 'react';
 
-import { FormControl, InputLabel, Select, MenuItem, Button, IconButton, Typography } from 'material-ui';
-import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
-import TextField from 'material-ui/TextField';
+import {  Button} from 'material-ui';
+
 
 
 import Dialog, {
     DialogActions,
-    DialogContent,
-    DialogContentText,
+    DialogContent,    
     DialogTitle,
 } from 'material-ui/Dialog';
-import axios from 'axios';
 
 import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion } from '../../functions/autosuggest'
 import Autosuggest from 'react-autosuggest';
@@ -33,7 +30,6 @@ const style = {
 class AddAssignee extends Component {
 
     constructor(props) {
-        var editor
         super(props);
         this.state = {
             open: false,
@@ -62,8 +58,7 @@ class AddAssignee extends Component {
         return (name[0])
     }
 
-    getPeople() {
-        console.log(this.props.people)
+    getPeople() {      
         const people = this.props.people
             .map(human => {
                 return { label: human.name, id: human._id }
@@ -72,8 +67,7 @@ class AddAssignee extends Component {
     }
 
     handleSuggestionsFetchRequested = ({ value }) => {
-        console.log("VALUE")
-        console.log(value)
+        
         this.setState({
             suggestions: getSuggestions(this.getPeople(), value),
         });
@@ -138,14 +132,13 @@ class AddAssignee extends Component {
     }
 
     handleColorChange = (color) => {
-        console.log(color)
+        
         this.setState({ color: color.hex });
     };
 
 
     render() {
-        console.log(this.props.people)
-
+       
         return (
             <div style={style.seq}>
 

@@ -4,39 +4,24 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import ProjectItem from './ProjectItem';
 import List from 'material-ui/List';
-import axios from 'axios';
 
-/*
-const styles = {
-    Paper: {
-        padding: 20
-    }
-}
-*/
 
 
 class ProjectsLists extends Component {
-    constructor(props) {
-        super(props);
-        
-    }
 
-    
-
-   
-
+    //MOCK ID
     getYourId() {
         return "5aae90c29398b5351435e90c";
     }
 
+    //get projects based on category: Assigned, In progress, Done
     getProjectList(type) {
 
         //const projects = this.props.projects;
         const filterText = this.props.filterText;
 
         const projectList = this.props.data
-            .filter(project => {
-                console.log(project)
+            .filter(project => {                
                 if (type === 1) {
                     return project.supervisor === this.getYourId();
                 }

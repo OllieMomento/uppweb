@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import Header from '../layouts/Header'
 import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
-import history from '../../history'
 import axios from 'axios';
 import LeftPane from '../layouts/leftPane/LeftPane'
 import Graph from './graph';
@@ -84,8 +83,7 @@ class ShotPage extends Component {
 
         axios.get('http://localhost:3001/api/projects/' + projectURL)
             .then(res => {
-                this.setState({ project: res.data });
-                console.log("dostal jsme project Shot")
+                this.setState({ project: res.data });              
 
                 this.getSelectedSeq()
 
@@ -124,18 +122,13 @@ class ShotPage extends Component {
 
     updateGraphAssetsOnServer(assetsXML, assets) {
 
-
-        console.log("assets")
-        console.log(assets)
-        console.log('http://localhost:3001/api/projects/' + this.state.project._id)
-
         axios.put('http://localhost:3001/api/projects/' + this.state.project._id, {
             assetsXML: assetsXML,
             assets: assets
 
         })
             .then(response => {
-                console.log(response);                
+                //console.log(response);                
             })
             .catch(err => {
 
@@ -150,8 +143,7 @@ class ShotPage extends Component {
         var leftPane
         var graph
         if (!this.state.isLoading) {
-            console.log("23SHOT")
-            console.log(this.state.shots)
+        
             leftPane = <LeftPane style={style.LeftPane} project={this.state.project} people={this.state.people} shots={this.state.shots} asset={null} />
             graph = <Graph project={this.state.project} updateGraphAssetsOnServer={this.updateGraphAssetsOnServer.bind(this)} shots={this.state.shots} shotArray={this.state.shotArray} people={this.state.people} />
         } else {

@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import { Header, Footer, Subheader } from '../layouts/index';
 
+import Header from '../layouts/Header';
+import Toolbar from '../layouts/Toolbar';
 import ProjectsLists from './ProjectsLists';
 import axios from 'axios';
 
 const style = {
 
   Div: {
-    margin: '1em'
+    margin: '2em',
+    marginTop: '1em'
   }
 };
 
@@ -25,23 +27,23 @@ class HomepageS extends Component {
 
     }
   }
+  //Search bar filtering
   filterUpdate(value) {
     this.setState({
       filterText: value
     })
   }
 
+  //Get project data from server
   loadProjectsFromServer = () => {
-    console.log("LOAD PROJECT")
     var url = 'http://localhost:3001/api/projects'
     axios.get(url)
       .then(res => {
         this.setState({ data: res.data });
       })
   }
-
+  //Get people data from server
   loadPeopleFromServer = () => {
-
     axios.get('http://localhost:3001/api/people/')
         .then(res => {
             this.setState({ people: res.data });
@@ -52,17 +54,15 @@ class HomepageS extends Component {
   componentDidMount() {
     this.loadProjectsFromServer();
     this.loadPeopleFromServer()
-    //setInterval(this.loadProjectsFromServer, this.props.pollInterval);
 }
 
 
 
   render() {
-    //console.log('filterText state from parent component', this.state.filterText)
-    console.log("DATAA")
-    console.log(this.state.data)
-    var projectList
-    if (this.state.data != "") {
+
+    //Condition if projects data is not loaded
+    var projectList    
+    if (this.state.data !== "") {
       projectList =<ProjectsLists
         url={this.props.url}
         filterText={this.state.filterText}
@@ -72,28 +72,28 @@ class HomepageS extends Component {
     }else{
       projectList = "Loading"
     }
-    var subheader
-    if(this.state.people != "") {
-      subheader = <Subheader
+
+    //Condition if people data is not loaded
+    var toolbar    
+    if(this.state.people !== "") {
+      toolbar = <Toolbar
             filterText={this.state.filterText}
             filterUpdate={this.filterUpdate.bind(this)}
             loadProjectsFromServer={this.loadProjectsFromServer}
             people={this.state.people}
           />
     }else{
-      subheader = "Loading"
+      toolbar = "Loading"
     }
 
     return (
       <div className="HomepageS">
         <Header />
         <div style={style.Div}>
-          {subheader}
-        {projectList}
-        </div>
-       
+          {toolbar}
+          {projectList}
+        </div>       
       </div>
-
     );
   }
 }

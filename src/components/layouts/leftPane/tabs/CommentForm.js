@@ -1,7 +1,6 @@
 //CommentForm.js
 import React, { Component } from 'react';
 import dateFormat from 'dateformat'
-import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 
 const style = {
@@ -37,6 +36,8 @@ class CommentForm extends Component {
     handleTextChange = (e) => {
         this.setState({ text: e.target.value });
     }
+
+    //method that calls parent method to store Comment
     handleSubmit = (e) => {
         e.preventDefault();
         let text = this.state.text.trim();
@@ -49,6 +50,7 @@ class CommentForm extends Component {
         this.props.onCommentSubmit({ author: this.state.author, date: date, text: text, id: new Date().valueOf() });
         this.setState({ text: '' });
     }
+    
     render() {
         return (
             <form onSubmit={this.handleSubmit} style={style.form}>

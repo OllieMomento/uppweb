@@ -1,15 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
-import axios from 'axios';
 import {
-    mxGraph,
-    mxGraphModel,
-    mxPanningHandler,
-    mxPerimeter,
-    mxPoint,
-    mxRectangle,
     mxEditor,
-    mxGuide,
     mxGraphHandler,
     mxOutline,
     mxEdgeHandler,
@@ -17,35 +9,21 @@ import {
     mxConstants,
     mxEdgeStyle,
     mxLayoutManager,
-    mxCell,
-    mxGeometry,
-    mxRubberband,
-    mxDragSource,
-    mxKeyHandler,
     mxCodec,
     mxClient,
     mxConnectionHandler,
     mxUtils,
-    mxToolbar,
     mxEvent,
     mxImage,
-    mxFastOrganicLayout,
-    mxCellTracker,
-    mxObjectCodec,
-    mxCodecRegistry,
-    mxEdgeLabelLayout,
-    mxLog,
     mxDefaultKeyHandler,
-    mxVertexHandler,
-    mxUndoManager
+    mxRubberband
 } from "mxgraph-js";
+
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/arrow.svg'
 import newNode from '../../images/newNode.png'
-import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
-import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
-import { Router, Route, Link, withRouter } from "react-router-dom";
-import Footer from "../layouts/Footer"
+import { Button, IconButton } from 'material-ui';
+import { Delete, Undo, Redo } from 'material-ui-icons';
 import history from '../../history';
 import { RubberBandSelection } from '../../functions/rubberband'
 import SequenceTool from './SequenceTool';
@@ -78,8 +56,7 @@ const style = {
 class Graph extends Component {
 
     constructor(props) {
-        console.log("constructor")
-        var editor
+       
         super(props);
         this.state = {
             adj: [],
@@ -173,7 +150,7 @@ class Graph extends Component {
             var doc = mxUtils.parseXml(xml);
             var codec = new mxCodec(doc);
             var model = codec.decode(doc.documentElement, graph.getModel())
-            console.log(model)
+            //console.log(model)
             var cells = model.getElementsByTagName("mxCell");
 
             var cellArr = Array.from(cells);
@@ -213,8 +190,8 @@ class Graph extends Component {
                     var targetElement = vertexes[element.getAttribute("target")]
 
 
-                    var doc = mxUtils.createXmlDocument();
-                    var edge = doc.createElement('Sequence')
+                    var doc2 = mxUtils.createXmlDocument();
+                    var edge = doc2.createElement('Sequence')
                     edge.setAttribute('seq', index);
 
                     this.setState({ activeSeq: this.state.seq[index] })
@@ -345,13 +322,13 @@ class Graph extends Component {
     };
 
     saveGraph(editor) {
-        console.log("SAVE")
-        console.log(editor)
+        //console.log("SAVE")
+       // console.log(editor)
 
         var encoder = new mxCodec();
         var graph = editor.graph
         var node = encoder.encode(graph.getModel());
-        console.log(node)
+  
         var nodes = node.getElementsByTagName("mxCell")
         var cellArr = Array.from(nodes);
         var vertexes = [];
@@ -359,8 +336,7 @@ class Graph extends Component {
         for (var i = 0; i < cellArr.length; i++) {
             let element = cellArr[i]
             var id = element.getAttribute("id")
-            var value = element.getAttribute("value")
-            var style = element.getAttribute("style")
+            var value = element.getAttribute("value")           
 
 
             //If element is Vertex/cell
@@ -386,8 +362,7 @@ class Graph extends Component {
         })
 
 
-        var xml = mxUtils.getPrettyXml(node)
-        var seq = this.state.seq
+        var xml = mxUtils.getPrettyXml(node)       
         var shots = vertexes
 
         this.props.updateGraphOnServer(xml, shots)
@@ -424,8 +399,6 @@ class Graph extends Component {
     }
 
     handleChangeActiveSeq = (event) => {
-        console.log("EVENT")
-        console.log(event)
 
         //activeSeq
         var active = this.props.project.seq.filter(seq => {
@@ -446,13 +419,10 @@ class Graph extends Component {
     }
 
 
-    loadGraph() {
-        console.log(Array.from(this.props.project.seq))
-
+    loadGraph() {       
 
         this.setState({ seq: Array.from(this.props.project.seq) })
         this.setState({ activeSeq: this.props.project.seq[0] })
-
 
 
         // Checks if the browser is supported
@@ -466,7 +436,7 @@ class Graph extends Component {
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 20, 20);
 
             var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
-            var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
+            //var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
 
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
@@ -480,8 +450,7 @@ class Graph extends Component {
             // graph, such as the rubberband selection, but most parts
             // of the UI are custom in this example.
 
-            var graph = this.editor.graph;
-            var model = graph.getModel();
+            var graph = this.editor.graph;          
 
             this.editor.validation = true
 
@@ -506,24 +475,23 @@ class Graph extends Component {
                 //var sequence = graph.getModel().getElementsByTagName("Sequence");
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
-                //console.log(node)
-                var activeSeq = this.state.activeSeq.id
+                               
                 var color = this.state.activeSeq.color
 
                 var seqs = node.getElementsByTagName("Sequence")
                 seqs = Array.from(seqs);
 
                 var edges = seqs.filter(seq => {
-                    return seq.getAttribute("seq") == this.state.activeSeq.color
+                    return seq.getAttribute("seq") === this.state.activeSeq.color
                 })
                 var flag = true;
                 edges.every(edge => {
 
                     let cell = edge.firstChild
                     cell.source = cell.getAttribute("source")
-                    cell.target = cell.getAttribute("target")
+                    cell.target = cell.getAttribute("target")                   
 
-                    if (cell.source == source.id || cell.target == target.id) {
+                    if (cell.source === source.id || cell.target === target.id) {
                         alert("Cannot connect")
                         flag = false
                         return false
@@ -559,8 +527,7 @@ class Graph extends Component {
 
             graph.dblClick = (evt, cell) => {
 
-                console.log(cell)
-                // history.push('/projects/' + this.props.project._id + '/' + cell.id);
+                //console.log(cell)             
 
                 if (cell.edge === true) {
                     return
@@ -593,15 +560,8 @@ class Graph extends Component {
             // Gets the default parent for inserting new cells. This
             // is normally the first child of the root (ie. layer 0).
             var parent = graph.getDefaultParent();
-            // console.log("parent:  " + parent)
-
+            
             this.readFromXML(graph, parent)
-
-
-
-
-
-
 
             this.addSidebarIcon(graph, sidebar, null,
                 newNode);
@@ -623,7 +583,7 @@ class Graph extends Component {
             graph.setAllowDanglingEdges(false);
 
             // Stops editing on enter or escape keypress
-            var rubberband = new mxRubberband(graph);
+            new mxRubberband(graph);
 
             // Enables guides (vodici cary)
             mxGraphHandler.prototype.guidesEnabled = true;
@@ -638,7 +598,7 @@ class Graph extends Component {
         //Rubberband selection in functions
         RubberBandSelection(container)
 
-        var outln = new mxOutline(this.editor.graph, outline);
+        new mxOutline(this.editor.graph, outline);
 
     }
     componentDidMount() {

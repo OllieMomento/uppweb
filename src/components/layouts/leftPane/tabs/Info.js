@@ -27,24 +27,14 @@ const style = {
 };
 
 
-
-
 class Info extends Component {
 
-
-
     handleChange = name => event => {
-        this.setState({
-            //[name]: event.target.value,
+        this.setState({            
         });
     };
 
-
-
-
-    render() {
-        // var start = this.props.project.start
-        //start = String(start).slice(0, 10)
+    render() {  
 
 
         return (

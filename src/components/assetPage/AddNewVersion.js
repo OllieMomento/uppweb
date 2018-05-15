@@ -1,9 +1,6 @@
-import React, { Component, createElement } from 'react';
-
+import React, { Component } from 'react';
 import Button from 'material-ui/Button';
-import Input from 'material-ui/Input';
 import dateFormat from 'dateformat'
-
 import Dialog, {
     DialogActions,
     DialogContent,
@@ -11,14 +8,11 @@ import Dialog, {
     DialogTitle,
 } from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography';
-//import SearchBar from 'material-ui-search-bar'
-import List, { ListItem, ListItemSecondaryAction, ListItemText, ListSubheader } from 'material-ui/List';
+import List, { ListItem,  ListItemText, ListSubheader } from 'material-ui/List';
 import Checkbox from 'material-ui/Checkbox';
 import axios from 'axios';
 
 const styles = {
-
     buttonAdd: {
         marginTop: "1em",
         marginLeft: "1em",
@@ -54,11 +48,10 @@ class AddNewVersion extends Component {
     addNewVersionHandler = () => {
         var desc = document.getElementById("descriptionWindow")
         var file = document.getElementById("inputWindow")
-        console.log(file.files[0])
+    
 
-        if (file.files[0] != null) {           
-            
-
+        // file is chosen
+        if (file.files[0] != null) {
             var newVersion = {
                 id: Date.now(),
                 commentsImplemented: this.state.checked,                
@@ -77,9 +70,7 @@ class AddNewVersion extends Component {
                 checked: []
             });
 
-
-
-
+        // file is not chosen
         } else {
             var button = document.getElementById("fileDiv")
             var para = document.createElement("p")
@@ -97,6 +88,7 @@ class AddNewVersion extends Component {
         const currentIndex = checked.indexOf(value);
         const newChecked = [...checked];
 
+        //if somethin is checked
         if (currentIndex === -1) {
             newChecked.push(value);
         } else {
@@ -108,12 +100,13 @@ class AddNewVersion extends Component {
         });
     };
 
+    //update version on server
     updateVersionsOnServer(newVersion) {
 
         var assetID = this.props.asset.id
 
         let assets = this.props.project.assets
-        let index = assets.findIndex(x => x.id == assetID);
+        let index = assets.findIndex(x => x.id === assetID);
 
         var versions = assets[index].versions.reverse()
         versions.push(newVersion)
@@ -124,8 +117,7 @@ class AddNewVersion extends Component {
         assets[index].versions = versions
         assets[index].status ="inprogress"
 
-        this.props.updateAsset(assets[index])
-       
+        this.props.updateAsset(assets[index])       
         
 
         axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
@@ -142,8 +134,8 @@ class AddNewVersion extends Component {
 
 
     render() {
-
       
+        //method for unique array
         Array.prototype.unique = function() {
             return this.filter(function (value, index, self) { 
               return self.indexOf(value) === index;
@@ -152,20 +144,28 @@ class AddNewVersion extends Component {
 
         var commentsImplemented = []
 
+        // Implemented comments in version
         this.props.asset.versions.map( version =>{
             version.commentsImplemented.map(comment =>{
                 commentsImplemented.push(comment)
+                return ""
             })
+            return ""
            
         })
+        // unique array
         commentsImplemented = commentsImplemented.unique()
     
+        //pendings comments
         var pendingComments = this.props.asset.comments.filter(comment => {
             return( !commentsImplemented.includes(comment.id))
         })
+
+
         return (
             <div >
                 <Button variant="raised" color="primary" style={styles.buttonAdd} onClick={this.handleClickOpen}> Add New Version </Button>
+                
                 <Dialog
                     open={this.state.open}
                     onClose={this.handleClose}

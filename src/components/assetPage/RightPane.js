@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
-import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import ImplementedComments from '../assetPage/ImplementedComments'
 import AddNewVersion from '../assetPage/AddNewVersion';
 import axios from 'axios';
-
-//import SearchBar from 'material-ui-search-bar'
-
 
 
 
@@ -29,7 +25,7 @@ const styles = {
 
     tableAndComments: {
         display: "flex",
-        //justifyContent: "space-between"
+       
     },
     table: {
         minWidth: 700,
@@ -80,14 +76,18 @@ class RightPane extends Component {
         }
         return false
     }
+
+    //get style depends on is its approved
     isApproved(n) {
         if (n.approved) {
             return "#81C784"
         }
         return ""
     }
+
+    //Update on server that the version is approved
     approveVersion = () => {
-        console.log(this.state.versions)
+
         var index = this.state.versions.indexOf(this.state.selectedVersion)
         var assets = this.props.project.assets
         var indexAsset = assets.indexOf(this.asset)
@@ -96,11 +96,8 @@ class RightPane extends Component {
         versions[index].approved = true
 
         var asset = this.props.asset
-        console.log(assets)
         asset.versions = versions
-
         assets[indexAsset] = asset
-
 
         if (versions.every(version => version.approved)) {
             assets[indexAsset].status = "done"
@@ -120,9 +117,6 @@ class RightPane extends Component {
             });
 
 
-
-
-
     }
 
 
@@ -130,7 +124,7 @@ class RightPane extends Component {
     render() {
 
         var approve
-        if (this.state.selectedVersion != "") {
+        if (this.state.selectedVersion !== "") {
             approve = <Button variant="raised" style={styles.buttonAdd} onClick={this.approveVersion}>
                 Approve version
     </Button>
@@ -157,7 +151,6 @@ class RightPane extends Component {
                             style={{ background: this.isApproved(n) }}
                             hover
                             onClick={event => this.handleClick(event, n.id, n)}
-                            role="radiobutton"
                             selected={isSelected}
 
                         >

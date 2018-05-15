@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ArrayAsset } from '../../data/assets'
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 
 
 const style = {

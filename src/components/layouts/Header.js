@@ -1,14 +1,9 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import IconButton from 'material-ui/IconButton';
-//import MenuIcon from 'material-ui-icons/Menu';
 import AccountCircle from 'material-ui-icons/AccountCircle';
-//import Switch from 'material-ui/Switch';
-//import { FormControlLabel, FormGroup } from 'material-ui/Form';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import { BrowserRouter as Link } from "react-router-dom";
 
@@ -18,7 +13,8 @@ const styles = {
 
   },
   flex: {
-    flex: 1,
+    flex: 1, 
+    marginBottom:"10px" 
   }
 };
 
@@ -41,22 +37,21 @@ class MenuAppBar extends Component {
   };
 
   render() {
-    const { classes } = this.props;
     const { auth, anchorEl } = this.state;
     const open = Boolean(anchorEl);
 
     return (
-      <div style={styles.root}>
+     
 
-        <AppBar position="static">
+        <AppBar position="static" style={{height:50}}>
           <Toolbar>
             <Link to="/test">
-              <Typography variant="title" color="inherit" className={classes.flex}>
+              <Typography variant="title" color="inherit" style={styles.flex}>
                 UPP Project Planner
             </Typography>
             </Link>
             {auth && (
-              <div>
+              <div style={{marginBottom:"10px"}}>
 
                 <IconButton
                   aria-owns={open ? 'menu-appbar' : null}
@@ -88,13 +83,10 @@ class MenuAppBar extends Component {
             )}
           </Toolbar>
         </AppBar>
-      </div>
+     
     );
   }
 }
 
-MenuAppBar.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
 
-export default withStyles(styles)(MenuAppBar);
+export default MenuAppBar;

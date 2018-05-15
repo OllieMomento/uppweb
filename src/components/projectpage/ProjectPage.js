@@ -4,10 +4,6 @@ import axios from 'axios';
 import Header from '../layouts/Header'
 import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
 import LeftPane from '../layouts/leftPane/LeftPane'
-import Grid from 'material-ui/Grid'
-import { Router, Route } from 'react-router-dom'
-import ShotPage from '../shotpage/ShotPage'
-import history from '../../history'
 
 
 const style = {
@@ -57,7 +53,7 @@ class ProjectPage extends Component {
         axios.get('http://localhost:3001/api/projects/' + this.props.match.params.id)
             .then(res => {
                 this.setState({ project: res.data });
-                console.log("dostal jsme project")
+                
                 this.setState({ isLoading: false })            
 
             })
@@ -78,10 +74,7 @@ class ProjectPage extends Component {
     }
 
     updateGraphOnServer = (xml, shots) => {
-        console.log("update")
-        console.log(shots,)
-
-        axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
+                axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,           
             shots: shots
 

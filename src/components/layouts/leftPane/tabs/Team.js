@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
-import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import { MenuItem } from 'material-ui/Menu';
-import Input, { InputLabel } from 'material-ui/Input';
-import Select from 'material-ui/Select';
-import Paper from 'material-ui/Paper';
-import match from 'autosuggest-highlight/match';
-import parse from 'autosuggest-highlight/parse';
+
 import Autosuggest from 'react-autosuggest';
 import axios from 'axios';
 import Chip from 'material-ui/Chip';
@@ -51,6 +44,7 @@ class Team extends Component {
     };
   
 
+    //Get all supervisors
     getSupervisors() {
         const people = this.props.people
             .filter(human => {
@@ -62,6 +56,7 @@ class Team extends Component {
         return (people)
     }
 
+    
     getNameFromID(id) {
         //not assigned supervisor
         if (id === "") {
@@ -99,7 +94,8 @@ class Team extends Component {
     };
 
 
-    putDataOnServer(suggestion, project) {
+    //Put supervisor on server
+    putSupervisorOnServer(suggestion, project) {
 
         axios.put('http://localhost:3001/api/projects/' + project._id, {
             supervisor: suggestion.id
@@ -111,11 +107,8 @@ class Team extends Component {
             });
     }
 
-    getSuggestionValue(suggestion) {
-
-        // console.log(this.props.project)
-        this.putDataOnServer(suggestion, this.props.project)
-
+    getSuggestionValue(suggestion) {   
+        this.putSupervisorOnServer(suggestion, this.props.project)
         return suggestion.label;
     }
 
@@ -130,6 +123,7 @@ class Team extends Component {
                     return (this.getNameFromID(asset.artists[0]))
                 }
             }
+            return ""
             
         })
         
@@ -159,19 +153,17 @@ class Team extends Component {
                     Artists
                 </Typography>
 
-                {artists.map((data,index) => {
-                    let avatar = null;
-                    
-                    if(data == null){
-                        return
+                {artists.map((data,index) => {                    
+                 
+                    if(data === ""){
+                        return ""
                     }
 
                     return (
                         <Chip
-                            key={index}
-                           // avatar={avatar}
+                            key={index}                          
                             label={data}
-                           // onDelete={this.handleDelete(data)}                          
+                            onDelete={this.handleDelete(data)}                          
                         />
                     );
                 })}

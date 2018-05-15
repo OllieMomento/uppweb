@@ -8,7 +8,6 @@ var Schema = mongoose.Schema;
 //the shape of your database entries.
 var ProjectsSchema = new Schema({
     name: String,
-
     desc: String,
     start: Date,
     end: Date,

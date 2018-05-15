@@ -1,17 +1,15 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+
 import {
     mxUtils,
     mxEvent,
-    mxRectangle,
-    mxWindow
+    mxRectangle,    
 
 } from "mxgraph-js";
+
 import Delete from '../images/delete.svg'
 import Duplicate from '../images/copy.svg'
 import Edit from '../images/edit.svg'
 import AddAssignee from '../images/addPerson.svg'
-import graphik from './../components/shotpage/graph'
 
 
 export function mxIconSet(state) {
@@ -41,7 +39,7 @@ export function mxIconSet(state) {
     this.images.push(img);
 
     // Delete
-    var img = mxUtils.createImage(Delete);
+    img = mxUtils.createImage(Delete);
 
     img.setAttribute('title', 'Delete');
     img.style.position = 'absolute';
@@ -71,7 +69,7 @@ export function mxIconSet(state) {
     this.images.push(img);
 
     // Add Assignee
-    var img = mxUtils.createImage(AddAssignee);
+    img = mxUtils.createImage(AddAssignee);
     img.setAttribute('title', 'Add Assignee');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
@@ -97,7 +95,7 @@ export function mxIconSet(state) {
     this.images.push(img);
 
     // Edit
-    var img = mxUtils.createImage(Edit);
+    img = mxUtils.createImage(Edit);
     img.setAttribute('title', 'Edit');
     img.style.position = 'absolute';
     img.style.cursor = 'pointer';
@@ -120,7 +118,7 @@ export function mxIconSet(state) {
             var y = state.y
 
             var origin = mxUtils.getOffset(graph.container);
-            console.log(origin)
+            
 
             var div = document.querySelector("#editName")
             div.style.position = "fixed"
@@ -134,12 +132,12 @@ export function mxIconSet(state) {
 
 
             var value = state.cell.getValue()
-            console.log(value)
+            
             var template = document.createElement('template');
             value = value.trim(); // Never return a text node of whitespace as the result
             template.innerHTML = value;
             value = template.content.firstChild;
-            console.log(value)
+           
 
             var nameEl = value.querySelector("#name")
 
@@ -160,19 +158,15 @@ export function mxIconSet(state) {
 
             div.addEventListener('keypress', (e) => {
                 var key = e.which || e.keyCode;
-                if (key === 13) { // 13 is enter
-                    console.log("kikot")
+                if (key === 13) { // 13 is enter                    
 
-                    nameEl.textContent = input.value
-                    console.log(value)
+                    nameEl.textContent = input.value                   
 
                     div.style.display = "none"
-                    state.cell.setValue('<div>' + value.innerHTML + '</div>')
-                    console.log(state.cell.getValue())
+                    state.cell.setValue('<div>' + value.innerHTML + '</div>')                   
 
 
-                    div.removeEventListener("keypress", e)
-                    console.log(div.childNodes)
+                    div.removeEventListener("keypress", e)                    
 
                     graph.refresh()
                     if (div.childNodes.length > 0) {
@@ -210,7 +204,7 @@ export function addMouseListeners(graph) {
                 }
             },
             mouseMove: function (sender, me) {
-                if (this.currentState != null && (me.getState() == this.currentState ||
+                if (this.currentState !== null && (me.getState() === this.currentState ||
                     me.getState() == null)) {
                     var tol = iconTolerance;
                     var tmp = new mxRectangle(me.getGraphX() - tol,
@@ -221,14 +215,14 @@ export function addMouseListeners(graph) {
                     }
                 }
 
-                var tmp = graph.view.getState(me.getCell());
+                tmp = graph.view.getState(me.getCell());
 
                 // Ignores everything but vertices
                 if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell))) {
                     tmp = null;
                 }
 
-                if (tmp != this.currentState) {
+                if (tmp !== this.currentState) {
                     if (this.currentState != null) {
                         this.dragLeave(me.getEvent(), this.currentState);
                     }

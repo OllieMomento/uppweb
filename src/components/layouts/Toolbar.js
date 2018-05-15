@@ -14,20 +14,18 @@ const style = {
     }
 }
 
-
-class Subheader extends Component {
+class Toolbar extends Component {
 
     render() {       
         return (
-            <div className="Subheader" >
+            <div className="Toolbar" >
                 <div style={style.Paper}>
                 
                     <SearchAndButtonBar
                         filterText={this.props.filterText}
                         filterUpdate={this.props.filterUpdate.bind(this)}
                         loadProjectsFromServer={this.props.loadProjectsFromServer}
-                        people={this.props.people}
-                        
+                        people={this.props.people}                        
                     />
                 </div>
             </div>
@@ -35,4 +33,4 @@ class Subheader extends Component {
     }
 }
 
-export default Subheader;
+export default Toolbar;

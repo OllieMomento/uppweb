@@ -1,8 +1,3 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-
-
-
 
 export function RubberBandSelection(container) {
     //RUBBERBAND SELECTION
@@ -42,7 +37,7 @@ export function RubberBandSelection(container) {
             selection.style.width = clientX - evt.clientX + "px"
         }
         else {
-            selection.style.left = clientX + "px",
+            selection.style.left = clientX + "px"
                 selection.style.width = evt.clientX - clientX + "px"
         }
         if (evt.clientY < clientY) {

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import Button from 'material-ui/Button';
-import { Link } from "react-router-dom";
+
 //import SearchBar from 'material-ui-search-bar'
 import Breadcrumbs from './Breadcrumbs'
 
@@ -21,10 +20,7 @@ const style = {
 
 class BreadcrumbsAndButton extends Component {
 
-    render() {
-
-        var url = window.location.href
-        var projectURL = url.split("/")
+    render() {               
 
         var paths = []
         paths.push({
@@ -47,7 +43,7 @@ class BreadcrumbsAndButton extends Component {
                     path = path +"_"+ shot.id
                     name = name + " "+ shot.name.replace("Shot ","")
                 }
-                
+                return ""
             })
 
             paths.push({
@@ -57,31 +53,13 @@ class BreadcrumbsAndButton extends Component {
         }
     
         if (this.props.asset != null) {
-            console.log("TADDDDDDDDDDDDDDDDDDDDDDDDDDy")         
+     
             
             paths.push({
                 name: this.props.asset.typeOf + "  "+this.props.asset.name,
                 path: ""
             })
-        }
-        
-
-
-
-        /*
-        
-        this.props.project.shots.map(shot=>{
-            console.log(shot)
-        })
-        
-        paths.push({
-            name: this.props.shots,
-            path: "http://localhost:3000/shots/" + this.props.project._id
-        })
-        */
-
-
-        //var breadcrumbs = 
+        }        
         return (
             <div style={style.Div}>
                 <Breadcrumbs paths={paths} />

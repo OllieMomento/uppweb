@@ -3,9 +3,6 @@ import axios from 'axios';
 import CommentList from './CommentList'
 import CommentForm from './CommentForm'
 
-//import SearchBar from 'material-ui-search-bar'
-
-
 
 const style = {
     SearchBar: {
@@ -25,8 +22,6 @@ const style = {
 };
 
 
-
-
 class CommentsBox extends Component {
 
     constructor(props) {
@@ -35,12 +30,13 @@ class CommentsBox extends Component {
             comments: []
         };
     }
+
+    //Update PROJECT comment on server
     handleCommentSubmitProject = (comment) => {
         let comments = this.props.project.comments.reverse();
         comment.id = Date.now();
         let newComments = comments.concat([comment]).reverse();
-        this.setState({ comments: newComments });
-        let project = this.props.project
+        this.setState({ comments: newComments });        
         this.props.project.comments = newComments
 
 
@@ -54,6 +50,7 @@ class CommentsBox extends Component {
             });
     }
 
+    //Update ASSET comment on server
     handleCommentSubmitAsset = (comment) => {
         let comments = this.props.asset.comments.reverse();
         comment.id = Date.now();
@@ -66,7 +63,7 @@ class CommentsBox extends Component {
         let assets = this.props.project.assets
 
 
-        let index = assets.findIndex(x => x.id == assetID);
+        let index = assets.findIndex(x => x.id === assetID);
         this.props.project.assets[index].comments = newComments
 
 
@@ -82,9 +79,8 @@ class CommentsBox extends Component {
     }
 
 
-
+    //PROJECT or ASSET comment
     handleCommentSubmit = (comment) => {
-
         if (this.props.asset != null) {
             this.handleCommentSubmitAsset(comment)
 
@@ -93,8 +89,8 @@ class CommentsBox extends Component {
         }
     }
 
+    //delete ASSET comment from server
     handleCommentDeleteAsset = (id) => {
-
         let comments = this.props.asset.comments;
 
         let newComments = comments
@@ -109,7 +105,7 @@ class CommentsBox extends Component {
         let assets = this.props.project.assets
 
 
-        let index = assets.findIndex(x => x.id == assetID);
+        let index = assets.findIndex(x => x.id === assetID);
         this.props.project.assets[index].comments = newComments
 
 
@@ -124,6 +120,8 @@ class CommentsBox extends Component {
             });
 
     }
+
+    //delete PROJECT comment from server
     handleCommentDeleteProject = (id) => {
 
          let comments = this.props.project.comments;
@@ -148,7 +146,7 @@ class CommentsBox extends Component {
 
     }
 
-
+    //PROJECT or ASSET comment
     handleCommentDelete = (id) => {
 
         if (this.props.asset != null) {
@@ -157,18 +155,10 @@ class CommentsBox extends Component {
         } else {
             this.handleCommentDeleteProject(id)
         }
-
-
-
-
     }
 
-
     render() {
-
         return (
-
-
             <div style={style.Div}>
                 <CommentForm onCommentSubmit={this.handleCommentSubmit} />
                 <CommentList

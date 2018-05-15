@@ -2,18 +2,17 @@
 import React, { Component } from 'react';
 
 import { FormControl, InputLabel, Select, MenuItem, Button, IconButton , Typography} from 'material-ui';
-import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
+import { AddCircle } from 'material-ui-icons';
 import TextField from 'material-ui/TextField';
 
 
 import Dialog, {
     DialogActions,
-    DialogContent,
-    DialogContentText,
+    DialogContent,    
     DialogTitle,
 } from 'material-ui/Dialog';
 import axios from 'axios';
-import { SketchPicker, CirclePicker } from 'react-color';
+import { CirclePicker } from 'react-color';
 
 
 
@@ -29,7 +28,6 @@ const style = {
 class SequenceTool extends Component {
 
     constructor(props) {
-        var editor
         super(props);
         this.state = {
             open: false,
@@ -85,7 +83,6 @@ class SequenceTool extends Component {
     }
 
     handleColorChange = (color) => {
-        console.log(color)
         this.setState({ color: color.hex });
       };
 
@@ -116,8 +113,7 @@ class SequenceTool extends Component {
     }
 
 
-    render() {
-        console.log(this.state.activeSeq)
+    render() {    
        
         return (
             <div style={style.seq}>

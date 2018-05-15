@@ -1,12 +1,10 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
-
 import Paper from 'material-ui/Paper';
 import TextField from 'material-ui/TextField';
 import { MenuItem } from 'material-ui/Menu';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
-import Autosuggest from 'react-autosuggest';
+
 
 //import SearchBar from 'material-ui-search-bar'
 

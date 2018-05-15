@@ -5,15 +5,16 @@ import Comment from './Comment';
 
 class CommentList extends Component {
 
-    render() {
-       
+    render() {       
         let comments
 
+        //Asset or project comments condition
         if (this.props.asset != null) {
             comments = this.props.asset.comments
         } else {
             comments = this.props.project.comments
         }
+            // Comments compoment 
             let commentNodes = comments.map((comment, index) => {
 
                 return (
@@ -27,6 +28,9 @@ class CommentList extends Component {
                     />
                 )
             })
+
+
+
             return (
                 <div >
                     {commentNodes}

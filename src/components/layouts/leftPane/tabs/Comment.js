@@ -69,18 +69,22 @@ class Comment extends Component {
     let id = this.props.comment.id
 
     this.props.onCommentDelete(id);
-    console.log('oops deleted2 ' + id);
+
   }
+
   handleTextChange = (e) => {
     this.setState({ text: e.target.value });
   }
+
   handleAuthorChange = (e) => {
     this.setState({ author: e.target.value });
   }
+
   rawMarkup() {
     let rawMarkup = marked(this.props.children.toString());
     return { __html: rawMarkup };
   }
+
   getNameFromID(id) {
     const name = this.props.people
       .filter(human => {
@@ -92,8 +96,9 @@ class Comment extends Component {
       })
     return (name)
   }
-  render() {
 
+  
+  render() {
     var commentStyle = style.pendingComment
     var textVersion = ""
     if (this.props.asset != null) {
@@ -105,12 +110,14 @@ class Comment extends Component {
             textVersion = version.name
 
           }
+          return ""
         })
+        return ""
       })
     }
 
 
-    if (textVersion != "") {
+    if (textVersion !== "") {
       var deleteButt =
         <div style={style.deleteAndText}>
           <Typography variant="caption" color="inherit" style={style.delete}>
@@ -122,7 +129,7 @@ class Comment extends Component {
         </div>
     }
     else {
-      var deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
+      deleteButt = <Typography variant="caption" color="inherit" style={style.delete}>
         <a href='button' onClick={this.deleteComment}>delete</a>
       </Typography>
 

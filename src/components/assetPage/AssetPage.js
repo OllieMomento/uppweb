@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 
 import Header from '../layouts/Header'
 import BreadcrumbsAndButton from '../layouts/BreadcrumbsAndButton'
-import history from '../../history'
 import axios from 'axios';
 import LeftPane from '../layouts/leftPane/LeftPane'
 import RightPane from '../assetPage/RightPane'
@@ -50,25 +49,23 @@ class AssetPage extends Component {
 
     }
 
+    //Get asset id form URL
     getAsset = () => {
         var url = window.location.href
-        var assetID = url.split("/")[6]
-        console.log("ASET ID")
-        console.log(assetID)
-        console.log(this.state.project)
+        var assetID = url.split("/")[6]       
+      
 
-        var asset = this.state.project.assets.filter(asset => {
-            console.log(asset)
-
-            return asset.id === parseInt(assetID)
+        var asset = this.state.project.assets.filter(asset => { 
+            return asset.id === parseInt(assetID, 10)
         })
-        console.log(asset[0])
+
+  
         this.setState({ asset: asset[0] })
         this.setState({ isLoading: false })
         return asset
 
     }
-    
+    //Update asset method for children component
     updateAsset(asset){
         this.setState({
             asset: asset
@@ -76,25 +73,25 @@ class AssetPage extends Component {
     }
 
 
+    //Get data from server based on project ID
     loadProjectsFromServer = () => {
-        //console.log("loadFromSercer")        
+            
         var url = window.location.href
 
         var projectURL = url.split("/")[4];
 
         axios.get('http://localhost:3001/api/projects/' + projectURL)
             .then(res => {
-                this.setState({ project: res.data });
-                console.log("dostal jsme project Shot")
+                this.setState({ project: res.data });              
 
                 this.getAsset()
 
             })
     }
 
+    
     loadPeopleFromServer = () => {
-        //console.log("loadFromSercer")
-        //console.log('http://localhost:3001/api/projects/' + this.props.match.params.id)
+       
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });
@@ -107,8 +104,8 @@ class AssetPage extends Component {
         this.loadPeopleFromServer();
     }
 
+    //Update graph XML in project data
     updateGraphOnServer(xml, seq, shots) {
-
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
             xml: xml,
             seq: seq,
@@ -122,9 +119,8 @@ class AssetPage extends Component {
             });
     }
 
-    updateGraphAssetsOnServer(assetsXML) {
-
-        console.log(this.props.project)
+    //Update graph asset XML in project data
+    updateGraphAssetsOnServer(assetsXML) {      
 
         axios.put('http://localhost:3001/api/projects/' + this.state.project._id, {
             assetsXML: assetsXML,
@@ -138,15 +134,10 @@ class AssetPage extends Component {
             });
     }
 
-
-
-
-
     render() {
 
         var leftPane
         var rightPane
-        var graph
         var bread
         if (!this.state.isLoading) {
 
@@ -169,12 +160,9 @@ class AssetPage extends Component {
                 <div style={style.Container}>
                     {leftPane}
                     {rightPane}
-
-
-
                 </div>
 
-                <div> footer</div>
+             
             </div>
         );
     }

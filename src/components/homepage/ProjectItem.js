@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import {
     ListItem,
     ListItemAvatar,
-    //ListItemIcon,
-    //ListItemSecondaryAction,
     ListItemText,
 } from 'material-ui/List';
 import FolderIcon from 'material-ui-icons/Folder';

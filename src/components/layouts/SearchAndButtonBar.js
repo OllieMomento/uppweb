@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import Button from 'material-ui/Button';
-import { Link } from "react-router-dom";
 import SearchBar from 'material-ui-search-bar'
 import AddNewProject from './../homepage/AddNewProject'
 
@@ -25,22 +23,6 @@ const style = {
 
 class SearchAndButtonBar extends Component {
 
-    /*filterUpdate() {
-        const val = this.myValue.value
-        this.props.filterUpdate(val)
-    }*/
-
-    /*
-    <form>
-                    <input
-                        type="text"
-                        ref={(value) => { this.myValue = value }}
-                        placeholder="Type to filter..."
-                        onChange={this.filterUpdate.bind(this)}
-                    />
-                </form>
-    */
-
     filterUpdate(value) {
         const val = value
         this.props.filterUpdate(val)
@@ -49,12 +31,11 @@ class SearchAndButtonBar extends Component {
     render() {
         return (
             <div style={style.Div}>
-                <AddNewProject project={this.props.project} loadProjectsFromServer={this.props.loadProjectsFromServer} people={this.props.people} />
-
-                
+                <AddNewProject project={this.props.project} loadProjectsFromServer={this.props.loadProjectsFromServer} people={this.props.people} />                
 
                 <SearchBar
-                    onChange={(value) => this.filterUpdate(value)}                                  
+                    onChange={(value) => this.filterUpdate(value)}      
+                    onRequestSearch={() => console.log('onRequestSearch')}                     
                     style={style.SearchBar}
                 />
             </div>

@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import CommentList from './CommentList'
 import Typography from 'material-ui/Typography';
-
-
-
 
 
 const style = {
@@ -25,7 +20,6 @@ const style = {
 
 
 
-
 class ImplementedComments extends Component {
 
     constructor(props) {
@@ -37,12 +31,12 @@ class ImplementedComments extends Component {
 
     render() {
 
+        //Get implementedComments in version
         var implementedComments = []
         if (this.props.selectedVersion.commentsImplemented != null) {
             implementedComments = this.props.selectedVersion.commentsImplemented.map(commentImplemented => {
 
-                var commentsRender = this.props.asset.comments.filter(comment => {
-                    //console.log(comment)
+                var commentsRender = this.props.asset.comments.filter(comment => {             
                     return (comment.id === commentImplemented)
                 })
                 return (commentsRender[0])

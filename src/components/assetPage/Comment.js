@@ -19,7 +19,7 @@ class Comment extends Component {
   }
 
   updateComment = (e) => {
-    e.preventDefault();
+     e.preventDefault();
     //brings up the update field when we click on the update link.
     this.setState({ toBeUpdated: !this.state.toBeUpdated });
   }
@@ -38,23 +38,28 @@ class Comment extends Component {
       text: ''
     })
   }
+
   deleteComment = (e) => {
     e.preventDefault();
     let id = this.props.comment.id
 
     this.props.onCommentDelete(id);
-    console.log('oops deleted3 ' + id);
+   
   }
+
   handleTextChange = (e) => {
     this.setState({ text: e.target.value });
   }
+
   handleAuthorChange = (e) => {
     this.setState({ author: e.target.value });
   }
+
   rawMarkup() {
     let rawMarkup = marked(this.props.children.toString());
     return { __html: rawMarkup };
   }
+
   getNameFromID(id) {
     const name = this.props.people
       .filter(human => {
@@ -66,9 +71,10 @@ class Comment extends Component {
       })
     return (name)
   }
+
+
   render() {
-    //console.log(this.props.author)
-    //console.log(this.props.people)
+
     return (
       <div >
         <div style={{ marginBottom: '1em' }}>
@@ -89,7 +95,7 @@ class Comment extends Component {
           </Typography>
         </div>
         
-      </div>
+    </div>
     )
   }
 }

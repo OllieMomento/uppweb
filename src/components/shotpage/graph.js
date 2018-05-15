@@ -1,15 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
-import axios from 'axios';
 import {
-    mxGraph,
-    mxGraphModel,
-    mxPanningHandler,
-    mxPerimeter,
-    mxPoint,
-    mxRectangle,
     mxEditor,
-    mxGuide,
     mxGraphHandler,
     mxOutline,
     mxEdgeHandler,
@@ -17,42 +9,24 @@ import {
     mxConstants,
     mxEdgeStyle,
     mxLayoutManager,
-    mxCell,
-    mxGeometry,
-    mxDragSource,
-    mxKeyHandler,
     mxCodec,
     mxClient,
     mxConnectionHandler,
     mxUtils,
-    mxToolbar,
     mxEvent,
     mxImage,
-    mxFastOrganicLayout,
-    mxCellTracker,
-    mxObjectCodec,
-    mxCodecRegistry,
-    mxEdgeLabelLayout,
-    mxLog,
     mxDefaultKeyHandler,
-    mxVertexHandler,
-    mxStackLayout,
-    mxEventSource,
-    mxPopupMenu
 } from "mxgraph-js";
+
 import Grid from '../../images/grid.gif'
 import Connector from '../../images/arrow.svg'
 import newNode from '../../images/newNode.png'
-import { FormControl, InputLabel, Select, MenuItem, Button, IconButton } from 'material-ui';
-import { Delete, Undo, Redo, AddCircle } from 'material-ui-icons';
-import Footer from "../layouts/Footer"
+import { Button, IconButton } from 'material-ui';
+import { Delete, Undo, Redo } from 'material-ui-icons';
+
 import history from '../../history';
-import { isAbsolute } from 'path';
 import { RubberBandSelection } from '../../functions/rubberband'
 import { mxIconSet, addMouseListeners } from '../../functions/hoverIcons'
-import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggestion, getAssetTypes } from '../../functions/autosuggest'
-import Autosuggest from 'react-autosuggest';
-import Toolbar from '../shotpage/Toolbar'
 
 import PopUpSelect from '../shotpage/PopUpSelect'
 import './graph.css'
@@ -82,7 +56,7 @@ const style = {
 class Graph extends Component {
 
     constructor(props) {
-        var editor
+       
         super(props);
         this.state = {
             adj: [],
@@ -106,8 +80,7 @@ class Graph extends Component {
         };
 
     }
-    handleWindowOpen = (bool) => {
-        //console.log(bool)
+    handleWindowOpen = (bool) => {  
 
         this.saveGraph(this.editor)
 
@@ -212,34 +185,26 @@ class Graph extends Component {
         graph.getModel().beginUpdate();
         try {
 
-            var assetsXML = this.props.project.assetsXML;
-            //console.log("PROJECT")
-            // console.log(this.props.project)
-
-            //console.log(assetsXML)
+            var assetsXML = this.props.project.assetsXML;   
 
             //Create new vertexes represention shots nodes
-            if (assetsXML == '') {
+            if (assetsXML === '') {
                 this.createShotsVertex(graph)
             }
             else {
                 var doc = mxUtils.parseXml(assetsXML);
                 var codec = new mxCodec(doc);
                 var model = codec.decode(doc.documentElement, graph.getModel())
-                // console.log(model)
                 var cells = model.getElementsByTagName("mxCell");
 
                 var cellArr = Array.from(cells);
-                // console.log("cellArr")
-                // console.log(cellArr)
-                var vertexes = [];
-                var vertexesAll = [];
+     
+                var vertexes = [];               
 
                 var shotArray = this.props.shotArray
-                //console.log("ShotArray")
-                //console.log(shotArray)
+       
                 let index = 0
-                let IndexEdge = 0
+                
                 var stack = []
                 var vertexArray = []
 
@@ -272,14 +237,14 @@ class Graph extends Component {
                     //If element is Vertex/cell
                     if (element.hasAttribute("vertex") && value != null) {
 
-                        var index = this.props.project.assets.map(function (e) { return e.id; }).indexOf(parseInt(id));
+                        index = this.props.project.assets.map(function (e) { return e.id; }).indexOf(parseInt(id, 10));
                         //console.log(index)
                         //console.log(this.props.project.assets)
-                        if (index != -1) {
-                            if (this.props.project.assets[index].status == "done") {
+                        if (index !== -1) {
+                            if (this.props.project.assets[index].status === "done") {
                                 style = "fillColor=#A5D6A7;strokeColor=#43A047"
                             }
-                            else if (this.props.project.assets[index].status == "inprogress") {
+                            else if (this.props.project.assets[index].status === "inprogress") {
                                 style = "fillColor=#FFCC80;strokeColor=#FF8A65"
                             }
                         }
@@ -321,11 +286,7 @@ class Graph extends Component {
                     });
                 }
 
-                //while stack is empty
-                console.log("stack")
-                console.log(stack)
-
-
+                //while stack is empty   
                 while (stack.length !== 0) {
 
 
@@ -420,14 +381,12 @@ class Graph extends Component {
     };
 
     addVertex(asset) {
-        console.log("addVertex")
+       // console.log("addVertex")
 
         var graph = this.editor.graph
 
         var parent = graph.getDefaultParent();
         var model = graph.getModel();
-
-        var popUp = document.getElementById("popUpMenu")
 
         var x = this.state.clientCoord.x
         var y = this.state.clientCoord.y
@@ -447,10 +406,6 @@ class Graph extends Component {
             var name = number
             var node = `<div><h4 id="title">${title}</h4><h5 id=assignee>\u0020</h5><h3 id ="name">${name}</h3></div>`
 
-            console.log(typeof node)
-
-
-            var index = model.nextId
             v1 = graph.insertVertex(parent, null, node, x, y, 100, 75, 'fillColor=#e57373;strokeColor=#d32f2f');
 
 
@@ -470,12 +425,12 @@ class Graph extends Component {
     saveGraph(editor) {
         var vertexes = [];
         var cells = editor.graph.getModel().cells
-        console.log(cells)
+       
 
         for (var id in cells) {
             let cell = cells[id]
             //cell.visible = true
-            console.log(cell)
+           
 
 
 
@@ -493,29 +448,30 @@ class Graph extends Component {
                 var title = value.getElementsByTagName("h4")[0].innerHTML
                 var name = value.getElementsByTagName("h3")[0].innerHTML
                 var artists = value.getElementsByTagName("h5")[0].dataset.artist
-                console.log("VALUE")
-                console.log(value)
+              
 
                 var flag = false
                 var DBasset
+                var cellID = parseInt(cell.id, 10)
                 this.props.project.assets.map(asset => {
 
-                    if (asset.id === parseInt(cell.id)) {
+                    if (asset.id === cellID) {
 
                         flag = true
                         DBasset = asset
                     }
+                    return ""
                 })
                 //already added in DB
                 if (flag) {
-                    DBasset.name = name,
-                        DBasset.typeOf = title
+                    DBasset.name = name
+                    DBasset.typeOf = title
                     DBasset.artists = artists
                     vertexes.push(DBasset)
                     //add new asset in DB
                 } else {
                     let asset = {
-                        id: parseInt(cell.id),
+                        id: parseInt(cell.id, 10),
                         name: name,
                         typeOf: title,
                         desc: "",
@@ -535,19 +491,18 @@ class Graph extends Component {
         }
 
 
-        console.log(vertexes)
+        
 
         this.setState({
             assets: vertexes
         })
         var assets = vertexes
-        console.log("assets")
-        console.log(assets)
+        
 
         var encoder = new mxCodec();
         var node = encoder.encode(editor.graph.getModel());
         var assetsXML = mxUtils.getPrettyXml(node)
-        console.log(node)
+     
 
 
 
@@ -560,10 +515,7 @@ class Graph extends Component {
     }
 
 
-    loadGraph() {
-
-        console.log("project shots")
-        console.log(this.props.project.shots)
+    loadGraph() {     
 
 
         // Checks if the browser is supported
@@ -576,14 +528,10 @@ class Graph extends Component {
             mxConstants.MIN_HOTSPOT_SIZE = 20;
             mxConstants.DEFAULT_HOTSPOT = 10;
 
-
-
             mxConnectionHandler.prototype.connectImage = new mxImage(Connector, 20, 20);
 
-
-
             var sidebar = ReactDOM.findDOMNode(this.refs.graphSidebar);
-            var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
+            //var toolbar = ReactDOM.findDOMNode(this.refs.graphToolbar);
 
             // Creates the div for the graph
             var container = ReactDOM.findDOMNode(this.refs.graphContainer);
@@ -596,9 +544,7 @@ class Graph extends Component {
             // graph, such as the rubberband selection
             this.editor = new mxEditor();
             var graph = this.editor.graph;
-            var model = graph.getModel();
-
-
+           
 
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
@@ -640,7 +586,7 @@ class Graph extends Component {
 
 
             graph.dblClick = (evt, cell) => {
-                console.log(cell)
+               // console.log(cell)
 
                 //click outside of cell
                 if (cell === undefined || cell.value === null) {
@@ -682,10 +628,9 @@ class Graph extends Component {
             };
 
             mxIconSet.prototype.openWindow = (cell) => {
-                console.log("prototype")
-                this.handleWindowOpen(true),
-
-                    this.setState({ clickedCell: cell })
+               
+                this.handleWindowOpen(true)
+                this.setState({ clickedCell: cell })
 
             };
 
@@ -746,7 +691,7 @@ class Graph extends Component {
 
             this.readFromXML(graph, parent)
 
-            var outln = new mxOutline(this.editor.graph, outline);
+            new mxOutline(this.editor.graph, outline);
 
         }
 
@@ -769,7 +714,7 @@ class Graph extends Component {
         var clientY = evt.clientY
 
         var popUp = document.getElementById("popUpMenu")
-        console.log(popUp)
+       
         popUp.style.top = clientY + "px"
         popUp.style.left = clientX + "px"
 
@@ -777,12 +722,11 @@ class Graph extends Component {
     }
 
 
-    setAsset(asset) {
-        console.log("setAsset")
+    setAsset(asset) {       
 
         this.setState({ activePopUp: false })
         this.addVertex(asset)
-        console.log(asset)
+     
     }
 
 
@@ -790,7 +734,7 @@ class Graph extends Component {
 
 
     render() {
-        console.log("render")
+       
         var popUp
         if (this.state.activePopUp) {
             popUp = <PopUpSelect setAsset={this.setAsset.bind(this)} />

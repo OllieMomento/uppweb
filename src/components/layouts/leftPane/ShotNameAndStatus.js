@@ -65,7 +65,7 @@ class ShotNameAndStatus extends Component {
 
         var names = shots.map((shot, index)=>{
             let number = shot.name.replace("Shot ", "")
-            if(index != shots.length-1){  
+            if(index !== shots.length-1){  
                 number = number + ', '             
             }          
             

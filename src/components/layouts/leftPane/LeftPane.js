@@ -29,26 +29,23 @@ class LeftPane extends Component {
 
 
     render() {
- 
+        var nameAndStatus
+        var tabsBar
+        
         //Project
-        if (this.props.shots === null && this.props.asset === null) {
-           
-            var nameAndStatus = <ProjectNameAndStatus project={this.props.project} />
-            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} />
+        if (this.props.shots === null && this.props.asset === null) {           
+             nameAndStatus = <ProjectNameAndStatus project={this.props.project} />
+             tabsBar = <TabsBar project={this.props.project} people={this.props.people} />
         }
         //Shots
-        else if (this.props.shots !== null && this.props.asset === null) {
-    
-            console.log(this.props.shots)
-            
-            var nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
-            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} shots={this.props.shots} />
+        else if (this.props.shots !== null && this.props.asset === null) {            
+             nameAndStatus = <ShotNameAndStatus project={this.props.project} shots={this.props.shots} />
+             tabsBar = <TabsBar project={this.props.project} people={this.props.people} shots={this.props.shots} />
         }
         // Asset
-        else{
-  
-            var nameAndStatus = <AssetNameAndStatus project={this.props.project} shots={this.props.shots} asset={this.props.asset}/>
-            var tabsBar = <TabsBar project={this.props.project} people={this.props.people} asset={this.props.asset}/>
+        else{  
+             nameAndStatus = <AssetNameAndStatus project={this.props.project} shots={this.props.shots} asset={this.props.asset}/>
+             tabsBar = <TabsBar project={this.props.project} people={this.props.people} asset={this.props.asset}/>
         }
 
         return (
