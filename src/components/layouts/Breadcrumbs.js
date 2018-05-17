@@ -13,9 +13,7 @@ const style = {
         display: 'flex',
         
         listStyle: 'none',
-    },
-    Li: {
-    }
+    } 
 
 };
 
@@ -24,6 +22,7 @@ const style = {
 
 class Breadcrumbs extends Component {
 
+    // get path in correct form
     getPath(paths) {
         var pathTmp = paths.map(( path, index) => {
 

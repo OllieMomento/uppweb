@@ -22,6 +22,7 @@ class BreadcrumbsAndButton extends Component {
 
     render() {               
 
+        //breadcrumbs
         var paths = []
         paths.push({
             name: "Home",

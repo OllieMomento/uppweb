@@ -16,10 +16,7 @@ const style = {
         backgroundColor: "#eeeeee",        
         flexDirection: 'column',            
     }
-
 };
-
-
 
 
 class TabsBar extends Component {
@@ -41,9 +38,6 @@ class TabsBar extends Component {
 
 
     render() {
-
-        
-        
 
         const { value } = this.state;
 
