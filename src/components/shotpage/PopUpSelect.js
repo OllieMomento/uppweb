@@ -27,13 +27,13 @@ class PopUpSelect extends Component {
 
     filterUpdate() {
         const value = this.myValue.value
-
         this.setState({
             filterText: value
         })
 
     }
 
+    //get list of types of assets
     getList() {
         var array = ArrayAsset.filter(asset => {
 

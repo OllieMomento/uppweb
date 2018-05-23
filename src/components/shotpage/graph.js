@@ -90,31 +90,8 @@ class Graph extends Component {
     }
 
 
-    getColors() {
-        var colors = ['red', 'green', 'pink', 'yellow']
-        return colors;
-    }
-
-    getSelectedSeq() {
-
-    }
-
-    getColor(index) {
-        var colors = this.getColors()
-        return colors[index]
-    }
-
-    getIndex(color) {
-        var colors = this.getColors()
-        return colors.indexOf(color)
-    }
-    getIndexFromStyle(style) {
-        var color = style.replace('strokeColor=', '');
-        return this.getIndex(color)
-    }
-
+    //Set Edge and Vertex style
     setStyle(graph, editor) {
-
 
         // Automatically handle parallel edges
         var layout = new mxParallelEdgeLayout(graph);
@@ -143,7 +120,6 @@ class Graph extends Component {
 
 
         // graph.alternateEdgeStyle = 'elbow=vertical';
-
         var styleNode = graph.getStylesheet().getDefaultVertexStyle();
         styleNode[mxConstants.STYLE_FONTSIZE] = '12';
         styleNode[mxConstants.STYLE_FONTSTYLE] = 0;
@@ -157,8 +133,8 @@ class Graph extends Component {
 
     }
 
+    //Create shots if no layout was set
     createShotsVertex(graph) {
-
         var vertexes = []
         var parent = graph.getDefaultParent();
         var shots = this.props.project.shots
@@ -174,14 +150,12 @@ class Graph extends Component {
             else {
                 vertexes[shot.id].visible = false
             }
-
-
         })
     }
 
 
+    //read graph from XML
     readFromXML(graph, parent) {
-
         graph.getModel().beginUpdate();
         try {
 
@@ -191,6 +165,7 @@ class Graph extends Component {
             if (assetsXML === '') {
                 this.createShotsVertex(graph)
             }
+            //layout was set
             else {
                 var doc = mxUtils.parseXml(assetsXML);
                 var codec = new mxCodec(doc);
@@ -199,16 +174,13 @@ class Graph extends Component {
 
                 var cellArr = Array.from(cells);
      
-                var vertexes = [];               
-
-                var shotArray = this.props.shotArray
-       
-                let index = 0
-                
+                var vertexes = [];  
+                var shotArray = this.props.shotArray       
+                let index = 0                
                 var stack = []
                 var vertexArray = []
 
-                //add  selected Shots
+                //add  selected Shots to stack
                 var shots = this.props.project.shots
                 shots.forEach((shot, index) => {
                     if (shotArray.includes(shot.id.toString())) {
@@ -230,16 +202,12 @@ class Graph extends Component {
                     var style = element.getAttribute("style")
 
 
-
-
-
-
                     //If element is Vertex/cell
                     if (element.hasAttribute("vertex") && value != null) {
 
                         index = this.props.project.assets.map(function (e) { return e.id; }).indexOf(parseInt(id, 10));
-                        //console.log(index)
-                        //console.log(this.props.project.assets)
+                        
+                        // set color based on status
                         if (index !== -1) {
                             if (this.props.project.assets[index].status === "done") {
                                 style = "fillColor=#A5D6A7;strokeColor=#43A047"
@@ -251,16 +219,14 @@ class Graph extends Component {
 
                         //  console.log(style)
 
-
                         var geometry = element.getElementsByTagName("mxGeometry");
                         var x = geometry[0].getAttribute("x")
                         var y = geometry[0].getAttribute("y")
                         var width = geometry[0].getAttribute("width")
                         var height = geometry[0].getAttribute("height")
 
-                        //add shots selected shots vertex
+                        //add shots selected Shots vertex
                         if (!value.startsWith("Shot")) {
-
 
                             vertexes[id] = graph.insertVertex(parent, id, value, x, y, width, height, style);
                             vertexes[id].visible = false
@@ -268,7 +234,7 @@ class Graph extends Component {
 
                     }
 
-                    // Sequence element > edge
+                    // add  edge
                     if (element.hasAttribute("edge")) {
 
                         var color = "#212121"
@@ -280,29 +246,23 @@ class Graph extends Component {
                     }
                 }
 
+                //unique array function
                 Array.prototype.unique = function () {
                     return this.filter(function (value, index, self) {
                         return self.indexOf(value) === index;
                     });
                 }
 
-                //while stack is empty   
+                //Going through grapf, if the cell is connected with selected Shot, set visible on true
                 while (stack.length !== 0) {
 
-
                     var cell = stack.pop()
-
 
                     cell.visible = true
                     var inEdges = graph.getModel().getIncomingEdges(cell)
 
-
-
-
                     inEdges.forEach((edge, index) => {
-
                         var vertex = edge.source
-
                         stack.push(vertex)
                     })
                 }
@@ -329,7 +289,6 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(null, true, false), 1, 0);
             graph.moveCells(graph.getChildCells(null, true, false), -1, 0);
 
-
             graph.center()
             graph.refresh()
 
@@ -345,6 +304,7 @@ class Graph extends Component {
 
 
 
+    //Sidebar - add new vertex
     addSidebarIcon = (editor, graph, sidebar, label, image) => {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
@@ -371,15 +331,13 @@ class Graph extends Component {
         dragElt.style.height = '50px';
 
         // Creates the image which is used as the drag icon (preview)
-
-
-
         var ds = mxUtils.makeDraggable(img, graph, funct.bind(this), dragElt, 0, 0, true, true);
         ds.setGuidesEnabled(true);
 
 
     };
 
+    //add vertex 
     addVertex(asset) {
        // console.log("addVertex")
 
@@ -422,17 +380,13 @@ class Graph extends Component {
     }
 
 
+    //Save graph as XML
     saveGraph(editor) {
         var vertexes = [];
-        var cells = editor.graph.getModel().cells
-       
+        var cells = editor.graph.getModel().cells       
 
         for (var id in cells) {
-            let cell = cells[id]
-            //cell.visible = true
-           
-
-
+            let cell = cells[id]         
 
             // parent nodes and shots
             if (cell.value === undefined || cell.value === null) {
@@ -490,7 +444,6 @@ class Graph extends Component {
 
         }
 
-
         
 
         this.setState({
@@ -501,12 +454,11 @@ class Graph extends Component {
 
         var encoder = new mxCodec();
         var node = encoder.encode(editor.graph.getModel());
-        var assetsXML = mxUtils.getPrettyXml(node)
-     
+        var assetsXML = mxUtils.getPrettyXml(node)    
 
 
 
-        // this.props.updateGraphOnServer(xml, seq, shots)
+        //update on server
         this.props.updateGraphAssetsOnServer(assetsXML, assets)
 
         this.setState({
@@ -515,7 +467,8 @@ class Graph extends Component {
     }
 
 
-    loadGraph() {     
+    // Main function
+    loadGraph() {    
 
 
         // Checks if the browser is supported
@@ -549,10 +502,6 @@ class Graph extends Component {
             // Disables built-in context menu
             mxEvent.disableContextMenu(container);
 
-
-
-
-
             // Disable highlight of cells when dragging from toolbar
             graph.setDropEnabled(false);
 
@@ -562,17 +511,16 @@ class Graph extends Component {
 
             this.editor.setGraphContainer(container);
 
-
             //Set styles
             this.setStyle(graph, this.editor)
 
-
+            //Insert edge prototype
             mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
-
                 var color = "#212121"
                 graph.insertEdge(parent, id, value, source, target, 'strokeColor=' + color)
             }
 
+            //key binds
             var keyHandler = new mxDefaultKeyHandler(this.editor);
             keyHandler.bindAction(46, 'delete');
             keyHandler.bindAction(90, 'undo', true);
@@ -584,7 +532,7 @@ class Graph extends Component {
             keyHandler.bindAction(109, 'zoomOut');
 
 
-
+            //Double click on asset
             graph.dblClick = (evt, cell) => {
                // console.log(cell)
 
@@ -592,7 +540,6 @@ class Graph extends Component {
                 if (cell === undefined || cell.value === null) {
                     return
                 }
-
 
                 //Click on asset not shot
                 if (!cell.value.includes("Shot")) {
@@ -605,10 +552,6 @@ class Graph extends Component {
                             state: { project: this.props.project }
                         })
                     }
-
-
-
-
                 }
 
                 // Disables any default behaviour for the double click
@@ -647,13 +590,9 @@ class Graph extends Component {
             // console.log("parent:  " + parent)
 
 
-
-
             this.addSidebarIcon(this.editor, graph, sidebar, null, newNode);
 
-
             graph.setHtmlLabels(true);
-
 
             // Enables new connections in the graph
             graph.setConnectable(true);
@@ -663,14 +602,11 @@ class Graph extends Component {
             graph.setTooltips(false);
             // graph.setMultigraph(false);
 
-
             // Does not allow dangling edges
             graph.setAllowDanglingEdges(false);
 
-            // Stops editing on enter or escape keypress
 
-
-            // Enables guides (vodici cary)
+            // Enables guides
             mxGraphHandler.prototype.guidesEnabled = true;
 
             // Disable highlight of cells when dragging from toolbar
@@ -678,7 +614,6 @@ class Graph extends Component {
 
             // Enables snapping waypoints to terminals
             mxEdgeHandler.prototype.snapToTerminals = true;
-
 
             //Rubberband selection in functions
             RubberBandSelection(container)
@@ -701,6 +636,7 @@ class Graph extends Component {
         this.loadGraph()
     }
 
+    //menu with types of asset
     popupMenu(evt, x, y) {
         this.setState({ activePopUp: true })
         this.setState({

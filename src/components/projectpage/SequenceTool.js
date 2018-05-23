@@ -15,8 +15,6 @@ import axios from 'axios';
 import { CirclePicker } from 'react-color';
 
 
-
-
 const style = {
 
     seq: {
@@ -45,12 +43,11 @@ class SequenceTool extends Component {
         this.setState({ open: false });
     };
 
+    //add new sequence handler
     addNewSequenceHandler = () => {
         var name = document.getElementById("nameWindow")
 
         if (name.value != null) {
-
-
 
             var newSequence = {
                 name: name.value,
@@ -66,36 +63,21 @@ class SequenceTool extends Component {
                 open: false,
             });
 
-
-
-
-
-        } else {
-            var button = document.getElementById("fileDiv")
-            var para = document.createElement("p")
-            var text = document.createTextNode("File is required");
-            para.appendChild(text)
-            para.style.color = "red"
-            button.appendChild(para)
         }
 
 
     }
 
+    
     handleColorChange = (color) => {
         this.setState({ color: color.hex });
       };
 
+    //update on server new sequences
     updateSequenceOnServer(newSequence) {
-
         var seq = this.props.project.seq
-
-
         seq.reverse().push(newSequence)
         seq.reverse()
-
-
-
 
 
         axios.put('http://localhost:3001/api/projects/' + this.props.project._id, {
@@ -108,7 +90,6 @@ class SequenceTool extends Component {
             .catch(err => {
                 console.log(err);
             });
-
         this.props.setActiveSeq()
     }
 

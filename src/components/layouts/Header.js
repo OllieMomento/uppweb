@@ -24,9 +24,11 @@ class MenuAppBar extends Component {
     anchorEl: null,
   };
 
+  //auth
   handleChange = (event, checked) => {
     this.setState({ auth: checked });
   };
+  
 
   handleMenu = event => {
     this.setState({ anchorEl: event.currentTarget });

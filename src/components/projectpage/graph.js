@@ -74,25 +74,9 @@ class Graph extends Component {
         };
 
     }
-    getColors() {
-        var colors = ['red', 'green', 'pink', 'yellow']
-        return colors;
-    }
 
-    getColor(index) {
-        var colors = this.getColors()
-        return colors[index]
-    }
 
-    getIndex(color) {
-        var colors = this.getColors()
-        return colors.indexOf(color)
-    }
-    getIndexFromStyle(style) {
-        var color = style.replace('strokeColor=', '');
-        return this.getIndex(color)
-    }
-
+    // Edge and Vertex styles
     setStyle(graph) {
         // Changes the default style for edges "in-place" and assigns
         // an alternate edge style which is applied in mxGraph.flip
@@ -118,28 +102,24 @@ class Graph extends Component {
         mxConstants.VERTEX_SELECTION_STROKEWIDTH = 2;
         mxConstants.OUTLINE_COLOR= '#3f51b5'
         mxConstants.OUTLINE_HANDLE_FILLCOLOR= '#e91e63'
-        mxConstants.OUTLINE_HANDLE_STROKECOLOR= '#e91e63'
-    
+        mxConstants.OUTLINE_HANDLE_STROKECOLOR= '#e91e63'   
 
     }
 
 
 
+    //Read graph form XML 
     readFromXML(graph, parent) {
 
         // Automatically handle parallel edges
         var layout = new mxParallelEdgeLayout(graph);
-        var layoutMgr = new mxLayoutManager(graph);
-
-        
+        var layoutMgr = new mxLayoutManager(graph);        
 
         layoutMgr.getLayout = function (cell) {
             if (cell.getChildCount() > 0) {
                 return layout;
             }
-        };
-
-       
+        };     
 
 
         graph.getModel().beginUpdate();
@@ -217,7 +197,7 @@ class Graph extends Component {
             graph.moveCells(graph.getChildCells(null, true, true), 1, 0);
             graph.moveCells(graph.getChildCells(null, true, true), -1, 0);
             graph.center()
-
+            
             this.setState({
                 readingXMLdone: true,
                 changed: false,
@@ -230,6 +210,7 @@ class Graph extends Component {
 
     }
 
+    //Sidebar - add new vertex
     addSidebarIcon(graph, sidebar, label, image) {
         // Function that is executed when the image is dropped on
         // the graph. The cell argument points to the cell under
@@ -241,20 +222,11 @@ class Graph extends Component {
             var v1 = null;
 
             model.beginUpdate();
-            try {
-                // NOTE: For non-HTML labels the image must be displayed via the style
-                // rather than the label markup, so use 'image=' + image for the style.
-                // as follows: v1 = graph.insertVertex(parent, null, label,
-                // pt.x, pt.y, 120, 120, 'image=' + image);
+            try {               
                 var index = graph.getChildVertices(graph.getDefaultParent()).length +1
-               // var index = model.nextId - 1
-
+             
                 var number = ('0' + index + '0').slice(-3)
-                var title = `Shot ${number}`
-
-                 
-
-
+                var title = `Shot ${number}`          
 
                 v1 = graph.insertVertex(parent, null, title, x, y, 100, 50);
 
@@ -262,17 +234,10 @@ class Graph extends Component {
                     nodesLength: this.state.nodesLength + 1
                 })
 
-
-
-
             }
             finally {
-
                 model.endUpdate();
-
-
             }
-
             graph.setSelectionCell(v1);
         }
 
@@ -284,6 +249,7 @@ class Graph extends Component {
         img.title = 'Drag this to the diagram to create a new vertex';
         sidebar.appendChild(img);
 
+        //Create the dashed rectange 
         var dragElt = document.createElement('div');
         dragElt.style.border = 'dashed black 1px';
         dragElt.style.width = '100px';
@@ -294,36 +260,8 @@ class Graph extends Component {
         ds.setGuidesEnabled(true);
     };
 
-    addToolbarButton(editor, toolbar, action, label, image, isTransparent) {
-        var button = document.createElement('button');
-        button.setAttribute("id", action + "Button");
-        button.style.fontSize = '10';
-        if (image != null) {
-            var img = document.createElement('img');
-            img.setAttribute('src', image);
-            img.style.width = '16px';
-            img.style.height = '16px';
-            img.style.verticalAlign = 'middle';
-            img.style.marginRight = '2px';
-            button.appendChild(img);
-        }
-        if (isTransparent) {
-            button.style.background = 'transparent';
-            button.style.color = '#FFFFFF';
-            button.style.border = 'none';
-        }
-
-        mxEvent.addListener(button, 'click', (evt) => {
-            editor.execute(action);
-        });
-        mxUtils.write(button, label);
-        var divEdit = document.getElementById("graph-edit")
-        divEdit.appendChild(button);
-    };
-
-    saveGraph(editor) {
-        //console.log("SAVE")
-       // console.log(editor)
+    //Save graph as XML
+    saveGraph(editor) {           
 
         var encoder = new mxCodec();
         var graph = editor.graph
@@ -350,10 +288,8 @@ class Graph extends Component {
                     artists: [],
                     supervisor: this.props.project.supervisor,
                     status: "notstarted"
-
                 }
                 vertexes.push(shot)
-
             }
         }
 
@@ -361,10 +297,10 @@ class Graph extends Component {
             shots: vertexes
         })
 
-
         var xml = mxUtils.getPrettyXml(node)       
         var shots = vertexes
 
+        //update graph on server
         this.props.updateGraphOnServer(xml, shots)
 
         this.setState({
@@ -374,6 +310,7 @@ class Graph extends Component {
 
     }
 
+    // opne selected vertexes
     openSelectedShots(editor) {
 
         var selection = editor.graph.getSelectionCells()
@@ -388,9 +325,7 @@ class Graph extends Component {
             } else {
                 url = url + cell.id
             }
-
         })
-
 
         history.push({
             pathname: '/projects/' + this.props.project._id + '/shots/' + url,
@@ -398,6 +333,7 @@ class Graph extends Component {
 
     }
 
+    //handle of active sequences
     handleChangeActiveSeq = (event) => {
 
         //activeSeq
@@ -409,9 +345,9 @@ class Graph extends Component {
             activeSeqName: active[0].name
         });
 
-    }
+    }    
+    
     setActiveSeq = () => {
-
         this.setState({
             activeSeq: this.props.project.seq[0],
             activeSeqName: this.props.project.seq[0].name
@@ -419,6 +355,7 @@ class Graph extends Component {
     }
 
 
+    // main function of Graph
     loadGraph() {       
 
         this.setState({ seq: Array.from(this.props.project.seq) })
@@ -469,10 +406,9 @@ class Graph extends Component {
             //Set styles
             this.setStyle(graph)
 
-            mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {
-
-
-                //var sequence = graph.getModel().getElementsByTagName("Sequence");
+            //If connection, test condition
+            mxConnectionHandler.prototype.insertEdge = (parent, id, value, source, target, style) => {               
+                
                 var encoder = new mxCodec();
                 var node = encoder.encode(graph.getModel());
                                
@@ -491,6 +427,7 @@ class Graph extends Component {
                     cell.source = cell.getAttribute("source")
                     cell.target = cell.getAttribute("target")                   
 
+                    //consition
                     if (cell.source === source.id || cell.target === target.id) {
                         alert("Cannot connect")
                         flag = false
@@ -500,8 +437,8 @@ class Graph extends Component {
                     return true
                 })
 
+                // Connection without problem
                 if (flag) {
-
                     var doc = mxUtils.createXmlDocument();
                     var edge = doc.createElement('Sequence')
                     edge.setAttribute('seq', color);
@@ -511,6 +448,7 @@ class Graph extends Component {
                 }
             }
 
+            //Bind keys
             var keyHandler = new mxDefaultKeyHandler(this.editor);
             keyHandler.bindAction(46, 'delete');
             keyHandler.bindAction(90, 'undo', true);
@@ -519,15 +457,11 @@ class Graph extends Component {
             keyHandler.bindAction(67, 'copy', true);
             keyHandler.bindAction(86, 'paste', true);
             keyHandler.bindAction(107, 'zoomIn');
-            keyHandler.bindAction(109, 'zoomOut');
-
-            // Disables built-in context menu
-            mxEvent.disableContextMenu(container);
+            keyHandler.bindAction(109, 'zoomOut');           
 
 
-            graph.dblClick = (evt, cell) => {
-
-                //console.log(cell)             
+            // double click on Shot
+            graph.dblClick = (evt, cell) => {                          
 
                 if (cell.edge === true) {
                     return
@@ -541,13 +475,9 @@ class Graph extends Component {
                         pathname: '/projects/' + this.props.project._id + '/shots/' + cell.id,
                         state: { project: this.props.project }
                     })
-
-
                 }
                 // Disables any default behaviour for the double click
                 mxEvent.consume(evt);
-
-
 
             };
 
@@ -605,7 +535,6 @@ class Graph extends Component {
         this.editor = new mxEditor();
         this.loadGraph()
     }
-
  
 
     render() {
@@ -636,10 +565,6 @@ class Graph extends Component {
                         setActiveSeq={this.setActiveSeq}
                     />
 
-
-
-
-
                     <div className="graph-toolbar-open" id="graph-open">
                         <Button variant="raised" color="primary" type="submit" style={style.button} onClick={() => this.openSelectedShots(this.editor)}>
                             Open selected shots
@@ -655,8 +580,6 @@ class Graph extends Component {
                 </div>
             </div>
         );
-
-
     }
 }
 

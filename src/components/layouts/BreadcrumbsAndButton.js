@@ -24,15 +24,18 @@ class BreadcrumbsAndButton extends Component {
 
         //breadcrumbs
         var paths = []
+        //home
         paths.push({
             name: "Home",
             path: "http://localhost:3000"
         })
+        //project
         paths.push({
             name: this.props.project.name,
             path: "http://localhost:3000/projects/" + this.props.project._id
         })
 
+        //if in shot hiearchy
         if (this.props.shots != null) {
             var path = ""
             var name = ""
@@ -46,16 +49,16 @@ class BreadcrumbsAndButton extends Component {
                 }
                 return ""
             })
-
+            //shot
             paths.push({
                 name: "Shots " + name,
                 path: "http://localhost:3000/projects/" + this.props.project._id + "/shots/" + path
             })
         }
     
-        if (this.props.asset != null) {
-     
-            
+        //if in asset hiearchy
+        if (this.props.asset != null) {     
+            //asset
             paths.push({
                 name: this.props.asset.typeOf + "  "+this.props.asset.name,
                 path: ""

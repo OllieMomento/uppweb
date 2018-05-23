@@ -33,8 +33,8 @@ class Toolbar extends Component {
         });
     };
 
+    //array of types of Assets
     getAssetTypes = () => {
-
         var array = [
             "Modelling",
             "Texturing",

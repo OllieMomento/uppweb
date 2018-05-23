@@ -1,3 +1,11 @@
+INSTALLATION:
+
+1. Download and install node.js
+2. Open folder webupp in Command Prompt
+3. Write "npm run start-dev" in Command Prompt
+4. Open browser in URL "localhost:3000"
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>

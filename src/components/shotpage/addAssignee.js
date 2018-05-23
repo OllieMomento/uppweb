@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 
 import {  Button} from 'material-ui';
 
-
-
 import Dialog, {
     DialogActions,
     DialogContent,    
@@ -15,12 +13,7 @@ import { getSuggestions, renderInput, renderSuggestionsContainer, renderSuggesti
 import Autosuggest from 'react-autosuggest';
 
 
-
-
-
-
 const style = {
-
     seq: {
         display: "flex"
     }
@@ -42,6 +35,7 @@ class AddAssignee extends Component {
         };
     }
 
+    //get name of person based on ID
     getNameFromID(id) {
         //not assigned 
         if (id === "") {
@@ -66,8 +60,7 @@ class AddAssignee extends Component {
         return (people)
     }
 
-    handleSuggestionsFetchRequested = ({ value }) => {
-        
+    handleSuggestionsFetchRequested = ({ value }) => {        
         this.setState({
             suggestions: getSuggestions(this.getPeople(), value),
         });
@@ -93,9 +86,6 @@ class AddAssignee extends Component {
         return suggestion.label;
     }
 
-
-
-
     handleClickOpen = () => {
         this.setState({ open: true });
     };
@@ -104,19 +94,19 @@ class AddAssignee extends Component {
         this.setState({ open: false });
     };
 
-    assignArtist = () => {
-       
+    //assign artist
+    assignArtist = () => {       
         var template = document.createElement('template');
         var value = this.props.cell.value.trim()
         template.innerHTML = value;
         value = template.content.firstChild;
 
-        //Assiginee
-        
+        //Assiginee        
         value.getElementsByTagName("h5")[0].innerHTML = this.state.value
         value.getElementsByTagName("h5")[0].dataset.artist = this.state.artistID
 
 
+        //place the name into cell
         this.props.cell.setValue("<div>" + value.innerHTML + "</div>")
 
         this.props.editor.graph.refresh()
@@ -127,12 +117,9 @@ class AddAssignee extends Component {
         })
 
         this.props.handleWindowOpen(false)
-
-
     }
 
-    handleColorChange = (color) => {
-        
+    handleColorChange = (color) => {        
         this.setState({ color: color.hex });
     };
 

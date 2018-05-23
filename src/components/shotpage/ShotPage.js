@@ -50,12 +50,12 @@ class ShotPage extends Component {
         };
 
     }
+    // get selected shots
     getSelectedSeq = () => {
         var url = window.location.href
         var shotIDs = url.split("/");
 
         var shotArray = shotIDs[6].split("_")
-
 
         this.setState({ shotArray: shotArray })
 
@@ -69,7 +69,7 @@ class ShotPage extends Component {
 
     }
 
-
+    //load project from server
     loadProjectsFromServer = () => {
         //console.log("loadFromSercer")        
         var url = window.location.href
@@ -90,8 +90,8 @@ class ShotPage extends Component {
             })
     }
 
+    //get people from project
     loadPeopleFromServer = () => {
-
         axios.get('http://localhost:3001/api/people/')
             .then(res => {
                 this.setState({ people: res.data });
@@ -104,6 +104,7 @@ class ShotPage extends Component {
         this.loadPeopleFromServer();
     }
 
+    //update graph XML, Seq on server
     updateGraphOnServer(xml, seq, shots) {
 
         axios.put('http://localhost:3001/api/projects/' + this.props.match.params.id, {
@@ -120,6 +121,7 @@ class ShotPage extends Component {
             });
     }
 
+    //update assetXML, assets on server
     updateGraphAssetsOnServer(assetsXML, assets) {
 
         axios.put('http://localhost:3001/api/projects/' + this.state.project._id, {
@@ -151,7 +153,6 @@ class ShotPage extends Component {
             graph = <div>Loading Graph</div>
         }
 
-        //console.log(this.props.location.state.project)
         return (
             <div className="ShotPage" style={style.Page}>
                 <Header />

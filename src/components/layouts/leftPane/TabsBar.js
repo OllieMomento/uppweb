@@ -25,10 +25,12 @@ class TabsBar extends Component {
         
     };
 
+    //change selected tab
     handleChange = (event, value) => {
         this.setState({ value });
     };
 
+    // Set selected tab to Info
     componentDidMount(){
         if(this.props.asset != null){
             this.setState({value:1})

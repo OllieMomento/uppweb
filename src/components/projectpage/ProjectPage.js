@@ -33,9 +33,6 @@ const style = {
 };
 
 
-
-
-
 class ProjectPage extends Component {
 
     constructor(props) {
@@ -48,6 +45,7 @@ class ProjectPage extends Component {
 
     }
 
+    //load projects form server
     loadProjectsFromServer = () => {
        
         axios.get('http://localhost:3001/api/projects/' + this.props.match.params.id)
@@ -59,6 +57,7 @@ class ProjectPage extends Component {
             })
     }
 
+    //load people form server
     loadPeopleFromServer = () => {
        
         axios.get('http://localhost:3001/api/people/')
